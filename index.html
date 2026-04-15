@@ -140,10 +140,11 @@ input[type=text]:focus{outline:none;border-color:var(--border-gold)}
 .card.warden-dealing{animation:warden-deal .5s ease-out forwards;transform-origin:center}
 .card.warden-flipping{animation:warden-flip .55s ease-in-out forwards;transform-origin:center}
 .warden-plan-preview{margin-top:6px;display:flex;justify-content:center;align-items:center;gap:6px;min-height:56px}
-.plan-silhouette{width:44px;height:56px;border:1.5px dashed #7a4a58;border-radius:5px;background:linear-gradient(135deg,rgba(30,18,24,0.7),rgba(14,8,12,0.7));display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3px;box-shadow:inset 0 0 8px rgba(0,0,0,0.4)}
-.plan-silhouette .plan-art{width:28px;height:28px;opacity:0.55;filter:grayscale(0.7) brightness(0.85)}
+.plan-silhouette{min-width:42px;padding:3px 4px;border:1.5px dashed #7a4a58;border-radius:5px;background:linear-gradient(135deg,rgba(30,18,24,0.7),rgba(14,8,12,0.7));display:flex;flex-direction:column;align-items:center;gap:1px;box-shadow:inset 0 0 8px rgba(0,0,0,0.4)}
+.plan-silhouette .plan-art{width:26px;height:26px;opacity:0.6;filter:grayscale(0.6) brightness(0.9)}
 .plan-silhouette .plan-art *{stroke:#a88080!important;fill:#a88080!important}
-.plan-silhouette .plan-stats{font-size:9px;color:#d0a0a0;letter-spacing:0.5px;margin-top:2px;font-weight:600}
+.plan-silhouette .plan-stats{font-size:9px;color:#d0a0a0;letter-spacing:0.3px;font-weight:600;line-height:1.05;display:flex;flex-direction:column;align-items:center;gap:0}
+.plan-silhouette .plan-sigils{display:flex;gap:1px;font-size:10px;margin-top:1px}
 .plan-empty{font-size:10px;color:#6a4a4a;font-style:italic}
 .tut-mask{position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:500;pointer-events:auto;animation:fadeIn .3s}
 .tut-highlight{position:fixed;border:2px solid var(--border-gold);border-radius:8px;box-shadow:0 0 0 9999px rgba(0,0,0,0.72),0 0 22px rgba(200,168,75,0.85),inset 0 0 18px rgba(200,168,75,0.25);z-index:502;pointer-events:none;transition:all .3s;animation:tut-pulse 1.6s ease-in-out infinite;background:transparent}
@@ -192,9 +193,10 @@ body.screen-battle .hand{min-height:0;flex-shrink:0}
   .hand .card{scroll-snap-align:start;flex:0 0 auto}
   body.screen-battle .hand{min-height:0!important}
   body.screen-battle .warden-plan-preview{min-height:38px!important;gap:3px!important}
-  body.screen-battle .plan-silhouette{width:32px!important;height:40px!important}
+  body.screen-battle .plan-silhouette{min-width:34px!important;padding:2px 3px!important}
   body.screen-battle .plan-silhouette .plan-art{width:20px!important;height:20px!important}
   body.screen-battle .plan-silhouette .plan-stats{font-size:8px!important}
+  body.screen-battle .plan-silhouette .plan-sigils{font-size:9px!important}
   body.screen-battle .fragments{font-size:12px!important;margin:1px 0!important}
   body.screen-battle .action-bar{padding:2px!important;gap:2px 4px!important}
   body.screen-battle .action-bar button{padding:4px 8px!important;min-height:26px!important}
@@ -519,7 +521,7 @@ function renderBattle(root,opts){
   root.innerHTML=`
     <div class="panel battle-field" style="border-color:#3a1e24">
       <div class="center cinzel" style="font-size:11px;color:#b88080">${wardenName}${G.isBossBattle?' · '+T('boss'):''}</div>
-      <div class="center warden-plan-preview" title="다음 턴 배치 예고">${(G.wardenNextPlan||[]).map(c=>`<div class="plan-silhouette"><svg class="plan-art" viewBox="0 0 60 60"><use href="#${ART[c.id]||'art-faded_memory'}"/></svg><div class="plan-stats">⚔${c.attack} ❤${c.currentHp}</div></div>`).join('')||`<span class="plan-empty">${LANG==='ko'?'다음 턴 예정 없음':'No plan'}</span>`}</div>
+      <div class="center warden-plan-preview" title="${LANG==='ko'?'다음 턴 배치 예고':'Next turn plan'}">${(G.wardenNextPlan||[]).map(c=>{const sigs=(c.sigils&&c.sigils.length)?c.sigils:(c.sigil?[c.sigil]:[]);const sigHtml=sigs.slice(0,3).map(s=>`<span title="${LANG==='ko'?SIGIL_LABEL_KO[s]||s:SIGIL_LABEL_EN[s]||s}">${SIGIL_EMOJI[s]||'✨'}</span>`).join('');return `<div class="plan-silhouette" title="${c.isFused?c.name:Tc(c.id)}"><svg class="plan-art" viewBox="0 0 60 60"><use href="#${ART[c.id]||'art-faded_memory'}"/></svg><div class="plan-stats"><div>⚔${c.attack}</div><div>❤${c.currentHp??c.maxHp}</div>${sigHtml?`<div class="plan-sigils">${sigHtml}</div>`:''}</div></div>`;}).join('')||`<span class="plan-empty">${LANG==='ko'?'다음 턴 예정 없음':'No plan'}</span>`}</div>
       ${fragsHtml(G.wardenFragments,'warden')}
       <div class="row" id="ws"></div>
     </div>
