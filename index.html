@@ -530,8 +530,8 @@ function renderBattle(root,opts){
       <div class="action-bar">
         <span class="ink battle-ink" id="inkSac" style="cursor:pointer;user-select:none" title="${LANG==='ko'?'탭하여 필드 카드 희생 (+잉크)':'Tap to sacrifice field cards (+ink)'}">💧 ${G.currentInk}</span>
         <span style="color:#a88cd8;font-size:11px" title="망각">🌫${G.oblivionGauge}</span>
-        <span style="color:#c8a84b;font-size:10px" title="기억 카운터">${G.sacrificeCounter}/10</span>
-        <span style="font-size:12px;color:var(--text-bright)">📖${G.playerDeck.length}</span>
+        <span style="color:#c8a84b;font-size:10px;letter-spacing:1px" title="기억 카운터 ${G.sacrificeCounter}/10">${'●'.repeat(G.sacrificeCounter)}${'○'.repeat(10-G.sacrificeCounter)}</span>
+        <span style="font-size:12px;color:var(--text-bright)" title="${LANG==='ko'?'덱에 남은 카드':'Cards left in deck'}">📖${G.playerDeck.length}</span>
         <span style="font-size:12px">${G.items.map((id,i)=>`<button class="item-btn" data-i="${i}" title="${ITEMS[id].name[LANG]}">${ITEMS[id].icon}</button>`).join('')}</span>
         <button id="ibl" title="${LANG==='ko'?'자물쇠':'Locks'}" style="font-size:12px;padding:4px 8px;border-color:#5a5a3a;color:#c8a84b">🔒</button>
         <button id="cncd" title="${LANG==='ko'?'항복':'Concede'}" style="font-size:12px;padding:4px 8px;border-color:#5a3848;color:#a88080">🏳️</button>
