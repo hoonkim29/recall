@@ -442,7 +442,7 @@ function enterBattle(opts){
   for(let i=0;i<4&&prePlaced>0;i++){if(G.wardenHand.length===0)break;const c=G.wardenHand.shift();G.wardenSlots[i]=c;prePlaced--;}
   G.wardenNextPlan=[];computeWardenPlan();
   setScreen('battle',{_started:true,isBoss:opts.isBoss});
-  if(G.runCount===0&&!G.tutorialStage){setTimeout(()=>runTutorialSequence('intro'),400);}
+  // Tutorial starts AFTER warden greeting modal dismissed (avoids modal conflict)
 }
 
 function renderBattle(root,opts){
@@ -492,8 +492,12 @@ function renderBattle(root,opts){
       const r=G.runCount;let line;
       if(G.currentRoom===1){line=r===0?(LANG==='ko'?'처음 오셨군요. 카드로 길을 여는 곳이에요.':'First time here. This is where cards open the way.'):r<=5?(LANG==='ko'?'또 왔네요. 몇 번째죠?':"You're back. How many times now?"):(LANG==='ko'?'오래 있으면 안 돼요. 나처럼 되기 전에.':"You shouldn't stay so long. Not like I did.");}
       else{line=r===0?(LANG==='ko'?'(오웬은 말없이 카드를 놓는다.)':'(Owen silently places a card.)'):r===1?(LANG==='ko'?'여기 왔었죠.':'You were here.'):r===2?(LANG==='ko'?'누군가를 찾고 있죠?':"You're looking for someone?"):(LANG==='ko'?'저도 찾고 있었어요. 지금은 누구였는지 모르겠어요.':"I was looking too. Now I can't remember who.");}
-      modal(wardenName.toUpperCase(),line);
+      modal(wardenName.toUpperCase(),line,()=>{
+        if(G.runCount===0&&!G.tutorialStage&&G.screen==='battle'){runTutorialSequence('intro');}
+      });
     },200);
+  } else if(G.runCount===0&&!G.tutorialStage){
+    setTimeout(()=>{if(G.screen==='battle')runTutorialSequence('intro');},400);
   }
 }
 
