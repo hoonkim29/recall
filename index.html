@@ -699,8 +699,57 @@ function renderVictory(root){const hint=G.pendingNode&&G.pendingNode.type==='bat
 function renderCardChoice(root){const pool=G.currentRoom===1?['archive_rat','old_book','forgotten_dog','reverb_card','echo']:['echo','forgotten_dog','old_book','reverb_card','afterimage','night_watcher'];const picks=shuffle(pool).slice(0,3).map(id=>mkCard(id));root.innerHTML=`<h3 class="center">${LANG==='ko'?'기억 선택':'Choose a Memory'}</h3><div class="row" id="ch" style="flex-wrap:wrap;justify-content:center;margin:16px 0"></div><button id="sk" style="display:block;margin:0 auto">${T('skip')}</button>`;const c=root.querySelector('#ch');picks.forEach(card=>{const e=renderCardEl(card,{onClick:()=>{G.playerDeck.push(card);G.playerDeck=shuffle(G.playerDeck);msg((LANG==='ko'?'획득: ':'Gained: ')+Tc(card.id));setScreen('map');}});c.appendChild(e);});root.querySelector('#sk').addEventListener('click',()=>{if(Math.random()<0.4&&G.items.length<3){const keys=Object.keys(ITEMS);const pick=keys[Math.floor(Math.random()*keys.length)];giveItem(pick);msg((LANG==='ko'?'유물 획득: ':'Relic: ')+ITEMS[pick].name[LANG]);}setScreen('map');});}
 
 // MAP
-const MAPS={1:{nodes:{start:{x:240,y:40,type:'start',c:['r1_battle_l','r1_relic','r1_chestA']},r1_battle_l:{x:100,y:130,type:'battle',c:['r1_reading']},r1_relic:{x:240,y:130,type:'relic',c:['r1_chestB']},r1_chestA:{x:380,y:130,type:'chestA',c:['r1_battle_hint']},r1_reading:{x:100,y:220,type:'reading',c:['r1_chestB']},r1_battle_hint:{x:380,y:220,type:'battle_hint',c:['r1_chestB']},r1_chestB:{x:240,y:310,type:'chestB',c:['r1_battle_l2','r1_vault','r1_battle_r2']},r1_battle_l2:{x:100,y:400,type:'battle',c:['r1_reclass']},r1_vault:{x:240,y:400,type:'vault',c:['r1_fuse','r1_reclass']},r1_battle_r2:{x:380,y:400,type:'battle',c:['r1_fuse']},r1_reclass:{x:140,y:485,type:'reclass',c:['r1_explore']},r1_fuse:{x:340,y:485,type:'fuse',c:['r1_explore']},r1_explore:{x:240,y:540,type:'explore',c:['r1_locks']},r1_locks:{x:240,y:595,type:'locks',c:['r1_boss']},r1_boss:{x:240,y:650,type:'boss',c:[]}}},
-2:{nodes:{r2_start:{x:240,y:40,type:'start',c:['r2_battle_l','r2_relic','r2_mysteryA']},r2_battle_l:{x:60,y:130,type:'battle',c:['r2_chestA','r2_reading']},r2_relic:{x:240,y:130,type:'relic',c:['r2_chestB']},r2_mysteryA:{x:420,y:130,type:'mysteryA',c:['r2_vault']},r2_chestA:{x:60,y:220,type:'chestA',c:['r2_chestB']},r2_reading:{x:170,y:220,type:'reading',c:['r2_chestB']},r2_vault:{x:420,y:220,type:'vault',c:['r2_chestB']},r2_chestB:{x:240,y:310,type:'chestB',c:['r2_battle_l2','r2_battle_mid','r2_mysteryB']},r2_battle_l2:{x:60,y:400,type:'battle',c:['r2_fuse']},r2_battle_mid:{x:240,y:400,type:'battle',c:['r2_fuse','r2_mysteryC']},r2_mysteryB:{x:420,y:400,type:'mysteryB',c:['r2_mysteryC']},r2_mysteryC:{x:340,y:485,type:'mysteryC',c:['r2_fuse']},r2_fuse:{x:180,y:485,type:'fuse',c:['r2_reclass']},r2_reclass:{x:300,y:530,type:'reclass',c:['r2_explore']},r2_explore:{x:240,y:580,type:'explore',c:['r2_locks']},r2_locks:{x:240,y:625,type:'locks',c:['r2_boss']},r2_boss:{x:240,y:680,type:'boss',c:[]}}}};
+const MAPS={1:{nodes:{
+  start:{x:240,y:40,type:'start',c:['r1_battle_l','r1_relic','r1_chestA']},
+  r1_battle_l:{x:100,y:115,type:'battle',c:['r1_reading']},
+  r1_relic:{x:240,y:115,type:'relic',c:['r1_chestB']},
+  r1_chestA:{x:380,y:115,type:'chestA',c:['r1_battle_hint']},
+  r1_reading:{x:100,y:190,type:'reading',c:['r1_chestB']},
+  r1_battle_hint:{x:380,y:190,type:'battle_hint',c:['r1_chestB']},
+  r1_chestB:{x:240,y:265,type:'chestB',c:['r1_battle_l2','r1_vault','r1_battle_r2']},
+  r1_battle_l2:{x:100,y:340,type:'battle',c:['r1_reclass']},
+  r1_vault:{x:240,y:340,type:'vault',c:['r1_fuse','r1_reclass']},
+  r1_battle_r2:{x:380,y:340,type:'battle',c:['r1_fuse']},
+  r1_reclass:{x:140,y:415,type:'reclass',c:['r1_explore']},
+  r1_fuse:{x:340,y:415,type:'fuse',c:['r1_explore']},
+  r1_explore:{x:240,y:480,type:'explore',c:['r1_mysteryA','r1_campfire']},
+  r1_mysteryA:{x:150,y:555,type:'mysteryA',c:['r1_battle3_l','r1_reading_late']},
+  r1_campfire:{x:330,y:555,type:'reading',c:['r1_reading_late','r1_battle3_r']},
+  r1_battle3_l:{x:100,y:630,type:'battle_hint',c:['r1_chestC']},
+  r1_reading_late:{x:240,y:630,type:'reading',c:['r1_chestC']},
+  r1_battle3_r:{x:380,y:630,type:'battle',c:['r1_chestC']},
+  r1_chestC:{x:240,y:705,type:'chestB',c:['r1_locks']},
+  r1_locks:{x:240,y:775,type:'locks',c:['r1_boss']},
+  r1_boss:{x:240,y:850,type:'boss',c:[]}
+}},
+2:{nodes:{
+  r2_start:{x:240,y:40,type:'start',c:['r2_battle_l','r2_relic','r2_mysteryA']},
+  r2_battle_l:{x:60,y:110,type:'battle',c:['r2_chestA','r2_reading']},
+  r2_relic:{x:240,y:110,type:'relic',c:['r2_chestB']},
+  r2_mysteryA:{x:420,y:110,type:'mysteryA',c:['r2_vault']},
+  r2_chestA:{x:60,y:185,type:'chestA',c:['r2_chestB']},
+  r2_reading:{x:170,y:185,type:'reading',c:['r2_chestB']},
+  r2_vault:{x:420,y:185,type:'vault',c:['r2_chestB']},
+  r2_chestB:{x:240,y:260,type:'chestB',c:['r2_battle_l2','r2_battle_mid','r2_mysteryB']},
+  r2_battle_l2:{x:60,y:335,type:'battle',c:['r2_fuse']},
+  r2_battle_mid:{x:240,y:335,type:'battle',c:['r2_fuse','r2_mysteryC']},
+  r2_mysteryB:{x:420,y:335,type:'mysteryB',c:['r2_mysteryC']},
+  r2_mysteryC:{x:340,y:410,type:'mysteryC',c:['r2_fuse']},
+  r2_fuse:{x:180,y:410,type:'fuse',c:['r2_reclass']},
+  r2_reclass:{x:300,y:470,type:'reclass',c:['r2_explore']},
+  r2_explore:{x:240,y:535,type:'explore',c:['r2_battle3_l','r2_mysteryD','r2_battle3_r']},
+  r2_battle3_l:{x:100,y:605,type:'battle_hint',c:['r2_vault2']},
+  r2_mysteryD:{x:240,y:605,type:'mysteryB',c:['r2_vault2','r2_reading2']},
+  r2_battle3_r:{x:380,y:605,type:'battle',c:['r2_reading2']},
+  r2_vault2:{x:150,y:680,type:'vault',c:['r2_chestC']},
+  r2_reading2:{x:330,y:680,type:'reading',c:['r2_chestC']},
+  r2_chestC:{x:240,y:755,type:'chestB',c:['r2_battle4','r2_campfire2']},
+  r2_battle4:{x:140,y:830,type:'battle',c:['r2_reading3']},
+  r2_campfire2:{x:340,y:830,type:'reading',c:['r2_reading3']},
+  r2_reading3:{x:240,y:905,type:'reading',c:['r2_locks']},
+  r2_locks:{x:240,y:975,type:'locks',c:['r2_boss']},
+  r2_boss:{x:240,y:1050,type:'boss',c:[]}
+}}};
 const ICONS={start:'⬥',battle:'⚔',battle_hint:'⚔',chestA:'📦',chestB:'📦',reading:'📖',locks:'🔒',boss:'👁',mysteryA:'?',mysteryB:'?',mysteryC:'?',vault:'💠',relic:'💎',fuse:'✦',reclass:'⇄',explore:'🚪'};
 
 function canEnter(id){
@@ -717,7 +766,8 @@ function canEnter(id){
 
 function renderMap(root){
   const map=MAPS[G.currentRoom];
-  root.innerHTML=`<div class="center" style="padding:6px 0"><div class="cinzel gold" style="font-size:14px">${G.currentRoom===1?T('room_1'):T('room_2')}</div><div class="dim" style="font-size:11px">${T('run')} ${G.runCount} · ${T('hints')} ${G.collectedHints.length} · ${T('deck')} ${G.playerDeck.length} · <a href="#" id="vd" style="color:var(--text-gold);text-decoration:underline;cursor:pointer">${T('view_deck')}</a></div>${fragsHtml(G.playerFragments,'player')}</div><svg class="map-svg" viewBox="0 0 480 640" id="ms"></svg>`;
+  const maxY=Math.max(...Object.values(map.nodes).map(n=>n.y))+50;
+  root.innerHTML=`<div class="center" style="padding:6px 0"><div class="cinzel gold" style="font-size:14px">${G.currentRoom===1?T('room_1'):T('room_2')}</div><div class="dim" style="font-size:11px">${T('run')} ${G.runCount} · ${T('hints')} ${G.collectedHints.length} · ${T('deck')} ${G.playerDeck.length} · <a href="#" id="vd" style="color:var(--text-gold);text-decoration:underline;cursor:pointer">${T('view_deck')}</a></div>${fragsHtml(G.playerFragments,'player')}</div><svg class="map-svg" viewBox="0 0 480 ${maxY}" id="ms" preserveAspectRatio="xMidYMin meet"></svg>`;
   const svg=root.querySelector('#ms');
   for(const[id,n]of Object.entries(map.nodes)){for(const to of n.c){const tgt=map.nodes[to];if(!tgt)continue;const ln=document.createElementNS('http://www.w3.org/2000/svg','path');ln.setAttribute('d',`M ${n.x} ${n.y} Q ${(n.x+tgt.x)/2} ${(n.y+tgt.y)/2+10} ${tgt.x} ${tgt.y}`);ln.setAttribute('stroke','#3d2838');ln.setAttribute('stroke-width','1.5');ln.setAttribute('fill','none');svg.appendChild(ln);}}
   for(const[id,n]of Object.entries(map.nodes)){const done=G.completedNodes.includes(id);const skipped=(G.skippedNodes||[]).includes(id);const avail=canEnter(id);const g=document.createElementNS('http://www.w3.org/2000/svg','g');g.classList.add('map-node');if(avail)g.classList.add('available');if(skipped)g.classList.add('skipped');const c=document.createElementNS('http://www.w3.org/2000/svg','circle');c.setAttribute('cx',n.x);c.setAttribute('cy',n.y);c.setAttribute('r','22');if(done){c.setAttribute('fill','#c8a84b');c.setAttribute('stroke','#c8a84b');}else if(skipped){c.setAttribute('fill','#0a0608');c.setAttribute('stroke','#2a1e28');c.setAttribute('opacity','0.4');}else if(avail){c.setAttribute('fill','#1a1418');c.setAttribute('stroke','#c8a84b');c.setAttribute('stroke-width','2');}else{c.setAttribute('fill','#1a1418');c.setAttribute('stroke','#3d2838');}g.appendChild(c);const t=document.createElementNS('http://www.w3.org/2000/svg','text');t.setAttribute('x',n.x);t.setAttribute('y',n.y+5);t.setAttribute('text-anchor','middle');t.setAttribute('fill',done?'#110d0f':(skipped?'#2a1e28':(avail?'#c8a84b':'#5a5050')));t.setAttribute('font-size','16');t.textContent=ICONS[n.type]||'·';g.appendChild(t);if(skipped){const sl=document.createElementNS('http://www.w3.org/2000/svg','line');sl.setAttribute('x1',n.x-14);sl.setAttribute('y1',n.y-14);sl.setAttribute('x2',n.x+14);sl.setAttribute('y2',n.y+14);sl.setAttribute('stroke','#5a3848');sl.setAttribute('stroke-width','1.5');sl.setAttribute('opacity','0.6');g.appendChild(sl);}if(avail){g.style.cursor='pointer';g.addEventListener('click',()=>enterNode(id,n));}svg.appendChild(g);}
@@ -727,7 +777,7 @@ function showDeckModal(){const w=document.createElement('div');w.className='moda
 
 function enterNode(id,node){G.currentNodeId=id;G.visitedNodes.push(id);G.skippedNodes=G.skippedNodes||[];const map=MAPS[G.currentRoom].nodes;for(const[pk,pn]of Object.entries(map)){if(pn.c&&pn.c.includes(id)&&(G.completedNodes.includes(pk)||G.visitedNodes.includes(pk))){for(const sib of pn.c){if(sib!==id&&!G.skippedNodes.includes(sib)&&!G.visitedNodes.includes(sib)&&!G.completedNodes.includes(sib))G.skippedNodes.push(sib);}}}G.pendingNode={id,...node};const t=node.type;if(t==='battle'||t==='battle_hint')enterBattle({isBoss:false,nodeId:id,grantsHint:t==='battle_hint'});else if(t.startsWith('chest'))enterMemBox(id,t);else if(t==='reading')setScreen('campfire');else if(t==='vault')setScreen('vault');else if(t==='relic')setScreen('relic');else if(t==='fuse')setScreen('fuse');else if(t==='reclass')setScreen('reclass');else if(t==='explore')setScreen('explore');else if(t.startsWith('mystery'))setScreen('mystery',{type:t});else if(t==='locks')setScreen('lockpuzzle');else if(t==='boss')enterBattle({isBoss:true,nodeId:id});}
 
-function enterMemBox(id,type){const H={r1_chestA:{idx:0,text:LANG==='ko'?'찢긴 입고 기록부: 입고일 11월 03일.':'A torn intake log. Entry date: November 03.'},r1_chestB:{idx:2,text:LANG==='ko'?'메모: 다이아몬드(◆), 삼각형(▲). "순서대로."':'A memo: ◆ then ▲. "In order."'},r2_chestA:{idx:3,text:LANG==='ko'?'진열 표찰: property of _ _ _':'Display tag: property of _ _ _'},r2_chestB:{idx:5,text:LANG==='ko'?'전시 유물. 천의 색은 푸르렀다.':'The exhibit cloth. Its color, once. Blue.'}};const h=H[id]||{idx:-1,text:''};setScreen('memorybox',{id,type,text:h.text,hintIdx:h.idx});}
+function enterMemBox(id,type){const H={r1_chestA:{idx:0,text:LANG==='ko'?'찢긴 입고 기록부: 입고일 11월 03일.':'A torn intake log. Entry date: November 03.'},r1_chestB:{idx:2,text:LANG==='ko'?'메모: 다이아몬드(◆), 삼각형(▲). "순서대로."':'A memo: ◆ then ▲. "In order."'},r1_chestC:{idx:1,text:LANG==='ko'?'명찰 조각 한 점: E _ I _ E.':'A badge fragment: E _ I _ E.'},r2_chestA:{idx:3,text:LANG==='ko'?'진열 표찰: property of _ _ _':'Display tag: property of _ _ _'},r2_chestB:{idx:5,text:LANG==='ko'?'전시 유물. 천의 색은 푸르렀다.':'The exhibit cloth. Its color, once. Blue.'},r2_chestC:{idx:6,text:LANG==='ko'?'사진 구석에 겨우 한 사람. 나머지 셋은 지워졌다.':'One face remains in the photo corner. The other three, erased.'}};const h=H[id]||{idx:-1,text:''};setScreen('memorybox',{id,type,text:h.text,hintIdx:h.idx});}
 function renderMemoryBox(root,opts){root.innerHTML=`<div class="center" style="padding-top:40px"><h3>${T('memory_box')}</h3><div class="panel"><div class="speaker">${LANG==='ko'?'기억 조각':'Memory Fragment'}</div><div class="dialogue">${opts.text}</div></div><button class="primary" id="b" style="margin-top:16px">${T('back')}</button></div>`;root.querySelector('#b').addEventListener('click',()=>{if(opts.hintIdx>=0&&!G.collectedHints.includes(opts.hintIdx))G.collectedHints.push(opts.hintIdx);if(!G.completedNodes.includes(opts.id))G.completedNodes.push(opts.id);setScreen('map');});}
 
 function renderCampfire(root){const lockRange=G.currentRoom===1?[0,1,2]:[3,4,5,6];const missingHints=lockRange.filter(i=>!G.collectedHints.includes(i));const canRecall=missingHints.length>0&&G.playerFragments>=2;root.innerHTML=`<div class="center" style="padding-top:40px"><h3>${T('campfire')}</h3><div class="panel dialogue">${LANG==='ko'?'잠시 쉰다. 불빛이 흔들린다.':'A brief rest. The flame flickers.'}</div><button id="h" style="display:block;margin:10px auto;width:80%">${T('heal')}</button><button id="u" style="display:block;margin:10px auto;width:80%">${T('upgrade')}</button><button id="rc" ${canRecall?'':'disabled'} style="display:block;margin:10px auto;width:80%">${LANG==='ko'?'힌트 추억하기 (조각 ✦2 희생)':'Recall a hint (sacrifice ✦2)'}</button></div>`;const fin=()=>{G.completedNodes.push(G.currentNodeId);setScreen('map');};root.querySelector('#h').addEventListener('click',()=>{G.playerFragments=Math.min(5,G.playerFragments+1);fin();});root.querySelector('#u').addEventListener('click',()=>{const p=G.playerDeck.filter(c=>c.id!=='faded_memory');if(!p.length){msg('—');return;}const t=p[Math.floor(Math.random()*p.length)];t.attack+=1;msg(Tc(t.id)+' +1 atk');if(G.currentRoom===1&&!G.collectedHints.includes(1))G.collectedHints.push(1);fin();});root.querySelector('#rc').addEventListener('click',()=>{if(!canRecall)return;const pick=missingHints[Math.floor(Math.random()*missingHints.length)];G.collectedHints.push(pick);G.playerFragments=Math.max(0,G.playerFragments-2);saveGame();modal(LANG==='ko'?'힌트':'Hint',HINTS[pick]?HINTS[pick]():'',fin);});}
