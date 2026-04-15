@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RECALL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;1,400&family=Noto+Sans+KR:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-deep:#09070a;--bg-dark:#110d0f;--bg-panel:#1a1418;--bg-card:#221820;
+  --border-dim:#3d2838;--border-warm:#6b3f50;--border-gold:#c8a84b;--border-red:#7a2e2e;
+  --text-bright:#f0ddc8;--text-main:#d4a898;--text-dim:#7a5858;--text-gold:#c8a84b;
+  --ink-color:#6ab0e0;--fragment:#c8a84b;--remembered:#5a9a6a;--blood:#8b2222;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;background:var(--bg-deep);color:var(--text-main);font-family:'Crimson Text','Noto Sans KR',serif;font-size:14px;overflow-x:hidden}
+body{background-color:#0a0608;min-height:100vh;background-repeat:no-repeat;background-position:center;background-attachment:fixed;transition:background-image .4s}
+body.bg-title,body.bg-title-vault,body.bg-battle-r1,body.bg-battle-r2{background-color:#0a0608;background-repeat:no-repeat;background-position:center center;background-size:contain}
+body.bg-title{background-image:url("image/dorm_card.jpg")}
+body.bg-title-vault{background-image:url("image/dorm_card_vault.jpg")}
+body.bg-battle-r1{background-image:url("image/reception_table.png")}
+body.bg-battle-r2{background-image:url("image/corridor_table.png")}
+body.bg-title::after,body.bg-title-vault::after,body.bg-battle-r1::after,body.bg-battle-r2::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:2;background:linear-gradient(to bottom,rgba(0,0,0,0.08) 0%,rgba(0,0,0,0.18) 40%,rgba(0,0,0,0.38) 85%,rgba(0,0,0,0.55) 100%)}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/><feColorMatrix values='0 0 0 0 0.7  0 0 0 0 0.55  0 0 0 0 0.3  0 0 0 0.05 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");opacity:0.5;z-index:1;mix-blend-mode:overlay}
+#app{max-width:520px;margin:0 auto;min-height:100vh;padding:14px;position:relative;z-index:3}
+h1,h2,h3{font-family:'Cinzel',serif;color:var(--text-gold);margin:6px 0;font-weight:600;letter-spacing:0.1em}
+h1{font-size:46px;letter-spacing:0.3em;text-shadow:0 0 16px rgba(200,168,75,0.4)}
+button{background:linear-gradient(to bottom,var(--bg-panel),var(--bg-card));color:var(--text-main);border:1.5px solid var(--border-warm);border-radius:4px;padding:10px 14px;font-size:15px;cursor:pointer;font-family:inherit;letter-spacing:0.04em;transition:all .2s}
+button:hover:not(:disabled){border-color:var(--border-gold);color:var(--text-bright)}
+button:disabled{opacity:0.35;cursor:not-allowed}
+button.primary{border-color:var(--border-gold);color:var(--text-gold)}
+.screen{animation:fadeIn .4s}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.panel{background:linear-gradient(to bottom,rgba(26,20,24,0.9),rgba(17,13,15,0.9));border:1px solid var(--border-dim);border-radius:5px;padding:10px;margin:6px 0;box-shadow:inset 0 0 18px rgba(0,0,0,0.5)}
+.center{text-align:center}.dim{color:var(--text-dim);font-size:11px}.gold{color:var(--text-gold)}.cinzel{font-family:'Cinzel',serif;letter-spacing:0.08em}
+.card{width:110px;height:154px;background:linear-gradient(to bottom,#2a1e28,#1a1418);border:1.5px solid var(--border-warm);border-radius:6px;padding:3px;display:inline-flex;flex-direction:column;margin:2px;position:relative;cursor:pointer;user-select:none;transition:transform .18s,border-color .18s;box-shadow:inset 0 0 10px rgba(0,0,0,0.6);overflow:hidden;font-family:'Cinzel',serif;vertical-align:top}
+.card:hover{border-color:var(--border-gold);transform:translateY(-3px)}
+.card.selected{border-color:var(--border-gold);box-shadow:0 0 12px rgba(200,168,75,0.6)}
+.card.remembered{border-color:var(--remembered)}
+.card .cost{position:absolute;top:4px;right:4px;width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#8ec8e8,#3e80b8);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;z-index:2}
+.card[data-cost="0"] .cost{background:radial-gradient(circle at 30% 30%,#6a6a6a,#333)}
+.card .name{font-size:12px;font-weight:600;color:var(--text-bright);padding:2px 22px 2px 3px;line-height:1.15;min-height:22px;overflow:hidden}
+.card .art{flex:1 1 0;min-height:0;margin:1px 0;border-radius:2px;background:rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;border:1px solid rgba(0,0,0,0.4);overflow:hidden}
+.card .art svg{width:100%;height:100%;max-height:100%;display:block}
+.card .stats{display:flex;justify-content:space-around;padding:3px 3px 0;font-size:13px;color:var(--text-gold);font-weight:600}
+.card .sigil{font-size:7px;color:var(--text-dim);text-align:center;text-transform:uppercase}
+.slot{width:110px;height:154px;border:1.5px solid var(--border-dim);border-radius:6px;background:linear-gradient(135deg,#140c10,#0a0608);display:inline-flex;margin:2px;vertical-align:top;position:relative;cursor:pointer;align-items:center;justify-content:center;color:var(--text-dim);font-size:11px;font-family:'Cinzel',serif;box-shadow:inset 0 0 10px rgba(0,0,0,0.7)}
+.slot.targeted{border-color:var(--border-gold);box-shadow:0 0 10px rgba(200,168,75,0.4)}
+.slot.warden{border-color:#3a1e24}
+.row{display:flex;justify-content:center;flex-wrap:nowrap;overflow-x:auto;padding:2px 0}
+.hand{display:flex;overflow-x:auto;gap:1px;padding:2px 0;min-height:114px}
+.fragments{font-size:24px;letter-spacing:5px;text-align:center;margin:4px 0;font-family:'Cinzel',serif;text-shadow:0 0 6px currentColor}
+.fragments.player{color:var(--fragment)}
+.fragments.warden{color:var(--border-red);filter:brightness(1.3)}
+.divider{height:2px;margin:6px 0;background:linear-gradient(to right,transparent,var(--border-gold),transparent);position:relative}
+.divider::before{content:"❦";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:var(--bg-dark);padding:0 8px;color:var(--border-gold);font-size:12px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:200;padding:16px}
+.modal-content{background:linear-gradient(to bottom,var(--bg-panel),var(--bg-dark));border:1.5px solid var(--border-gold);border-radius:5px;padding:16px;max-width:400px;width:100%}
+.dialogue{font-style:italic;color:var(--text-bright);margin:6px 0;line-height:1.6;font-size:16px;font-family:'Crimson Text','Noto Sans KR',serif}
+.speaker{font-family:'Cinzel',serif;color:var(--text-gold);font-size:11px;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:4px}
+.msg{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--bg-panel);border:1px solid var(--border-gold);padding:6px 14px;border-radius:3px;z-index:250;font-size:12px;color:var(--text-bright)}
+.ink{color:var(--ink-color);font-family:'Cinzel',serif;font-weight:600;font-size:16px}
+.item-btn{background:#2a1e26;border:1px solid #5a9a6a;color:#c8a84b;border-radius:4px;padding:2px 8px;font-size:14px;margin:0 2px;cursor:pointer}
+.item-btn:hover{background:#3a2e36;border-color:#c8a84b}
+@keyframes hit-shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px);filter:brightness(1.8) hue-rotate(-20deg)}75%{transform:translateX(5px);filter:brightness(1.8) hue-rotate(-20deg)}}
+@keyframes card-die{to{transform:scale(0.7) rotate(-15deg);opacity:0}}
+.card.hit{animation:hit-shake 0.25s ease}
+.card.dying{animation:card-die 0.4s forwards}
+.card.faded-card{opacity:0.4;filter:grayscale(1) brightness(0.6)}
+.side-fans{position:fixed;right:8px;top:80px;display:flex;flex-direction:column;gap:14px;z-index:90;pointer-events:none}
+.side-fans .fan{width:58px;height:80px;position:relative;pointer-events:auto}
+.side-fans .fan .card-back{position:absolute;width:40px;height:58px;border-radius:5px;background:linear-gradient(135deg,#2a1824,#120a0f);border:1px solid var(--border-dim);box-shadow:0 3px 8px rgba(0,0,0,0.7);left:50%;top:6px;transform-origin:50% 100%}
+.side-fans .fan .card-back:nth-child(1){transform:translateX(-50%) rotate(-14deg)}
+.side-fans .fan .card-back:nth-child(2){transform:translateX(-50%) rotate(0deg)}
+.side-fans .fan .card-back:nth-child(3){transform:translateX(-50%) rotate(14deg)}
+.side-fans .fan .lbl{position:absolute;bottom:-14px;left:0;right:0;text-align:center;font-size:9px;color:var(--text-dim);letter-spacing:0.5px}
+.side-fans .fan.tappable{cursor:pointer}
+.side-fans .fan.tappable:hover .card-back{border-color:var(--border-gold);box-shadow:0 3px 12px rgba(200,168,75,0.4)}
+.side-fans .fan.warden .card-back{background:linear-gradient(135deg,#2a0e14,#0d0608);border-color:#3a1e24}
+.card.remembered{border-color:var(--remembered)!important;box-shadow:0 0 8px rgba(90,154,106,0.3)}
+.card.death{border-color:#8b2222!important;box-shadow:0 0 10px rgba(139,34,34,0.5);background:linear-gradient(135deg,#221820 0%,#2a1818 100%)}
+@keyframes flicker{0%,100%{opacity:1}10%{opacity:0.3}20%{opacity:1}30%{opacity:0.6}40%{opacity:1}}
+.battery-flicker{animation:flicker 1.5s}
+@keyframes screen-off{0%{clip-path:inset(0 0 0 0);filter:brightness(1)}50%{filter:brightness(0.4)}100%{clip-path:inset(0 0 100% 0);filter:brightness(0)}}
+.screen-off{animation:screen-off 2s forwards}
+.scanlines{position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,0.3) 0,rgba(0,0,0,0.3) 2px,transparent 2px,transparent 4px);z-index:9999;animation:fadeIn 0.5s}
+input[type=text]{background:var(--bg-card);color:var(--text-bright);border:1px solid var(--border-warm);border-radius:3px;padding:7px;font-size:13px;width:100%;font-family:inherit}
+input[type=text]:focus{outline:none;border-color:var(--border-gold)}
+.action-bar{display:flex;justify-content:space-between;align-items:center;padding:4px 2px;gap:4px;flex-wrap:wrap}
+.draw-area{display:flex;gap:8px;justify-content:center;padding:8px 0}
+.draw-btn{width:110px;height:130px;border:2px solid var(--border-warm);border-radius:6px;background:linear-gradient(135deg,#2a1e28,#110d0f);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;font-family:'Cinzel',serif;color:var(--text-bright);transition:all .2s}
+.draw-btn:hover:not(:disabled){border-color:var(--border-gold);transform:translateY(-2px)}
+.draw-btn:disabled{opacity:0.3;cursor:not-allowed}
+.draw-btn .icon{font-size:26px;margin-bottom:4px}
+.draw-btn .label{font-size:11px;text-align:center}
+.title-wrap{padding-top:50px;text-align:center}
+.title-deck{width:140px;height:196px;border:2px solid var(--border-gold);border-radius:10px;background:linear-gradient(135deg,#2a1e28 0%,#1a1418 60%,#3a2a28 100%);margin:24px auto;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 0 28px rgba(200,168,75,0.3),inset 0 0 28px rgba(0,0,0,0.6);animation:pg 3s ease-in-out infinite}
+.title-deck::before{content:"RECALL";font-family:'Cinzel',serif;font-size:16px;color:var(--text-gold);letter-spacing:0.3em}
+@keyframes pg{0%,100%{box-shadow:0 0 22px rgba(200,168,75,0.2),inset 0 0 28px rgba(0,0,0,0.6)}50%{box-shadow:0 0 40px rgba(200,168,75,0.5),inset 0 0 28px rgba(0,0,0,0.6)}}
+.map-svg{width:100%;display:block;margin:8px 0}
+.map-node{cursor:pointer}
+.map-node.available circle{animation:np 2s ease-in-out infinite}
+@keyframes np{0%,100%{filter:drop-shadow(0 0 3px rgba(200,168,75,0.5))}50%{filter:drop-shadow(0 0 10px rgba(200,168,75,0.9))}}
+.room-scene{perspective:900px;perspective-origin:50% 35%;position:relative;height:360px;margin:16px auto;max-width:440px;transform-style:preserve-3d}
+.room-scene .floor{position:absolute;left:0;right:0;bottom:0;height:180px;transform:rotateX(55deg) translateZ(-40px);transform-origin:center bottom;background:repeating-linear-gradient(90deg,#1a1216 0,#1a1216 40px,#1e1519 40px,#1e1519 80px);opacity:0.85}
+.room-scene .wall{position:absolute;left:0;right:0;top:0;height:220px;transform:translateZ(-200px);background:linear-gradient(180deg,#0d0a0e 0%,#1a1418 100%)}
+.room-scene .obj{position:absolute;padding:10px 14px;background:linear-gradient(135deg,#2a1e24,#1a1218);border:1px solid var(--border-dim);border-radius:6px;color:var(--text-main);font-size:13px;cursor:pointer;transform:translateZ(15px);box-shadow:0 15px 30px rgba(0,0,0,0.7),0 5px 10px rgba(0,0,0,0.5);transition:transform 0.2s,box-shadow 0.2s,border-color 0.2s;text-align:center}
+.room-scene .obj:hover{transform:translateZ(25px) scale(1.04);box-shadow:0 22px 44px rgba(0,0,0,0.85);border-color:var(--border-gold);color:var(--text-gold)}
+.room-scene .obj::before{content:'';position:absolute;bottom:-8px;left:10%;width:80%;height:8px;background:radial-gradient(ellipse,rgba(0,0,0,0.6) 0%,transparent 70%);filter:blur(4px);pointer-events:none}
+.phone-btn{position:fixed;right:10px;bottom:10px;width:130px;height:210px;background:linear-gradient(to bottom,#2a1e28,#110d0f);border:1.5px solid var(--border-gold);border-radius:10px;cursor:pointer;z-index:150;padding:8px;font-family:'Noto Sans KR','Crimson Text',serif;color:var(--text-main);text-align:left;overflow:hidden;box-shadow:0 6px 16px rgba(0,0,0,0.6),inset 0 0 10px rgba(0,0,0,0.5)}
+.phone-btn .pm-head{display:flex;justify-content:space-between;font-size:9px;color:var(--text-dim);margin-bottom:4px}
+.phone-btn .pm-pips{font-size:8px;color:#c8a84b;letter-spacing:1px;margin-bottom:6px}
+.phone-btn .pm-name{font-family:'Cinzel',serif;font-size:11px;color:var(--text-bright);margin-bottom:4px}
+.phone-btn .pm-msg{font-size:10px;line-height:1.3;color:var(--text-dim);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.phone-btn .pm-msg.me{color:var(--text-main);text-align:right}
+.phone-btn.pulse{animation:pmpulse 0.9s ease-in-out infinite}
+@keyframes pmpulse{0%,100%{box-shadow:0 6px 16px rgba(0,0,0,0.6),0 0 0 rgba(200,80,80,0)}50%{box-shadow:0 6px 16px rgba(0,0,0,0.6),0 0 18px rgba(200,80,80,0.8)}}
+@keyframes atk-rush{0%{transform:translateY(0)}30%{transform:translateY(-18px)}60%{transform:translateY(-110px)}100%{transform:translateY(0)}}
+@keyframes atk-rush-down{0%{transform:translateY(0)}30%{transform:translateY(18px)}60%{transform:translateY(110px)}100%{transform:translateY(0)}}
+@keyframes atk-wave{0%,100%{opacity:1;filter:brightness(1)}40%{opacity:0.4;filter:brightness(1.8) hue-rotate(-30deg)}70%{opacity:0.7}}
+@keyframes atk-shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+@keyframes atk-arc{0%{transform:translate(0,0) rotate(0)}30%{transform:translate(10px,-40px) rotate(-12deg)}60%{transform:translate(30px,-80px) rotate(-25deg)}100%{transform:translate(0,0) rotate(0)}}
+@keyframes atk-arc-down{0%{transform:translate(0,0) rotate(0)}30%{transform:translate(10px,40px) rotate(12deg)}60%{transform:translate(30px,80px) rotate(25deg)}100%{transform:translate(0,0) rotate(0)}}
+@keyframes warden-deal{0%{transform:translate(0,-80px) rotateY(180deg);opacity:0}30%{opacity:1}100%{transform:translate(0,0) rotateY(180deg);opacity:1}}
+@keyframes warden-flip{0%{transform:rotateY(180deg)}100%{transform:rotateY(0deg)}}
+@keyframes block-pop{0%{transform:translateY(0) scale(0.6);opacity:0}15%{transform:translateY(-6px) scale(1.2);opacity:1}30%{transform:translateY(-12px) scale(1);opacity:1}75%{transform:translateY(-24px) scale(1);opacity:1}100%{transform:translateY(-34px) scale(0.9);opacity:0}}
+.card.facedown .name,.card.facedown .art,.card.facedown .stats,.card.facedown .sigil,.card.facedown .cost{visibility:hidden}
+.card.facedown{background:linear-gradient(135deg,#3a2028 0%,#1a0e14 50%,#3a2028 100%);border-color:#5a3848;position:relative;backface-visibility:hidden;transform-style:preserve-3d}
+.card.facedown::after{content:"◈";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:36px;color:#8a6a4a;text-shadow:0 0 8px rgba(138,106,74,0.4);letter-spacing:0.1em}
+.card.warden-dealing{animation:warden-deal .5s ease-out forwards;transform-origin:center}
+.card.warden-flipping{animation:warden-flip .55s ease-in-out forwards;transform-origin:center}
+.tut-mask{position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:500;pointer-events:auto;animation:fadeIn .3s}
+.tut-highlight{position:fixed;border:2px solid var(--border-gold);border-radius:8px;box-shadow:0 0 0 9999px rgba(0,0,0,0.72),0 0 22px rgba(200,168,75,0.85),inset 0 0 18px rgba(200,168,75,0.25);z-index:502;pointer-events:none;transition:all .3s;animation:tut-pulse 1.6s ease-in-out infinite;background:transparent}
+@keyframes tut-pulse{0%,100%{box-shadow:0 0 0 9999px rgba(0,0,0,0.72),0 0 16px rgba(200,168,75,0.6),inset 0 0 14px rgba(200,168,75,0.15)}50%{box-shadow:0 0 0 9999px rgba(0,0,0,0.72),0 0 30px rgba(200,168,75,1),inset 0 0 22px rgba(200,168,75,0.35)}}
+.tut-dialog{position:fixed;background:linear-gradient(to bottom,#2a1e28,#1a1418);border:1.5px solid var(--border-gold);border-radius:8px;padding:14px 16px;color:var(--text-main);font-size:14px;line-height:1.5;max-width:300px;z-index:502;box-shadow:0 8px 24px rgba(0,0,0,0.8);animation:fadeIn .3s}
+.tut-dialog .tut-label{font-family:'Cinzel',serif;color:var(--text-gold);font-size:11px;letter-spacing:0.15em;margin-bottom:6px;text-transform:uppercase}
+.tut-dialog button{margin-top:10px;width:100%;font-size:13px;padding:8px}
+.player-slot.atk-rush,.card.player-slot.atk-rush{animation:atk-rush 0.5s ease-in-out;z-index:10}
+.warden-slot.atk-rush,.card.warden-slot.atk-rush{animation:atk-rush-down 0.5s ease-in-out;z-index:10}
+.atk-wave{animation:atk-wave 0.6s ease-in-out;z-index:10}
+.atk-shake{animation:atk-shake 0.4s ease-in-out;z-index:10}
+.player-slot.atk-arc,.card.player-slot.atk-arc{animation:atk-arc 0.5s ease-in-out;z-index:10}
+.warden-slot.atk-arc,.card.warden-slot.atk-arc{animation:atk-arc-down 0.5s ease-in-out;z-index:10}
+@keyframes draw-flip{0%{transform:translate(-50%,-50%) rotateY(180deg) scale(0.8);opacity:0}20%{opacity:1}60%{transform:translate(-50%,-50%) rotateY(0deg) scale(1.1);opacity:1}100%{transform:translate(calc(-50% + 0px),200px) rotateY(0deg) scale(0.7);opacity:0}}
+.draw-ghost{position:fixed;left:50%;top:50%;width:110px;height:154px;border:2px solid var(--border-gold);border-radius:8px;background:linear-gradient(135deg,#2a1e24,#1a1218);z-index:400;pointer-events:none;animation:draw-flip 0.7s ease-in-out forwards;transform-style:preserve-3d;display:flex;align-items:center;justify-content:center;color:var(--text-gold);font-size:32px}
+.phone-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:175;opacity:0;pointer-events:none;transition:opacity .25s}.phone-backdrop.open{opacity:1;pointer-events:auto}
+.phone-overlay{position:fixed;top:0;right:0;bottom:0;width:320px;max-width:100vw;background:var(--bg-deep);border-left:1.5px solid var(--border-gold);z-index:180;display:flex;flex-direction:column;transition:transform .3s;transform:translateX(100%)}
+.phone-overlay.open{transform:translateX(0)}
+.phone-header{padding:12px;border-bottom:1px solid var(--border-dim);display:flex;align-items:center;gap:10px;background:var(--bg-panel)}
+.phone-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#c8a84b,#7a5030);flex:0 0 40px}
+.phone-avatar.empty{background:#555;filter:grayscale(1)}
+.phone-name{font-family:'Cinzel',serif;color:var(--text-bright);font-size:14px}
+.phone-close{margin-left:auto;background:none;border:none;color:var(--text-dim);font-size:22px;cursor:pointer}
+.phone-body{flex:1;overflow-y:auto;padding:10px;font-family:'Noto Sans KR','Crimson Text',serif;display:flex;flex-direction:column}
+.chat-bubble{max-width:75%;padding:7px 11px;margin:3px 0;border-radius:10px;font-size:15px;line-height:1.6;word-break:break-word}
+.chat-bubble.j{background:#2a1f24;color:var(--text-bright);border-bottom-left-radius:2px;align-self:flex-start}
+.chat-bubble.me{background:#3a3030;color:var(--text-bright);border-bottom-right-radius:2px;align-self:flex-end;text-align:right}
+.chat-bubble.locked{opacity:0.45;position:relative}
+.chat-bubble.locked::after{content:"🔒";position:absolute;right:-14px;top:50%;transform:translateY(-50%);font-size:10px}
+.chat-bubble.selectable{outline:2px solid rgba(139,34,34,0.6);cursor:pointer}
+.chat-bubble.selectable:hover{outline-color:var(--blood);background:rgba(139,34,34,0.2)}
+.chat-bubble.love{box-shadow:0 0 8px rgba(200,168,75,0.4)}
+.lang-btn{position:fixed;left:10px;top:10px;z-index:160;padding:4px 8px;font-size:11px}
+.debug-overlay,.sim-log{position:fixed;inset:0;background:rgba(0,0,0,0.95);color:#9cf;font-family:monospace;font-size:12px;padding:16px;z-index:300;overflow:auto;white-space:pre-wrap}
+.debug-overlay{color:#7f7}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="art-faded_memory" viewBox="0 0 60 60"><g fill="none" stroke="#6b4f3e"><circle cx="30" cy="30" r="22" opacity="0.25"/><circle cx="30" cy="30" r="15" opacity="0.4"/><circle cx="30" cy="30" r="8" opacity="0.6"/></g></symbol>
+<symbol id="art-afterimage" viewBox="0 0 60 60"><g stroke="#8ba5c8" fill="none"><line x1="15" y1="12" x2="52" y2="48" opacity="0.3"/><line x1="18" y1="12" x2="55" y2="48" opacity="0.5"/><line x1="21" y1="12" x2="58" y2="48" opacity="0.7"/></g></symbol>
+<symbol id="art-memory_shard" viewBox="0 0 60 60"><g stroke="#8ba5c8" fill="#2a3a4f"><polygon points="30,10 45,28 38,50 22,50 15,28" opacity="0.6"/><line x1="30" y1="10" x2="30" y2="50"/><line x1="15" y1="28" x2="45" y2="28"/></g></symbol>
+<symbol id="art-echo" viewBox="0 0 60 60"><g fill="none" stroke="#a88cd8"><circle cx="30" cy="30" r="6"/><circle cx="30" cy="30" r="14" opacity="0.6"/><circle cx="30" cy="30" r="22" opacity="0.3"/></g></symbol>
+<symbol id="art-lost_memory" viewBox="0 0 60 60"><text x="30" y="38" text-anchor="middle" font-size="28" fill="#c8a84b" font-family="Cinzel,serif">?</text></symbol>
+<symbol id="art-night_watcher" viewBox="0 0 60 60"><g fill="none" stroke="#c8a84b"><path d="M10,30 Q30,15 50,30 Q30,45 10,30 Z"/><circle cx="30" cy="30" r="6"/></g></symbol>
+<symbol id="art-archive_rat" viewBox="0 0 60 60"><g fill="#5a4a30" stroke="#8a6a40"><ellipse cx="30" cy="38" rx="14" ry="8"/><circle cx="44" cy="34" r="5"/></g></symbol>
+<symbol id="art-old_book" viewBox="0 0 60 60"><g stroke="#8a6a40" fill="#2a2116"><path d="M10,15 L30,20 L50,15 L50,48 L30,45 L10,48 Z"/><line x1="30" y1="20" x2="30" y2="45"/></g></symbol>
+<symbol id="art-forgotten_dog" viewBox="0 0 60 60"><g fill="#5a4a30" stroke="#8a6a40"><ellipse cx="28" cy="38" rx="16" ry="9"/><circle cx="14" cy="32" r="7"/></g></symbol>
+<symbol id="art-reverb" viewBox="0 0 60 60"><g fill="none" stroke="#a88cd8"><path d="M5,30 Q15,10 25,30 Q35,50 45,30 Q52,18 55,30"/><path d="M5,30 Q15,50 25,30 Q35,10 45,30 Q52,42 55,30" opacity="0.5"/></g></symbol>
+</defs></svg>
+
+<script>
+"use strict";
+
+const I18N={
+ko:{recall:'RECALL',loading:'기억의 서고',tap:'덱을 탭하세요',run:'런',deck:'덱',hand:'손',turn:'턴',draw_deck:'덱에서 뽑기',draw_fog:'흐릿한 기억',ring_bell:'턴 종료',sacrifice_select:'지울 기억을 선택하세요',cancel:'취소',confirm:'확인',continue:'계속',victory:'승리',elise:'엘리제',owen:'오웬',boss:'보스',fragments:'파편',hints:'힌트',locks:'자물쇠',solved:'해제됨',wrong:'틀렸다',memory_box:'오래된 상자',campfire:'쉴 곳',mystery:'수수께끼',vault:'기억 금고',heal:'파편 회복 (+1)',upgrade:'카드 연마 (+1 공격)',restore:'기억 되찾기 (-1 파편)',back:'돌아가기',skip:'건너뛰기',reset:'저장 초기화',confirm_reset:'저장 데이터를 지울까요?',view_deck:'덱 보기',close:'닫기',unknown:'알 수 없는 번호',empty_chat:'대화 내용이 없습니다',love_warning:'이 기억을 지우면 돌아오지 않아요. 정말로요.',delete:'지운다',back_btn:'돌아간다',room_1:'제1실 · 접수실',room_2:'제2실 · 유물실',
+ names:{faded_memory:'흐릿한 기억',afterimage:'잔상',memory_shard:'기억 파편',echo:'메아리',lost_memory:'길 잃은 기억',night_watcher:'야경꾼',archive_rat:'서고 쥐',old_book:'낡은 책',forgotten_dog:'잊혀진 개',reverb_card:'반향'}},
+en:{recall:'RECALL',loading:'Memory Archive',tap:'TAP THE DECK',run:'Run',deck:'Deck',hand:'Hand',turn:'Turn',draw_deck:'Draw from deck',draw_fog:'Faded Memory',ring_bell:'Ring Bell',sacrifice_select:'Choose a memory to erase',cancel:'Cancel',confirm:'Confirm',continue:'Continue',victory:'Victory',elise:'Elise',owen:'Owen',boss:'Boss',fragments:'Fragments',hints:'Hints',locks:'Locks',solved:'Solved',wrong:'Wrong',memory_box:'Memory Box',campfire:'Campfire',mystery:'Mystery',vault:'Memory Vault',heal:'Recover fragment (+1)',upgrade:'Sharpen card (+1 atk)',restore:'Restore memory (-1 frag)',back:'Back',skip:'Skip',reset:'Reset save',confirm_reset:'Erase save data?',view_deck:'View deck',close:'Close',unknown:'Unknown Number',empty_chat:'No conversation.',love_warning:'If you erase this memory, it will not return. Truly.',delete:'Erase',back_btn:'Go back',room_1:'Room 1 · Reception',room_2:'Room 2 · Exhibits',
+ names:{faded_memory:'Faded Memory',afterimage:'Afterimage',memory_shard:'Memory Shard',echo:'Echo',lost_memory:'Lost Memory',night_watcher:'Night Watcher',archive_rat:'Archive Rat',old_book:'Old Book',forgotten_dog:'Forgotten Dog',reverb_card:'Reverb'}}};
+let LANG=localStorage.getItem('recall_lang')||'ko';
+const T=k=>I18N[LANG][k]||k, Tc=id=>I18N[LANG].names[id]||id;
+
+const CARDS={
+  faded_memory:{inkCost:0,attack:0,maxHp:1,sigil:null},
+  afterimage:{inkCost:1,attack:1,maxHp:1,sigil:null},
+  memory_shard:{inkCost:1,attack:0,maxHp:3,sigil:'shatter'},
+  echo:{inkCost:2,attack:2,maxHp:2,sigil:null},
+  lost_memory:{inkCost:1,attack:0,maxHp:2,sigil:'talking'},
+  night_watcher:{inkCost:1,attack:1,maxHp:2,sigil:'vigilance'},
+  archive_rat:{inkCost:0,attack:1,maxHp:1,sigil:'ephemeral'},
+  old_book:{inkCost:2,attack:0,maxHp:4,sigil:'record'},
+  forgotten_dog:{inkCost:2,attack:2,maxHp:3,sigil:null},
+  reverb_card:{inkCost:1,attack:0,maxHp:2,sigil:'reverb'}};
+const ART={faded_memory:'art-faded_memory',afterimage:'art-afterimage',memory_shard:'art-memory_shard',echo:'art-echo',lost_memory:'art-lost_memory',night_watcher:'art-night_watcher',archive_rat:'art-archive_rat',old_book:'art-old_book',forgotten_dog:'art-forgotten_dog',reverb_card:'art-reverb'};
+let UID=0;
+function mkCard(id,remembered=false){const b=CARDS[id];const c={id,inkCost:b.inkCost,attack:b.attack,maxHp:b.maxHp,currentHp:b.maxHp,sigil:b.sigil,uid:++UID,turnsSurvived:0,remembered};if(remembered)c.attack+=1;return c;}
+function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+const J_MSGS=[
+{s:'J',t:'오늘 고마웠어'},{s:'me',t:'뭐가'},{s:'J',t:'그냥 다'},{s:'me',t:'ㅋㅋ뭔 말이야'},{s:'J',t:'됐어 자'},{s:'me',t:'ㅋㅋ잘자'},
+{s:'me',t:'어제 내가 이상한 말 한 것 같아서'},{s:'J',t:'아니야'},{s:'J',t:'나도 사실 좀 그랬어'},{s:'me',t:'뭐가'},{s:'J',t:'그냥'},{s:'me',t:'뭔데'},
+{s:'J',t:'오빠 사랑해',lock:'last'},
+{s:'J',t:'나 요즘 좀 힘든 것 같아'},{s:'me',t:'왜? 무슨 일 있어?'},{s:'J',t:'그냥 다 모르겠어'},{s:'me',t:'나 지금 나갈 수 있어'},{s:'me',t:'어디야'},{s:'J',t:'괜찮아 별거 아니야'},{s:'me',t:'별거 아닌 거 맞아?'},{s:'J',t:'응'},{s:'me',t:'그래도 나가'},{s:'me',t:'나 심심해'},
+{s:'J',t:'괜찮아?'},{s:'me',t:'응'},{s:'J',t:'진짜로?'},{s:'me',t:'응 그냥 피곤했나봐'},{s:'J',t:'알겠어'},{s:'J',t:'나 여기 있어',lock:'r1lock2'},
+{s:'J',t:'나 오늘 시험 완전 망했어'},{s:'me',t:'얼마나?'},{s:'J',t:'그냥 다 틀린 것 같아 ㅠ'},{s:'me',t:'괜찮아 나도 망했어'},{s:'J',t:'ㅋㅋㅋ우리 같이 망했다'},{s:'me',t:'밥이나 먹으러 가자'},
+{s:'J',t:'오늘 하늘 진짜 예쁘다',lock:'r2chestA'},{s:'me',t:'어디서'},{s:'J',t:'공대 앞'},{s:'J',t:'[사진]',lock:'r2chestA'},{s:'me',t:'진짜네'},
+{s:'J',t:'야 요즘 Recall이라는 앱 유행하던데 알아?'},{s:'me',t:'모르는데'},{s:'J',t:'진짜 신기한 게임이야 한번 해봐'},{s:'J',t:'나 어제 밤새했는데 멈출 수가 없었음'},{s:'me',t:'나중에'},{s:'J',t:'ㅋㅋ알겠어'},{s:'J',t:'오늘 저녁 같이 먹을 수 있어?'},{s:'me',t:'오늘 좀 바쁠 것 같아'},{s:'J',t:'그래 다음에'}];
+
+const G={runCount:0,screen:'title',solvedLocks:[false,false,false,false,false,false,false],rememberedCards:[],
+diedThisRun:[],playerDeck:[],deletedMsgs:[],sacrificeCounter:0,deathCards:[],items:[],runStats:{cardUsageCount:{},lastDeadCard:null,cardFieldSurvival:{}},currentRoom:1,currentNodeId:'start',completedNodes:[],collectedHints:[],visitedNodes:['start'],
+playerFragments:5,wardenFragments:5,currentInk:0,oblivionGauge:0,battery:100,playerHand:[],playerSlots:[null,null,null,null],wardenSlots:[null,null,null,null],wardenDeck:[],wardenHand:[],battleDiscard:[],isBossBattle:false,battlePhase:'draw',turnCount:0,selectedHandIdx:null,pendingSacrifice:null,pendingNode:null,phoneOpen:false,sacrificeMode:false};
+
+function saveGame(){try{localStorage.setItem('recall_save',JSON.stringify({r:G.runCount,l:G.solvedLocks,m:G.rememberedCards,d:G.deletedMsgs,sc:G.sacrificeCounter,dc:G.deathCards,it:G.items}));}catch(e){}}
+function loadGame(){try{const s=localStorage.getItem('recall_save');if(s){const d=JSON.parse(s);G.runCount=d.r||0;G.solvedLocks=d.l||Array(7).fill(false);G.rememberedCards=d.m||[];G.deletedMsgs=d.d||[];G.sacrificeCounter=d.sc||0;G.deathCards=d.dc||[];G.items=d.it||[];}}catch(e){}}
+const ITEMS={frag_shard:{name:{ko:'기억 파편',en:'Memory Fragment'},icon:'✦',use:()=>{G.playerFragments=Math.min(5,G.playerFragments+2);msg('+2 ✦');}},oblivion_boost:{name:{ko:'망각 가속기',en:'Oblivion Boost'},icon:'🟣',use:()=>{G.oblivionGauge=Math.min(8,G.oblivionGauge+4);msg('망각 +4');}},resonance:{name:{ko:'공명석',en:'Resonance Stone'},icon:'◈',use:()=>{G.resonanceActive=true;G.playerSlots.forEach(c=>{if(c)c.attack+=1;});G.playerHand.forEach(c=>{if(c.id!=='faded_memory')c.attack+=1;});msg(LANG==='ko'?'공명 — 이번 배틀 모든 카드 +1 공격':'Resonance — +1 atk all cards this battle');}},
+memory_crystal:{name:{ko:'기억 결정체',en:'Memory Crystal'},icon:'🔹',use:()=>{const i=G.playerSlots.findIndex(s=>s===null);if(i<0){msg(LANG==='ko'?'슬롯 없음':'No slot');return false;}G.playerSlots[i]=mkCard('faded_memory');}},
+oblivion_crystal:{name:{ko:'망각 결정체',en:'Oblivion Crystal'},icon:'🟣',use:()=>{const i=G.wardenSlots.findIndex(s=>s!==null);if(i<0){msg(LANG==='ko'?'적 없음':'No enemy');return false;}onCardDeath(G.wardenSlots[i]);G.wardenSlots[i]=null;}},
+archive_key:{name:{ko:'서고 열쇠',en:'Archive Key'},icon:'🗝',use:()=>{const i=G.solvedLocks.findIndex(x=>!x);if(i<0){msg(LANG==='ko'?'모두 해제됨':'All unlocked');return false;}G.solvedLocks[i]=true;saveGame();msg(`Lock ${i+1} ✓`);}},
+mirror:{name:{ko:'잔상 거울',en:'Afterimage Mirror'},icon:'🪞',use:()=>{const ei=G.wardenSlots.findIndex(s=>s!==null);const pi=G.playerSlots.findIndex(s=>s===null);if(ei<0||pi<0){msg(LANG==='ko'?'불가':'Invalid');return false;}const src=G.wardenSlots[ei];G.playerSlots[pi]={...src,uid:++UID,currentHp:src.maxHp};}},
+sealed:{name:{ko:'봉인된 기억',en:'Sealed Memory'},icon:'📜',use:()=>{for(let i=0;i<3&&G.playerDeck.length;i++)G.playerHand.push(G.playerDeck.pop());msg(LANG==='ko'?'3장 드로우':'Drew 3');}}};
+function giveItem(id){if(G.items.length<3){G.items.push(id);saveGame();}}
+function useItem(idx){const id=G.items[idx];if(!id||G.battlePhase!=='play')return;if(ITEMS[id].use()===false)return;G.items.splice(idx,1);saveGame();showScreen('battle',{_started:true,_greeted:true});}
+function generateDeathCard(){const eligible=id=>id&&id!=='faded_memory'&&!!CARDS[id];const usage=Object.entries(G.runStats.cardUsageCount||{}).filter(([id])=>eligible(id));const mostUsed=usage.sort((a,b)=>b[1]-a[1])[0];const surv=Object.entries(G.runStats.cardFieldSurvival||{}).filter(([id])=>eligible(id)).sort((a,b)=>b[1]-a[1])[0];const last=G.runStats.lastDeadCard;const atk=mostUsed?Math.max(1,CARDS[mostUsed[0]].attack||1):1;const hp=last&&eligible(last.id)?last.maxHp:(mostUsed?CARDS[mostUsed[0]].maxHp:2);const sigil=surv?CARDS[surv[0]].sigil:(last&&eligible(last.id)?last.sigil:null);const lastDel=G.deletedMsgs.length?J_MSGS[G.deletedMsgs[G.deletedMsgs.length-1]].t.split(/\s+/)[0]:'잔상';return{id:'death_'+Date.now(),inkCost:1,attack:atk,maxHp:hp,currentHp:hp,sigil,uid:++UID,name:lastDel,isDeath:true};}
+
+function buildStarterDeck(){const ids=['afterimage','afterimage','memory_shard','lost_memory'];const deck=ids.map(id=>mkCard(id));for(const id of G.rememberedCards)deck.push(mkCard(id,true));for(const dc of (G.deathCards||[]))deck.push({...dc,currentHp:dc.maxHp,uid:++UID});return shuffle(deck);}
+function buildWardenDeck(which){const D={elise_normal:['faded_memory','faded_memory','faded_memory','faded_memory','afterimage','afterimage','night_watcher','memory_shard'],elise_boss:['faded_memory','faded_memory','afterimage','afterimage','afterimage','night_watcher','night_watcher','memory_shard','memory_shard','forgotten_dog','forgotten_dog','echo'],owen_normal:['faded_memory','faded_memory','faded_memory','afterimage','afterimage','old_book','old_book','reverb_card'],owen_boss:['faded_memory','faded_memory','afterimage','afterimage','old_book','old_book','old_book','reverb_card','reverb_card','forgotten_dog','forgotten_dog','echo']};return shuffle(D[which].map(id=>mkCard(id)));}
+
+const appEl=()=>document.getElementById('app');
+function setScreen(n,o){G.screen=n;showScreen(n,o);}
+function showScreen(name,opts={}){
+  const root=appEl();
+  if(name!=='battle'&&typeof tutorialClose==='function')tutorialClose();
+  const el=document.createElement('div');el.className='screen';
+  if(name==='battle')el.style.animation='none';
+  document.body.classList.remove('bg-title','bg-title-vault','bg-battle-r1','bg-battle-r2');
+  if(name==='title')document.body.classList.add(G.runCount>=3?'bg-title-vault':'bg-title');
+  else if(name==='battle')document.body.classList.add(G.currentRoom===2?'bg-battle-r2':'bg-battle-r1');
+  removeLangBtn();removePhone();if(name!=='battle')document.querySelector('.side-fans')?.remove();
+  const lb=document.createElement('button');lb.className='lang-btn';lb.textContent=LANG==='ko'?'EN':'한';
+  lb.addEventListener('click',()=>{LANG=LANG==='ko'?'en':'ko';localStorage.setItem('recall_lang',LANG);setScreen(G.screen,opts);});
+  document.body.appendChild(lb);
+  if(!['title','cutscene','regression','loopending'].includes(name))addPhone();
+  switch(name){
+    case 'title':renderTitle(el);break;
+    case 'cutscene':renderCutscene(el,opts);break;
+    case 'map':renderMap(el);break;
+    case 'battle':renderBattle(el,opts);break;
+    case 'memorybox':renderMemoryBox(el,opts);break;
+    case 'campfire':renderCampfire(el);break;
+    case 'vault':renderVault(el);break;
+    case 'relic':renderRelic(el);break;
+    case 'fuse':renderFuse(el);break;
+    case 'reclass':renderReclass(el);break;
+    case 'explore':renderExplore(el);break;
+    case 'mystery':renderMystery(el,opts);break;
+    case 'lockpuzzle':renderLockPuzzle(el);break;
+    case 'victory':renderVictory(el);break;
+    case 'cardchoice':renderCardChoice(el);break;
+    case 'loopending':renderLoopEnding(el);break;
+    case 'regression':renderRegression(el);break;
+  }
+  root.replaceChildren(el);
+  if(!['title','cutscene','regression','loopending'].includes(name))addPhone();
+}
+function removeLangBtn(){document.querySelectorAll('.lang-btn').forEach(b=>b.remove());}
+function removePhone(){document.querySelectorAll('.phone-btn,.phone-overlay,.phone-backdrop').forEach(b=>b.remove());}
+function msg(t,ms=1300){const m=document.createElement('div');m.className='msg';m.textContent=t;document.body.appendChild(m);setTimeout(()=>m.remove(),ms);}
+function modal(sp,txt,onClose){const w=document.createElement('div');w.className='modal';const mc=document.createElement('div');mc.className='modal-content';mc.innerHTML=`${sp?`<div class="speaker">${sp}</div>`:''}<div class="dialogue">${txt}</div>`;const b=document.createElement('button');b.className='primary';b.textContent=T('continue');b.style.marginTop='10px';b.addEventListener('click',()=>{w.remove();onClose&&onClose();});mc.appendChild(b);w.appendChild(mc);document.body.appendChild(w);}
+
+function renderCardEl(c,opts={}){const d=document.createElement('div');d.className='card'+(c.remembered?' remembered':'')+(c.isDeath?' death':'')+(opts.selected?' selected':'')+(c.faded?' faded-card':'');d.dataset.cost=c.inkCost;const name=c.nameHidden?'???':((c.isDeath||c.isFused)?c.name:Tc(c.id))+(c.remembered?' ✦':'')+(c.isDeath?' ☠':'')+(c.isFused?' ✦':'');d.innerHTML=`<div class="cost">${c.inkCost}</div><div class="name">${name}</div><div class="art"><svg><use href="#${ART[c.id]||'art-faded_memory'}"/></svg></div><div class="stats"><span>⚔${c.attack}</span><span>❤${c.currentHp??c.maxHp}/${c.maxHp}</span></div>${c.sigil?`<div class="sigil">${c.sigil}</div>`:'<div class="sigil" style="opacity:0">-</div>'}`;if(opts.onClick)d.addEventListener('click',opts.onClick);return d;}
+function fragsHtml(c,side){c=Math.max(0,Math.min(5,c));return `<div class="fragments ${side}">${'✦'.repeat(c)}${'✧'.repeat(5-c)}</div>`;}
+
+// PHONE
+function isMsgLocked(m){if(!m.lock)return false;if(m.lock==='last')return true;if(m.lock==='r1lock2')return !G.solvedLocks[1];if(m.lock==='r2chestA')return !G.completedNodes.includes('r2_chestA');return true;}
+function visMsgs(){return J_MSGS.map((m,i)=>({...m,idx:i})).filter(m=>!G.deletedMsgs.includes(m.idx));}
+function renderPhoneMini(){const b=document.querySelector('.phone-btn');if(!b)return;const vis=visMsgs();const allDel=vis.length===0;const name=allDel?(LANG==='ko'?'알 수 없는 번호':'Unknown'):'J';const sc=G.sacrificeCounter||0;const pips='●'.repeat(sc)+'○'.repeat(10-sc);const last2=vis.slice(-2);const msgsHtml=last2.map(m=>{const s=m.s||m.sender;const t=m.t||m.text||'';return `<div class="pm-msg ${s==='me'?'me':''}">${s==='me'?'':'J: '}${t.length>14?t.slice(0,14)+'…':t}</div>`;}).join('')||`<div class="pm-msg" style="text-align:center;opacity:0.4">— — —</div>`;b.innerHTML=`<div class="pm-head"><span>🔋${G.battery}%</span><span>📱</span></div><div class="pm-pips">${pips}</div><div class="pm-name">${name}</div>${msgsHtml}`;b.classList.toggle('pulse',G.sacrificeMode||sc>=9);}
+function addPhone(){removePhone();const b=document.createElement('button');b.className='phone-btn';b.addEventListener('click',togglePhone);document.body.appendChild(b);const bd=document.createElement('div');bd.className='phone-backdrop';bd.id='phoneBackdrop';bd.addEventListener('click',()=>{if(G.phoneOpen&&!G.sacrificeMode)togglePhone();});document.body.appendChild(bd);const o=document.createElement('div');o.className='phone-overlay';o.id='phoneOverlay';o.addEventListener('click',e=>e.stopPropagation());document.body.appendChild(o);renderPhone();renderPhoneMini();}
+function togglePhone(){const o=document.getElementById('phoneOverlay');if(!o)return;if(G.sacrificeMode){msg(LANG==='ko'?'기억을 선택하세요':'Choose a memory');return;}G.phoneOpen=!G.phoneOpen;o.classList.toggle('open',G.phoneOpen);document.getElementById('phoneBackdrop')?.classList.toggle('open',G.phoneOpen);renderPhone();}
+function renderPhone(){renderPhoneMini();const o=document.getElementById('phoneOverlay');if(!o)return;const vis=visMsgs();const allGone=vis.length===0;const name=allGone?T('unknown'):'J';o.innerHTML=`<div class="phone-header"><div class="phone-avatar${allGone?' empty':''}"></div><div class="phone-name">${name}</div><button class="phone-close">×</button></div><div class="phone-body" id="pb"></div>`;o.querySelector('.phone-close').addEventListener('click',togglePhone);const body=o.querySelector('#pb');if(allGone){body.innerHTML=`<div class="dim center" style="margin-top:40px">${T('empty_chat')}</div>`;return;}const isLastLove=vis.length===1&&vis[0].lock==='last';vis.forEach(m=>{const bub=document.createElement('div');bub.className='chat-bubble '+m.s;const locked=isMsgLocked(m)&&m.lock!=='last';const isLove=m.lock==='last';const showLock=locked||(isLove&&!isLastLove);bub.textContent=(showLock?'🔒 ':'')+m.t;if(locked)bub.classList.add('locked');if(isLove&&!isLastLove)bub.classList.add('locked');if(isLove&&isLastLove)bub.classList.add('love');if(G.sacrificeMode&&!locked&&(!isLove||isLastLove)){bub.classList.add('selectable');bub.addEventListener('click',()=>onDeleteMsg(m.idx,isLove&&isLastLove));}body.appendChild(bub);});body.scrollTop=body.scrollHeight;}
+function onDeleteMsg(idx,isLove){if(isLove){const w=document.createElement('div');w.className='modal';const mc=document.createElement('div');mc.className='modal-content';mc.innerHTML=`<div class="dialogue">${T('love_warning')}</div>`;const d=document.createElement('button');d.className='primary';d.textContent=T('delete');d.style.marginRight='8px';const bk=document.createElement('button');bk.textContent=T('back_btn');d.addEventListener('click',()=>{w.remove();doDelMsg(idx);});bk.addEventListener('click',()=>w.remove());mc.appendChild(d);mc.appendChild(bk);w.appendChild(mc);document.body.appendChild(w);return;}doDelMsg(idx);}
+function doDelMsg(idx){G.deletedMsgs.push(idx);saveGame();G.sacrificeMode=false;G.phoneOpen=false;document.getElementById('phoneOverlay')?.classList.remove('open');renderPhone();if(G.screen==='battle')showScreen('battle',{_started:true,_greeted:true});}
+
+// TITLE
+function renderTitle(root){
+  root.innerHTML=`<div class="title-wrap"><h1>${T('recall')}</h1><div class="dim" style="letter-spacing:0.3em">${T('loading')}</div><div class="title-deck" id="deck"></div><div class="dim">${T('run')} #${G.runCount}</div><div class="dim" style="letter-spacing:0.3em;margin-top:18px">${T('tap')}</div><div style="margin-top:26px"><button id="rst" style="font-size:10px">${T('reset')}</button></div><div class="dim" style="margin-top:18px;font-size:10px">T = sim · D = debug</div></div>`;
+  root.querySelector('#deck').addEventListener('click',()=>{startNewRun();setScreen('cutscene',{text:LANG==='ko'?'엘리제: "카드가 손에 잡혔군요. 여기선 그게 시작이에요."':'Elise: "A card found its way into your hand. That is where it begins."',next:()=>enterBattle({isBoss:false,nodeId:'intro'})});});
+  root.querySelector('#rst').addEventListener('click',()=>{if(confirm(T('confirm_reset'))){try{localStorage.removeItem('recall_save');}catch(e){}G.runCount=0;G.solvedLocks=Array(7).fill(false);G.rememberedCards=[];G.deletedMsgs=[];G.deathCards=[];G.sacrificeCounter=0;G.items=[];G.collectedHints=[];G.completedNodes=[];G.diedThisRun=[];setScreen('title');}});
+}
+function renderCutscene(root,opts){root.innerHTML=`<div style="padding-top:100px"><div class="panel"><div class="dialogue" style="font-size:16px">${opts.text}</div><button class="primary" id="n" style="margin-top:18px;width:100%">${T('continue')}</button></div></div>`;root.querySelector('#n').addEventListener('click',opts.next);}
+
+function startNewRun(){G.playerFragments=5;G.battery=100;G.oblivionGauge=0;G.currentRoom=1;G.currentNodeId='start';G.completedNodes=[];G.collectedHints=[];G.visitedNodes=['start'];G.skippedNodes=[];G.pendingNode=null;G.tutorialShown={};G.playerDeck=buildStarterDeck();G.battleDiscard=[];G.diedThisRun=[];G.runStats={cardUsageCount:{},lastDeadCard:null,cardFieldSurvival:{}};}
+function tutorialTip(key,textKo,textEn){if(G.runCount!==0)return;G.tutorialShown=G.tutorialShown||{};if(G.tutorialShown[key])return;G.tutorialShown[key]=true;setTimeout(()=>modal(LANG==='ko'?'안내':'Guide',LANG==='ko'?textKo:textEn),200);}
+function tutorialClose(){document.querySelectorAll('.tut-mask,.tut-highlight,.tut-dialog').forEach(e=>e.remove());}
+function tutorialActive(){return !!document.querySelector('.tut-mask');}
+function runTutorialSequence(stage){
+  if(G.runCount!==0)return;
+  if(G.screen!=='battle'){tutorialClose();return;}
+  G.tutorialStage=stage;
+  const steps={
+    intro:{
+      textKo:'환영합니다. 이 게임은 당신과 상대가 서로의 <b>조각(✦)</b>을 깎는 카드 배틀이에요. 조각이 0이 되면 승리합니다.',
+      textEn:'Welcome. You and your opponent deplete each other\'s <b>fragments (✦)</b>. Reduce theirs to zero to win.',
+      onDone:()=>runTutorialSequence('ink')
+    },
+    ink:{target:'.battle-ink',textKo:'<b>💧 잉크</b>입니다. 이번 턴에 카드를 놓을 때 쓰는 자원이에요. 턴마다 다시 차오릅니다.',textEn:'This is <b>💧 Ink</b>. Spent to place cards this turn. Refills each turn.',onDone:()=>runTutorialSequence('hand')},
+    hand:{target:'#hand',textKo:'<b>손패</b>입니다. 각 카드의 파란 숫자(좌상단)는 배치 비용, ⚔는 공격력, ❤는 체력이에요.',textEn:'Your <b>hand</b>. Blue number = cost, ⚔ = attack, ❤ = HP.',onDone:()=>runTutorialSequence('field')},
+    field:{target:'.battle-field',textKo:'<b>배틀 필드</b> — 위는 상대(엘리제), 아래는 당신. 같은 레인 카드끼리 싸우고, 빈 레인 공격은 상대 조각을 직접 깎아요.',textEn:'<b>Battle field</b> — top is the warden, bottom is you. Same-lane cards fight; empty-lane hits go directly to fragments.',onDone:()=>runTutorialSequence('frags')},
+    frags:{target:'.fragments.warden',textKo:'<b>상대의 조각</b>입니다. 이걸 0으로 만들면 승리해요. 당신의 조각은 아래에 있어요.',textEn:'<b>Warden\'s fragments</b>. Reduce to zero to win. Yours are below.',onDone:()=>runTutorialSequence('placeAction')},
+    placeAction:{target:null,textKo:'이제 <b>잔상</b> 카드를 눌러서 빈 슬롯에 놓아보세요. (잔상은 ⚔1의 공격 카드예요)',textEn:'Now click the <b>Afterimage</b> card and place it in an empty slot. (Afterimage has ⚔1)',waitForAction:true,highlightCard:'afterimage'},
+    inkSpent:{target:'.battle-ink',textKo:'잉크 1이 소모됐죠? 카드의 배치 비용만큼 차감돼요.',textEn:'Ink dropped by 1 — equal to the card\'s cost.',onDone:()=>runTutorialSequence('fadedIntro')},
+    fadedIntro:{target:null,textKo:'이번엔 <b>흐릿한 기억</b>을 놓아보세요. 공격력은 0이지만, 놓은 뒤 <b>다시 누르면 희생</b>되어 잉크 +1과 기억 카운터 +1을 줍니다.',textEn:'Now place a <b>Faded Memory</b> (⚔0). After placing, <b>click it again to sacrifice</b> for +1 ink and +1 memory counter.',waitForAction:true,highlightCard:'faded_memory'},
+    sacFeedback:{target:'.battle-ink',textKo:'잉크가 회복됐고, 기억 카운터가 1 올라갔어요. 10개 모으면 기억 삭제 모드가 열려요.',textEn:'Ink restored, memory counter +1. Reach 10 to unlock delete mode.',onDone:()=>runTutorialSequence('endTurn')},
+    endTurn:{target:'#bell',textKo:'이제 <b>턴 종료</b>를 눌러 전투를 시작해요. 당신의 카드가 먼저 공격하고, 그 다음 상대가 공격해요. <b>경계(vigilance)</b> sigil이 붙은 카드는 받는 피해를 1 줄여서, 공격력 1 카드로는 상처를 못 내요. 이때 "🛡 차단" 표시가 떠요.',textEn:'Press <b>End Turn</b>. Your cards attack first, then the warden. Cards with <b>vigilance</b> reduce incoming damage by 1 — a 1-atk card won\'t hurt them, shown as "🛡 BLOCK".',waitForAction:true},
+    attackResult:{target:'.fragments.warden',textKo:'빈 레인을 공격했기 때문에 상대 조각이 깎였어요. ✦ 하나가 줄었죠?',textEn:'Since you hit an empty lane, a warden fragment dropped. ✦ is down by one.',onDone:()=>{tutorialClose();G.tutorialStage='done';}}
+  };
+  const s=steps[stage];if(!s){tutorialClose();return;}
+  setTimeout(()=>tutorialStep(s),250);
+}
+function tutorialStep(opts){
+  tutorialClose();
+  if(G.screen!=='battle')return;
+  const {target,textKo,textEn,buttonKo='계속',buttonEn='Continue',waitForAction,onDone,highlightCard}=opts;
+  let highlight=null,hlRect=null,mask=null;
+  let resolvedTarget=target;
+  if (highlightCard && !target){
+    const idx=G.playerHand.findIndex(c=>c.id===highlightCard);
+    if (idx>=0) resolvedTarget=document.querySelectorAll('#hand .card')[idx];
+  }
+  if (resolvedTarget){
+    const el=typeof resolvedTarget==='string'?document.querySelector(resolvedTarget):resolvedTarget;
+    if (el){
+      const r=el.getBoundingClientRect();hlRect=r;
+      highlight=document.createElement('div');highlight.className='tut-highlight';
+      highlight.style.left=(r.left-4)+'px';highlight.style.top=(r.top-4)+'px';
+      highlight.style.width=(r.width+8)+'px';highlight.style.height=(r.height+8)+'px';
+      document.body.appendChild(highlight);
+    }
+  } else {
+    mask=document.createElement('div');mask.className='tut-mask';document.body.appendChild(mask);
+  }
+  const dialog=document.createElement('div');dialog.className='tut-dialog';
+  dialog.innerHTML=`<div class="tut-label">${LANG==='ko'?'안내':'Guide'}</div><div>${LANG==='ko'?textKo:textEn}</div>${waitForAction?'':`<button class="primary">${LANG==='ko'?buttonKo:buttonEn}</button>`}`;
+  document.body.appendChild(dialog);
+  // Position dialog avoiding highlight
+  const vw=window.innerWidth,vh=window.innerHeight;
+  const dr=dialog.getBoundingClientRect();
+  let dx,dy;
+  if (hlRect){
+    const spaceBelow=vh-hlRect.bottom,spaceAbove=hlRect.top;
+    if (spaceBelow>=dr.height+20) dy=hlRect.bottom+12;
+    else if (spaceAbove>=dr.height+20) dy=hlRect.top-dr.height-12;
+    else dy=Math.max(12,vh-dr.height-12);
+    dx=Math.max(12,Math.min(vw-dr.width-12,hlRect.left+hlRect.width/2-dr.width/2));
+  } else {
+    dx=(vw-dr.width)/2; dy=(vh-dr.height)/2;
+  }
+  dialog.style.left=dx+'px';dialog.style.top=dy+'px';
+  if (!waitForAction){
+    dialog.querySelector('button').addEventListener('click',()=>{tutorialClose();onDone&&onDone();});
+  }
+  // highlight always pointer-events:none; mask may be null if target present
+  if (waitForAction && mask) mask.style.pointerEvents='none';
+  return {mask,highlight,dialog,close:tutorialClose};
+}
+
+// BATTLE
+function enterBattle(opts){
+  G.isBossBattle=!!opts.isBoss;G.playerFragments=5;G.wardenFragments=5;G.currentInk=1;G.oblivionGauge=0;G.turnCount=0;G.battleDiscard=[];G.resonanceActive=false;G.lowFragWarned=false;if(G.battery==null)G.battery=100;
+  G.playerSlots=[null,null,null,null];G.wardenSlots=[null,null,null,null];G.playerHand=[];G.selectedHandIdx=null;G.battlePhase='play';
+  G.playerDeck=shuffle(G.playerDeck);
+  for(let i=0;i<3;i++){if(G.playerDeck.length)G.playerHand.push(G.playerDeck.pop());}
+  G.playerHand.push(mkCard('faded_memory'));
+  const which=G.currentRoom===1?(opts.isBoss?'elise_boss':'elise_normal'):(opts.isBoss?'owen_boss':'owen_normal');
+  G.wardenDeck=buildWardenDeck(which);
+  G.wardenHand=[];for(let i=0;i<3;i++){if(G.wardenDeck.length)G.wardenHand.push(G.wardenDeck.pop());}
+  const uniqCompleted=[...new Set(G.completedNodes)];
+  const firstBattle=uniqCompleted.filter(n=>{const nd=MAPS[G.currentRoom]?.nodes[n];return nd&&(nd.type==='battle'||nd.type==='battle_hint'||nd.type==='boss');}).length===0;
+  let prePlaced=opts.isBoss?(G.currentRoom===2?3:2):(firstBattle?0:Math.min(2,1+Math.floor(uniqCompleted.length/3)));
+  for(let i=0;i<4&&prePlaced>0;i++){if(G.wardenHand.length===0)break;const c=G.wardenHand.shift();G.wardenSlots[i]=c;prePlaced--;}
+  G.wardenNextPlan=[];computeWardenPlan();
+  setScreen('battle',{_started:true,isBoss:opts.isBoss});
+  if(G.runCount===0&&!G.tutorialStage){setTimeout(()=>runTutorialSequence('intro'),400);}
+}
+
+function renderBattle(root,opts){
+  const wardenName=G.currentRoom===1?T('elise'):T('owen');
+  const drawPhase=G.battlePhase==='draw';
+  root.innerHTML=`
+    <div class="panel battle-field" style="border-color:#3a1e24">
+      <div class="center cinzel" style="font-size:11px;color:#b88080">${wardenName}${G.isBossBattle?' · '+T('boss'):''}</div>
+      <div class="center" style="margin-top:4px;display:flex;justify-content:center;gap:4px" title="다음 턴 배치 예고">${(G.wardenNextPlan||[]).map(c=>`<div style="width:34px;height:48px;border:1px dashed #5a3848;border-radius:4px;background:linear-gradient(135deg,#1a0e14,#0a0608);opacity:0.7;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:9px;color:#7a5858"><span style="opacity:0.6">▨</span><span style="color:#a88080">${c.attack}/${c.currentHp}</span></div>`).join('')||'<span style="font-size:10px;color:#6a4a4a">—</span>'}</div>
+      ${fragsHtml(G.wardenFragments,'warden')}
+      <div class="row" id="ws"></div>
+    </div>
+    <div class="divider"></div>
+    <div class="panel battle-field">
+      <div class="row" id="ps"></div>
+      ${fragsHtml(G.playerFragments,'player')}
+      <div class="action-bar">
+        <span class="ink battle-ink">💧 ${G.currentInk}</span>
+        <span style="color:#a88cd8;font-size:11px">망각 ${G.oblivionGauge}/8</span>
+        <span style="color:#6ab0e0;font-size:10px">🔋${G.battery}%</span>
+        <span style="color:#c8a84b;font-size:10px">${'●'.repeat(G.sacrificeCounter)}${'○'.repeat(10-G.sacrificeCounter)}</span>
+        <span class="dim" style="font-size:11px">${T('turn')} ${G.turnCount+1} · ${T('deck')} ${G.playerDeck.length}</span>
+        <span style="font-size:12px">${G.items.map((id,i)=>`<button class="item-btn" data-i="${i}" title="${ITEMS[id].name[LANG]}">${ITEMS[id].icon}</button>`).join('')}</span>
+        <button id="cncd" title="${LANG==='ko'?'항복':'Concede'}" style="font-size:12px;padding:4px 8px;border-color:#5a3848;color:#a88080">🏳️</button>
+        <button class="primary" id="bell" ${drawPhase?'disabled':''}>${T('ring_bell')}</button>
+      </div>
+    </div>
+    ${drawPhase?`<div class="panel"><div class="dim center" style="font-size:11px;margin-bottom:6px">${LANG==='ko'?'뽑기 선택':'Choose to draw'}</div><div class="draw-area"><button class="draw-btn" id="dd" ${G.playerDeck.length===0?'disabled':''}><div class="icon">📖</div><div class="label">${T('draw_deck')}<br>(${G.playerDeck.length})</div></button><button class="draw-btn" id="df"><div class="icon">🌫</div><div class="label">${T('draw_fog')}</div></button></div></div>`:`<div class="panel" style="padding:4px 8px"><div class="dim" style="font-size:10px">${T('hand')} · ${G.playerHand.length}</div><div class="hand" id="hand"></div></div>`}
+  `;
+  (function(){let sf=document.querySelector('.side-fans');if(!sf){sf=document.createElement('div');sf.className='side-fans';document.body.appendChild(sf);}const drawPhaseNow=G.battlePhase==='draw';sf.innerHTML=`<div class="fan warden" title="${T('elise')==='ELISE'||T('owen')==='OWEN'?'Warden':'수호자'} 덱"><div class="card-back"></div><div class="card-back"></div><div class="card-back"></div><div class="lbl">⚔ ${G.wardenDeck.length}</div></div><div class="fan ${drawPhaseNow?'tappable':''}" id="fanFog" title="흐릿한 기억"><div class="card-back"></div><div class="card-back"></div><div class="card-back"></div><div class="lbl">🌫 ∞</div></div><div class="fan ${drawPhaseNow&&G.playerDeck.length?'tappable':''}" id="fanDeck" title="메인 덱"><div class="card-back"></div><div class="card-back"></div><div class="card-back"></div><div class="lbl">📖 ${G.playerDeck.length}</div></div>`;if(drawPhaseNow){const ff=sf.querySelector('#fanFog');const fd=sf.querySelector('#fanDeck');ff&&ff.addEventListener('click',()=>root.querySelector('#df')?.click());if(G.playerDeck.length)fd&&fd.addEventListener('click',()=>root.querySelector('#dd')?.click());}})();
+  const ws=root.querySelector('#ws');G.wardenSlots.forEach((c,i)=>{let el;if(c){el=renderCardEl(c);if(c._facedown)el.classList.add('facedown');}else{el=document.createElement('div');el.className='slot warden';el.textContent='·';}el.classList.add('warden-slot');el.dataset.slot=i;ws.appendChild(el);});
+  const ps=root.querySelector('#ps');G.playerSlots.forEach((c,i)=>{let el;if(c){const isFaded=c.id==='faded_memory';el=renderCardEl(c,{onClick:()=>{if(isFaded&&G.battlePhase==='play')requestSacrifice(i);}});}else{el=document.createElement('div');el.className='slot';if(G.selectedHandIdx!==null)el.classList.add('targeted');el.textContent='SLOT '+(i+1);el.addEventListener('click',()=>{if(G.selectedHandIdx!==null&&G.battlePhase==='play')playCard(G.selectedHandIdx,i);});}el.classList.add('player-slot');el.dataset.slot=i;ps.appendChild(el);});
+  if(drawPhase){
+    const doDraw=(card,icon)=>{if(G.battlePhase!=='draw')return;G.battlePhase='drawing';const g=document.createElement('div');g.className='draw-ghost';g.textContent=icon;document.body.appendChild(g);setTimeout(()=>g.remove(),700);setTimeout(()=>{if(G.resonanceActive&&card.id!=='faded_memory')card.attack+=1;G.playerHand.push(card);G.battlePhase='play';showScreen('battle',{_started:true,_greeted:true});},420);};
+    root.querySelector('#dd').addEventListener('click',()=>{if(G.battlePhase!=='draw')return;if(!G.playerDeck.length&&G.battleDiscard.length){G.playerDeck=shuffle(G.battleDiscard.filter(c=>c.id!=='faded_memory'));G.battleDiscard=G.battleDiscard.filter(c=>c.id==='faded_memory');}if(G.playerDeck.length)doDraw(G.playerDeck.pop(),'📖');});
+    root.querySelector('#df').addEventListener('click',()=>{if(G.battlePhase!=='draw')return;doDraw(mkCard('faded_memory'),'🌫');});
+  }else{
+    const hand=root.querySelector('#hand');
+    G.playerHand.forEach((c,i)=>{const canAfford=c.inkCost===0||(G.currentInk+G.oblivionGauge)>=c.inkCost;const el=renderCardEl(c,{selected:G.selectedHandIdx===i,onClick:()=>{if(!canAfford){msg(LANG==='ko'?'잉크 부족':'Not enough ink');return;}G.selectedHandIdx=G.selectedHandIdx===i?null:i;showScreen('battle',{_started:true,_greeted:true});}});if(!canAfford)el.style.opacity='0.5';hand.appendChild(el);});
+    root.querySelector('#bell').addEventListener('click',endTurn);
+    root.querySelector('#cncd')?.addEventListener('click',()=>{if(confirm(LANG==='ko'?'항복하시겠습니까? 배터리가 절반으로 줄어들 수 있어요.':'Concede? You may lose half battery.'))concede();});
+    root.querySelectorAll('.item-btn').forEach(b=>b.addEventListener('click',()=>useItem(+b.dataset.i)));
+  }
+  if(!opts._greeted){
+    setTimeout(()=>{
+      const r=G.runCount;let line;
+      if(G.currentRoom===1){line=r===0?(LANG==='ko'?'처음 오셨군요. 카드로 길을 여는 곳이에요.':'First time here. This is where cards open the way.'):r<=5?(LANG==='ko'?'또 왔네요. 몇 번째죠?':"You're back. How many times now?"):(LANG==='ko'?'오래 있으면 안 돼요. 나처럼 되기 전에.':"You shouldn't stay so long. Not like I did.");}
+      else{line=r===0?(LANG==='ko'?'(오웬은 말없이 카드를 놓는다.)':'(Owen silently places a card.)'):r===1?(LANG==='ko'?'여기 왔었죠.':'You were here.'):r===2?(LANG==='ko'?'누군가를 찾고 있죠?':"You're looking for someone?"):(LANG==='ko'?'저도 찾고 있었어요. 지금은 누구였는지 모르겠어요.':"I was looking too. Now I can't remember who.");}
+      modal(wardenName.toUpperCase(),line);
+    },200);
+  }
+}
+
+function requestSacrifice(slotIdx){if(G.battlePhase!=='play')return;G.currentInk+=1;G.playerSlots[slotIdx]=null;G.sacrificeCounter+=1;saveGame();if(G.sacrificeCounter>=10){G.sacrificeCounter=0;saveGame();G.sacrificeMode=true;G.phoneOpen=true;document.getElementById('phoneOverlay')?.classList.add('open');renderPhone();msg(T('sacrifice_select'));}else{msg(`💧+1 · ${G.sacrificeCounter}/10`);}if(G.screen==='battle')showScreen('battle',{_started:true,_greeted:true});if(G.runCount===0&&G.tutorialStage==='fadedIntro'){setTimeout(()=>runTutorialSequence('sacFeedback'),400);}}
+
+function playCard(handIdx,slotIdx){const c=G.playerHand[handIdx];if(!c)return;if(G.playerSlots[slotIdx]){msg(LANG==='ko'?'슬롯 사용 중':'Slot occupied');return;}if(c.inkCost>G.currentInk+G.oblivionGauge){msg(LANG==='ko'?'자원 부족':'Not enough resources');return;}let cost=c.inkCost;const inkUsed=Math.min(G.currentInk,cost);G.currentInk-=inkUsed;cost-=inkUsed;if(cost>0){G.oblivionGauge-=cost;msg(LANG==='ko'?`망각 ${cost} 소모`:`Oblivion -${cost}`);}if(c.id!=='faded_memory')G.runStats.cardUsageCount[c.id]=(G.runStats.cardUsageCount[c.id]||0)+1;G.playerSlots[slotIdx]=c;G.playerHand.splice(handIdx,1);G.selectedHandIdx=null;
+if(G.runCount===0){if(G.tutorialStage==='placeAction'&&c.id==='afterimage'){setTimeout(()=>runTutorialSequence('inkSpent'),500);}else if(G.tutorialStage==='fadedIntro'&&c.id==='faded_memory'){/* wait for sacrifice click */}}if(c.sigil==='talking'){const ko=['...어디지? 나 어디 있는 거야?','또 여기야. 몇 번째인지 알고 있어?','저 사서 있잖아. 처음엔 달랐어.','자물쇠 말이야. 날짜를 봐.'];const en=['...where am I? Where is this?','Again here. Do you know how many times?','That receptionist... she was different at first.','The locks. Look at the dates.'];const idx=Math.min(G.runCount,3);setTimeout(()=>modal(LANG==='ko'?'길 잃은 기억':'Lost Memory',LANG==='ko'?ko[idx]:en[idx]),150);}showScreen('battle',{_started:true,_greeted:true});}
+
+function flashHit(side,idx){const sel=`.${side}-slot[data-slot="${idx}"]`;const el=document.querySelector(sel);if(el)el.classList.add('hit');setTimeout(()=>el&&el.classList.remove('hit'),250);}
+function showBlocked(side,idx){const sel=`.${side}-slot[data-slot="${idx}"]`;const el=document.querySelector(sel);if(!el)return;const r=el.getBoundingClientRect();const tag=document.createElement('div');tag.innerHTML=`🛡 ${LANG==='ko'?'차단':'BLOCK'}`;tag.className='block-tag';tag.style.cssText=`position:fixed;left:${r.left+r.width/2-58}px;top:${r.top+r.height/2-22}px;background:linear-gradient(135deg,rgba(110,70,88,0.98),rgba(70,42,56,0.98));color:#ffd778;padding:8px 18px;border-radius:8px;font-family:'Cinzel',serif;font-weight:700;font-size:17px;letter-spacing:0.18em;z-index:600;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,0.85),0 0 24px rgba(255,215,120,0.45);border:2px solid #c8a84b;text-shadow:0 0 10px rgba(255,215,120,0.6);animation:block-pop 1.4s ease-out forwards;white-space:nowrap`;document.body.appendChild(tag);setTimeout(()=>tag.remove(),1400);}
+function deathAnim(side,idx){const sel=`.${side}-slot[data-slot="${idx}"]`;const src=document.querySelector(sel);if(!src)return;const r=src.getBoundingClientRect();const ghost=src.cloneNode(true);ghost.style.position='fixed';ghost.style.left=r.left+'px';ghost.style.top=r.top+'px';ghost.style.width=r.width+'px';ghost.style.height=r.height+'px';ghost.style.margin='0';ghost.style.zIndex='200';ghost.style.pointerEvents='none';ghost.classList.add('dying');document.body.appendChild(ghost);setTimeout(()=>ghost.remove(),420);}
+const ATK_ANIM={afterimage:'atk-rush',forgotten_dog:'atk-rush',echo:'atk-rush',lost_memory:'atk-wave',reverb_card:'atk-wave',memory_shard:'atk-shake',old_book:'atk-shake',night_watcher:'atk-shake',archive_rat:'atk-arc'};
+function playAtkAnim(side,idx,card){if(!card)return;const cls=ATK_ANIM[card.id]||'atk-rush';const el=document.querySelector(`.${side}-slot[data-slot="${idx}"]`);if(!el)return;el.classList.add(cls);setTimeout(()=>el.classList.remove(cls),600);}
+function resolveCombatStep(attacker,i,done){if(i>=4){done();return;}const p=G.playerSlots[i];const e=G.wardenSlots[i];let acted=false;
+  if(attacker==='player'&&p&&p.attack>0){acted=true;playAtkAnim('player',i,p);if(e){let a=p.attack;if(e.sigil==='vigilance')a=Math.max(0,a-1);if(a>0){e.currentHp-=a;flashHit('warden',i);}else{setTimeout(()=>showBlocked('warden',i),250);}if(e.currentHp<=0){deathAnim('warden',i);G.oblivionGauge=Math.min(8,G.oblivionGauge+1);G.wardenSlots[i]=null;}}else{G.wardenFragments=Math.max(0,G.wardenFragments-p.attack);}
+    if(p.sigil==='ephemeral'&&G.playerSlots[i]===p){deathAnim('player',i);onCardDeath(p);G.playerSlots[i]=null;}
+    else if(p.sigil==='record'&&G.playerSlots[i]===p){p.turnsSurvived=(p.turnsSurvived||0)+1;if(p.turnsSurvived>=3){G.playerFragments=Math.min(5,G.playerFragments+1);p.turnsSurvived=0;}}}
+  else if(attacker==='warden'&&e&&e.attack>0){acted=true;playAtkAnim('warden',i,e);if(p){let a=e.attack;if(p.sigil==='vigilance')a=Math.max(0,a-1);if(a>0){p.currentHp-=a;flashHit('player',i);}else{setTimeout(()=>showBlocked('player',i),250);}if(p.currentHp<=0){if(p.sigil==='shatter')G.playerFragments=Math.min(5,G.playerFragments+1);deathAnim('player',i);onCardDeath(p);G.playerSlots[i]=null;}else if(p.sigil==='reverb'&&a>0)G.playerFragments=Math.min(5,G.playerFragments+1);}else{G.playerFragments=Math.max(0,G.playerFragments-e.attack);}
+    if(e.sigil==='ephemeral'&&G.wardenSlots[i]===e){deathAnim('warden',i);G.oblivionGauge=Math.min(8,G.oblivionGauge+1);G.wardenSlots[i]=null;}}
+  updateBattleFragments();setTimeout(()=>resolveCombatStep(attacker,i+1,done),acted?550:60);}
+function updateBattleFragments(){const w=document.querySelector('.fragments.warden');if(w)w.textContent=Array.from({length:5},(_,i)=>i<G.wardenFragments?'✦':'✧').join('');const pfs=document.querySelectorAll('.fragments');const p=pfs[pfs.length-1];if(p&&p!==w)p.textContent=Array.from({length:5},(_,i)=>i<G.playerFragments?'✦':'✧').join('');}
+function checkStalemate(){const noPlayerAtk=G.playerHand.concat(G.playerSlots.filter(Boolean)).concat(G.playerDeck).concat(G.battleDiscard).every(c=>!c||c.attack<=0);const noWardenAtk=G.wardenHand.concat(G.wardenSlots.filter(Boolean)).concat(G.wardenDeck).every(c=>!c||c.attack<=0);return noPlayerAtk&&noWardenAtk;}
+function concede(){if(G.battlePhase==='play'||G.battlePhase==='draw'){G.battlePhase='resolve';G.playerFragments=0;checkWinLose();}}
+function endTurn(){if(G.battlePhase!=='play')return;G.battlePhase='resolve';if(G.runCount===0&&G.tutorialStage==='endTurn'){tutorialClose();G.tutorialStage='attackPending';}
+  if(checkStalemate()){if(G.playerFragments>=G.wardenFragments)G.wardenFragments=0;else G.playerFragments=0;checkWinLose();return;}if(G.turnCount>=20){if(G.playerFragments>=G.wardenFragments)G.wardenFragments=0;else G.playerFragments=0;checkWinLose();return;}resolveCombatStep('player',0,()=>{if(checkWinLose())return;setTimeout(()=>{resolveCombatStep('warden',0,()=>{if(checkWinLose())return;if(!G.lowFragWarned&&G.playerFragments<=2&&G.playerFragments>0){G.lowFragWarned=true;const line=G.currentRoom===1?(LANG==='ko'?'거의 다 왔네요. 하지만 여기서 끝이에요.':"Almost there. But it ends here."):(LANG==='ko'?'조금만 더... 아니, 여기까지예요.':"Just a little more... no, this is as far as you go.");setTimeout(()=>modal(T(G.currentRoom===1?'elise':'owen').toUpperCase(),line),200);}setTimeout(()=>{wardenTurn(()=>{G.turnCount++;G.currentInk=1+Math.min(2,Math.floor(G.turnCount/2));G.playerSlots.forEach((c,i)=>{if(c){if(c.faded){G.playerSlots[i]=null;}else if(c.id!=='faded_memory'){G.runStats.cardFieldSurvival[c.id]=(G.runStats.cardFieldSurvival[c.id]||0)+1;}}});G.battlePhase='draw';showScreen('battle',{_started:true,_greeted:true});if(G.runCount===0&&G.tutorialStage==='attackPending'){setTimeout(()=>runTutorialSequence('attackResult'),400);}});},300);});},300);});}
+
+function resolveCombat(attacker){
+  for(let i=0;i<4;i++){const p=G.playerSlots[i];const e=G.wardenSlots[i];
+    if(attacker==='player'&&p){
+      if(e){let a=p.attack;if(e.sigil==='vigilance')a=Math.max(0,a-1);e.currentHp-=a;if(e.currentHp<=0){G.oblivionGauge=Math.min(8,G.oblivionGauge+1);G.wardenSlots[i]=null;}}
+      else{G.wardenFragments=Math.max(0,G.wardenFragments-p.attack);}
+      if(p.sigil==='ephemeral'&&p.attack>0&&G.playerSlots[i]===p){onCardDeath(p);G.playerSlots[i]=null;}
+      else if(p.sigil==='record'&&G.playerSlots[i]===p){p.turnsSurvived=(p.turnsSurvived||0)+1;if(p.turnsSurvived>=3){G.playerFragments=Math.min(5,G.playerFragments+1);p.turnsSurvived=0;}}
+    }else if(attacker==='warden'&&e){
+      if(p){let a=e.attack;if(p.sigil==='vigilance')a=Math.max(0,a-1);p.currentHp-=a;
+        if(p.currentHp<=0){if(p.sigil==='shatter')G.playerFragments=Math.min(5,G.playerFragments+1);onCardDeath(p);G.playerSlots[i]=null;}
+        else if(p.sigil==='reverb'&&a>0)G.playerFragments=Math.min(5,G.playerFragments+1);}
+      else{G.playerFragments=Math.max(0,G.playerFragments-e.attack);}
+      if(e.sigil==='ephemeral'&&e.attack>0&&G.wardenSlots[i]===e){G.oblivionGauge=Math.min(8,G.oblivionGauge+1);G.wardenSlots[i]=null;}
+    }
+  }
+}
+function onCardDeath(c){G.oblivionGauge=Math.min(8,G.oblivionGauge+1);if(c.id!=='faded_memory'){G.runStats.lastDeadCard={id:c.id,maxHp:c.maxHp,sigil:c.sigil};if(!G.diedThisRun.includes(c.id)&&!G.rememberedCards.includes(c.id))G.diedThisRun.push(c.id);c.currentHp=c.maxHp;c.turnsSurvived=0;G.battleDiscard.push(c);}}
+
+function pickWardenSlot(card){const emptyIdxs=[0,1,2,3].filter(i=>!G.wardenSlots[i]);if(!emptyIdxs.length)return -1;const wAtk=card?card.attack:0;const threats=emptyIdxs.filter(i=>{const p=G.playerSlots[i];return p&&p.attack>0;});if(threats.length){const killable=threats.filter(i=>{const p=G.playerSlots[i];const a=p.sigil==='vigilance'?Math.max(0,wAtk-1):wAtk;return a>=p.currentHp;});if(killable.length){let best=killable[0],bestAtk=-1;for(const i of killable){const pa=G.playerSlots[i].attack;if(pa>bestAtk){bestAtk=pa;best=i;}}return best;}let best=threats[0],bestAtk=-1;for(const i of threats){const pa=G.playerSlots[i].attack;if(pa>bestAtk){bestAtk=pa;best=i;}}return best;}const openLane=emptyIdxs.find(i=>!G.playerSlots[i]);if(openLane!=null)return openLane;let best=emptyIdxs[0],bestHp=Infinity;for(const i of emptyIdxs){const p=G.playerSlots[i];if(p&&p.currentHp<bestHp){bestHp=p.currentHp;best=i;}}return best;}
+function wardenTurn(done){if(G.wardenDeck.length)G.wardenHand.push(G.wardenDeck.pop());let ink=1+Math.min(2,Math.floor(G.turnCount/2));const fieldCap=G.isBossBattle?4:(G.currentRoom===2?4:3);const playCap=G.isBossBattle?(G.currentRoom===2?3:2):(G.currentRoom===2?2:1);const hand=[...G.wardenHand].sort((a,b)=>b.attack-a.attack);const used=new Set();const picks=[];for(const c of hand){if(picks.length>=playCap)break;if(c.inkCost>ink)continue;const simOnField=G.wardenSlots.filter(x=>x).length+picks.length;if(simOnField>=fieldCap)break;picks.push(c);ink-=c.inkCost;used.add(c.uid);}const placeOne=(idx)=>{if(idx>=picks.length){applyBossGimmick();computeWardenPlan();done&&done();return;}const c=picks[idx];const slot=pickWardenSlot(c);if(slot===-1){applyBossGimmick();computeWardenPlan();done&&done();return;}G.wardenSlots[slot]={...c,_facedown:true};showScreen('battle',{_started:true,_greeted:true});setTimeout(()=>{const el=document.querySelector(`.warden-slot[data-slot="${slot}"]`);if(el)el.classList.add('warden-dealing');setTimeout(()=>{if(el){el.classList.remove('warden-dealing');el.classList.add('warden-flipping');}setTimeout(()=>{if(G.wardenSlots[slot])delete G.wardenSlots[slot]._facedown;showScreen('battle',{_started:true,_greeted:true});setTimeout(()=>placeOne(idx+1),200);},550);},500);},50);};G.wardenHand=G.wardenHand.filter(c=>!used.has(c.uid));placeOne(0);}
+function computeWardenPlan(){const nextTurn=G.turnCount+1;const ink=1+Math.min(2,Math.floor(nextTurn/2));const fieldCap=G.isBossBattle?4:(G.currentRoom===2?4:3);const playCap=G.isBossBattle?(G.currentRoom===2?3:2):(G.currentRoom===2?2:1);const fieldAfter=G.wardenSlots.filter(x=>x).length;const slotsAvail=Math.min(4-fieldAfter,fieldCap-fieldAfter);const hand=[...G.wardenHand].sort((a,b)=>b.attack-a.attack);let left=ink,picks=[];for(const c of hand){if(picks.length>=playCap||picks.length>=slotsAvail)break;if(c.inkCost>left)continue;picks.push(c);left-=c.inkCost;}G.wardenNextPlan=picks;}
+function applyBossGimmick(){if(!G.isBossBattle)return;if(G.currentRoom===2){if(G.turnCount>0&&G.turnCount%5===0){const cands=G.playerHand.filter(c=>!c.nameHidden);if(cands.length){cands[Math.floor(Math.random()*cands.length)].nameHidden=true;const line=G.turnCount===5?(LANG==='ko'?'기억이... 잘 안 나.':"I can't quite remember..."):G.turnCount===10?(LANG==='ko'?'이것도 모르겠어.':"This too, I don't know."):(LANG==='ko'?'(침묵)':'(silence)');setTimeout(()=>modal(T('owen').toUpperCase(),line),300);}}return;}if(G.currentRoom!==1)return;if(G.turnCount===5){const occ=G.playerSlots.map((c,i)=>c?i:-1).filter(i=>i>=0);if(occ.length){const i=occ[Math.floor(Math.random()*occ.length)];G.playerSlots[i].attack=0;G.playerSlots[i].faded=true;setTimeout(()=>modal(T('elise').toUpperCase(),G.runCount===0?(LANG==='ko'?'기억이 흐려지는군요.':'Memories grow faint.'):(LANG==='ko'?'또 이렇게 됐네요.':'Again, like this.')),300);}}if(G.turnCount===7){const occ=G.playerSlots.map((c,i)=>c?i:-1).filter(i=>i>=0&&!G.wardenSlots[i]);if(occ.length){const i=occ[Math.floor(Math.random()*occ.length)];const src=G.playerSlots[i];G.wardenSlots[i]=mkCard(src.id);setTimeout(()=>modal(T('elise').toUpperCase(),G.runCount===0?(LANG==='ko'?'이 기억... 제가 가져도 될까요?':'This memory... may I have it?'):(LANG==='ko'?'익숙한 얼굴이네요.':'A familiar face.')),300);}}}
+
+function checkWinLose(){
+  if(G.wardenFragments<=0){G.battlePhase='over';const bossDefeatLine=G.isBossBattle?(G.currentRoom===1?(LANG==='ko'?'...그래요. 가도 돼요. 하지만 다음 방은 더 깊어요.':"...All right. Go. But the next room is deeper."):(LANG==='ko'?'...가져가요. 뭘 찾으러 왔든.':"...Take it. Whatever you came for.")):null;const afterModal=()=>setTimeout(()=>{restoreSlotsToDeck();if(G.isBossBattle){if(G.currentRoom===1){setScreen('cutscene',{text:LANG==='ko'?'"문이 생겼다. 원래 없던 자리에."':'"A door appeared. Where none had been."',next:()=>{G.currentRoom=2;G.currentNodeId='r2_start';G.visitedNodes=['r2_start'];G.completedNodes=[];setScreen('map');}});}else{setScreen('loopending');}}else{setScreen('victory');}},400);if(bossDefeatLine)setTimeout(()=>modal(T(G.currentRoom===1?'elise':'owen').toUpperCase(),bossDefeatLine,afterModal),300);else afterModal();return true;}
+  if(G.playerFragments<=0){
+    if(G.battery>50){
+      G.battery=50;G.playerFragments=3;G.playerSlots=[null,null,null,null];G.wardenSlots=[null,null,null,null];G.playerHand=[];G.currentInk=1;G.battlePhase='draw';document.body.classList.add('battery-flicker');setTimeout(()=>document.body.classList.remove('battery-flicker'),1500);
+      const r=G.runCount;const isElise=G.currentRoom===1;const line=isElise?(r===0?(LANG==='ko'?'배터리가 절반이네요. 오래 버티셨어요.':"Battery's at half. You've held on a while."):(LANG==='ko'?'또 여기까지예요. 익숙해지셨나요?':'Here again. Getting used to it?')):(r===0?(LANG==='ko'?'...':'...'):(LANG==='ko'?'...절반이 남았군요. 저도 그랬어요.':'...Half left. I was, too.'));
+      setTimeout(()=>modal(T(G.currentRoom===1?'elise':'owen').toUpperCase(),line,()=>showScreen('battle',{_started:true,_greeted:true})),400);
+      return true;
+    }
+    G.battery=0;G.battlePhase='over';const sl=document.createElement('div');sl.className='scanlines';document.body.appendChild(sl);document.body.classList.add('screen-off');setTimeout(()=>{sl.remove();document.body.classList.remove('screen-off');},2100);const dc=generateDeathCard();if(G.deathCards.length<3)G.deathCards.push(dc);saveGame();const r0=G.runCount;const isE=G.currentRoom===1;const line0=isE?(r0>=3?(LANG==='ko'?'...오래 걸렸네요. 이제 기록될 거예요.':"...Took you a while. It'll be recorded now."):(LANG==='ko'?'배터리가 다 됐군요. 다음엔 충전하고 오세요.':"Battery's out. Charge it next time.")):(r0>=2?(LANG==='ko'?'꺼지는군요. 저도 이렇게 됐을 거예요.':"It's going dark. I must have gone this way too."):(LANG==='ko'?'...':'...'));setTimeout(()=>modal(T(isE?'elise':'owen').toUpperCase(),line0,()=>runDeathCardCinematic(dc,()=>setScreen('regression'))),2200);return true;
+  }
+  return false;
+}
+function runDeathCardCinematic(dc,done){const ov=document.createElement('div');ov.style.cssText='position:fixed;inset:0;background:#000;z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text-gold);font-family:"Cinzel","Crimson Text",serif;padding:20px;animation:fadeIn 0.6s';ov.innerHTML=`<div id="dcLine" style="font-size:14px;min-height:28px;text-align:center;opacity:0;transition:opacity 0.6s"></div><div id="dcCard" style="margin:24px 0;width:140px;height:196px;border:2px solid var(--border-gold);border-radius:10px;background:linear-gradient(135deg,#1a1014,#0a0608);display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;transition:opacity 0.8s;box-shadow:0 0 40px rgba(200,168,75,0.3)"><div id="dcName" style="font-size:16px;color:var(--text-gold);min-height:22px;letter-spacing:1px">＿＿＿</div><div id="dcSigil" style="font-size:11px;color:#a88cd8;margin:8px 0;min-height:16px">—</div><div id="dcAtk" style="font-size:26px;color:#e0c888;min-height:34px">?</div><div id="dcHp" style="font-size:16px;color:#c87878;margin-top:6px;min-height:22px">?</div></div>`;document.body.appendChild(ov);const L=ov.querySelector('#dcLine');const C=ov.querySelector('#dcCard');const N=ov.querySelector('#dcName');const S=ov.querySelector('#dcSigil');const A=ov.querySelector('#dcAtk');const H=ov.querySelector('#dcHp');const ko=LANG==='ko';const say=(t,d)=>new Promise(r=>{L.style.opacity='0';setTimeout(()=>{L.textContent=t;L.style.opacity='1';setTimeout(r,d);},300);});const type=(el,str)=>new Promise(r=>{let i=0;el.textContent='';const iv=setInterval(()=>{el.textContent=str.slice(0,++i);if(i>=str.length){clearInterval(iv);r();}},60);});(async()=>{await say(ko?'잔상이 감지됩니다.':'Residual detected.',1600);await say(ko?'기억 패턴을 분석하는 중...':'Analyzing memory pattern...',1600);C.style.opacity='1';await new Promise(r=>setTimeout(r,600));await say(ko?'가장 오래 버틴 기억...':'Longest-surviving memory...',1400);S.textContent=dc.sigil||'—';S.style.color='#e0c888';await new Promise(r=>setTimeout(r,700));await say(ko?'가장 자주 소환된 기억...':'Most-summoned memory...',1400);A.textContent=dc.attack;A.style.textShadow='0 0 12px rgba(224,200,136,0.8)';await new Promise(r=>setTimeout(r,700));await say(ko?'마지막 순간의 기억...':'Last-moment memory...',1400);H.textContent='HP '+dc.maxHp;await new Promise(r=>setTimeout(r,700));await say(ko?'이름을 부여합니다...':'Assigning name...',1200);await type(N,dc.name);await new Promise(r=>setTimeout(r,800));await say(ko?'기록 완료. 서고에 남습니다.':'Recorded. Kept in the Archive.',1800);ov.style.transition='opacity 0.8s';ov.style.opacity='0';setTimeout(()=>{ov.remove();done();},900);})();}
+function restoreSlotsToDeck(){[...G.playerSlots,...G.battleDiscard,...G.playerHand].forEach(c=>{if(c&&c.id!=='faded_memory'){c.currentHp=c.maxHp;c.turnsSurvived=0;G.playerDeck.push(c);}});G.playerSlots=[null,null,null,null];G.battleDiscard=[];G.playerHand=[];G.playerDeck=shuffle(G.playerDeck);}
+
+function renderVictory(root){const hint=G.pendingNode&&G.pendingNode.type==='battle_hint';if(hint&&!G.collectedHints.includes(1))G.collectedHints.push(1);const isIntro=!G.pendingNode&&G.currentRoom===1;const line=isIntro?(LANG==='ko'?'"이제 길이 보이나요. 하지만 하나가 아니에요."':'"You can see the path now. But there is more than one."'):(G.currentRoom===2?(LANG==='ko'?'"...가져가요. 뭘 찾으러 왔든."':'"...Take it. Whatever you came for."'):(LANG==='ko'?'"또 오실 건가요? 여기는 출구가 없어요."':'"Coming back? There is no way out of here."'));root.innerHTML=`<div class="center" style="padding-top:40px"><h2>${T('victory')}</h2><div class="panel dialogue">${line}</div>${hint?`<div class="gold" style="margin:10px 0;font-size:12px">${LANG==='ko'?'힌트 획득: 명찰 E _ I _ E':'Hint: Badge E _ I _ E'}</div>`:''}<button class="primary" id="n" style="margin-top:14px">${T('continue')}</button></div>`;root.querySelector('#n').addEventListener('click',()=>{const map=MAPS[G.currentRoom]?.nodes||{};if(G.pendingNode&&map[G.pendingNode.id]&&!G.completedNodes.includes(G.pendingNode.id))G.completedNodes.push(G.pendingNode.id);else if(G.currentNodeId&&map[G.currentNodeId]&&!G.completedNodes.includes(G.currentNodeId))G.completedNodes.push(G.currentNodeId);G.pendingNode=null;setScreen('cardchoice');});}
+function renderCardChoice(root){const pool=G.currentRoom===1?['night_watcher','archive_rat','old_book','forgotten_dog','reverb_card']:['echo','forgotten_dog','old_book','reverb_card','afterimage'];const picks=shuffle(pool).slice(0,3).map(id=>mkCard(id));root.innerHTML=`<h3 class="center">${LANG==='ko'?'기억 선택':'Choose a Memory'}</h3><div class="row" id="ch" style="flex-wrap:wrap;justify-content:center;margin:16px 0"></div><button id="sk" style="display:block;margin:0 auto">${T('skip')}</button>`;const c=root.querySelector('#ch');picks.forEach(card=>{const e=renderCardEl(card,{onClick:()=>{G.playerDeck.push(card);G.playerDeck=shuffle(G.playerDeck);msg((LANG==='ko'?'획득: ':'Gained: ')+Tc(card.id));setScreen('map');}});c.appendChild(e);});root.querySelector('#sk').addEventListener('click',()=>{if(Math.random()<0.4&&G.items.length<3){const keys=Object.keys(ITEMS);const pick=keys[Math.floor(Math.random()*keys.length)];giveItem(pick);msg((LANG==='ko'?'유물 획득: ':'Relic: ')+ITEMS[pick].name[LANG]);}setScreen('map');});}
+
+// MAP
+const MAPS={1:{nodes:{start:{x:240,y:40,type:'start',c:['r1_battle_l','r1_relic','r1_chestA']},r1_battle_l:{x:100,y:130,type:'battle',c:['r1_reading']},r1_relic:{x:240,y:130,type:'relic',c:['r1_chestB']},r1_chestA:{x:380,y:130,type:'chestA',c:['r1_battle_hint']},r1_reading:{x:100,y:220,type:'reading',c:['r1_chestB']},r1_battle_hint:{x:380,y:220,type:'battle_hint',c:['r1_chestB']},r1_chestB:{x:240,y:310,type:'chestB',c:['r1_battle_l2','r1_vault','r1_battle_r2']},r1_battle_l2:{x:100,y:400,type:'battle',c:['r1_reclass']},r1_vault:{x:240,y:400,type:'vault',c:['r1_fuse','r1_reclass']},r1_battle_r2:{x:380,y:400,type:'battle',c:['r1_fuse']},r1_reclass:{x:140,y:485,type:'reclass',c:['r1_explore']},r1_fuse:{x:340,y:485,type:'fuse',c:['r1_explore']},r1_explore:{x:240,y:540,type:'explore',c:['r1_locks']},r1_locks:{x:240,y:595,type:'locks',c:['r1_boss']},r1_boss:{x:240,y:650,type:'boss',c:[]}}},
+2:{nodes:{r2_start:{x:240,y:40,type:'start',c:['r2_battle_l','r2_relic','r2_mysteryA']},r2_battle_l:{x:60,y:130,type:'battle',c:['r2_chestA','r2_reading']},r2_relic:{x:240,y:130,type:'relic',c:['r2_chestB']},r2_mysteryA:{x:420,y:130,type:'mysteryA',c:['r2_vault']},r2_chestA:{x:60,y:220,type:'chestA',c:['r2_chestB']},r2_reading:{x:170,y:220,type:'reading',c:['r2_chestB']},r2_vault:{x:420,y:220,type:'vault',c:['r2_chestB']},r2_chestB:{x:240,y:310,type:'chestB',c:['r2_battle_l2','r2_battle_mid','r2_mysteryB']},r2_battle_l2:{x:60,y:400,type:'battle',c:['r2_fuse']},r2_battle_mid:{x:240,y:400,type:'battle',c:['r2_fuse','r2_mysteryC']},r2_mysteryB:{x:420,y:400,type:'mysteryB',c:['r2_mysteryC']},r2_mysteryC:{x:340,y:485,type:'mysteryC',c:['r2_fuse']},r2_fuse:{x:180,y:485,type:'fuse',c:['r2_reclass']},r2_reclass:{x:300,y:530,type:'reclass',c:['r2_explore']},r2_explore:{x:240,y:580,type:'explore',c:['r2_locks']},r2_locks:{x:240,y:625,type:'locks',c:['r2_boss']},r2_boss:{x:240,y:680,type:'boss',c:[]}}}};
+const ICONS={start:'⬥',battle:'⚔',battle_hint:'⚔',chestA:'📦',chestB:'📦',reading:'📖',locks:'🔒',boss:'👁',mysteryA:'?',mysteryB:'?',mysteryC:'?',vault:'💠',relic:'💎',fuse:'✦',reclass:'⇄',explore:'🚪'};
+
+function canEnter(id){
+  if(G.completedNodes.includes(id))return false;
+  if((G.skippedNodes||[]).includes(id))return false;
+  const map=MAPS[G.currentRoom].nodes;const tgt=map[id];
+  for(const[k,n]of Object.entries(map)){
+    if(n.c&&n.c.includes(id)&&(G.completedNodes.includes(k)||G.visitedNodes.includes(k))){
+      if(tgt.type==='boss'){const s=G.currentRoom===1?G.solvedLocks.slice(0,3):G.solvedLocks.slice(3,7);return s.every(x=>x);}
+      return true;
+    }
+  }return false;
+}
+
+function renderMap(root){
+  const map=MAPS[G.currentRoom];
+  root.innerHTML=`<div class="center" style="padding:6px 0"><div class="cinzel gold" style="font-size:14px">${G.currentRoom===1?T('room_1'):T('room_2')}</div><div class="dim" style="font-size:11px">${T('run')} ${G.runCount} · ${T('hints')} ${G.collectedHints.length} · ${T('deck')} ${G.playerDeck.length}</div>${fragsHtml(G.playerFragments,'player')}</div><svg class="map-svg" viewBox="0 0 480 640" id="ms"></svg><div class="center"><button id="vd">${T('view_deck')}</button></div>`;
+  const svg=root.querySelector('#ms');
+  for(const[id,n]of Object.entries(map.nodes)){for(const to of n.c){const tgt=map.nodes[to];if(!tgt)continue;const ln=document.createElementNS('http://www.w3.org/2000/svg','path');ln.setAttribute('d',`M ${n.x} ${n.y} Q ${(n.x+tgt.x)/2} ${(n.y+tgt.y)/2+10} ${tgt.x} ${tgt.y}`);ln.setAttribute('stroke','#3d2838');ln.setAttribute('stroke-width','1.5');ln.setAttribute('fill','none');svg.appendChild(ln);}}
+  for(const[id,n]of Object.entries(map.nodes)){const done=G.completedNodes.includes(id);const skipped=(G.skippedNodes||[]).includes(id);const avail=canEnter(id);const g=document.createElementNS('http://www.w3.org/2000/svg','g');g.classList.add('map-node');if(avail)g.classList.add('available');if(skipped)g.classList.add('skipped');const c=document.createElementNS('http://www.w3.org/2000/svg','circle');c.setAttribute('cx',n.x);c.setAttribute('cy',n.y);c.setAttribute('r','22');if(done){c.setAttribute('fill','#c8a84b');c.setAttribute('stroke','#c8a84b');}else if(skipped){c.setAttribute('fill','#0a0608');c.setAttribute('stroke','#2a1e28');c.setAttribute('opacity','0.4');}else if(avail){c.setAttribute('fill','#1a1418');c.setAttribute('stroke','#c8a84b');c.setAttribute('stroke-width','2');}else{c.setAttribute('fill','#1a1418');c.setAttribute('stroke','#3d2838');}g.appendChild(c);const t=document.createElementNS('http://www.w3.org/2000/svg','text');t.setAttribute('x',n.x);t.setAttribute('y',n.y+5);t.setAttribute('text-anchor','middle');t.setAttribute('fill',done?'#110d0f':(skipped?'#2a1e28':(avail?'#c8a84b':'#5a5050')));t.setAttribute('font-size','16');t.textContent=ICONS[n.type]||'·';g.appendChild(t);if(skipped){const sl=document.createElementNS('http://www.w3.org/2000/svg','line');sl.setAttribute('x1',n.x-14);sl.setAttribute('y1',n.y-14);sl.setAttribute('x2',n.x+14);sl.setAttribute('y2',n.y+14);sl.setAttribute('stroke','#5a3848');sl.setAttribute('stroke-width','1.5');sl.setAttribute('opacity','0.6');g.appendChild(sl);}if(avail){g.style.cursor='pointer';g.addEventListener('click',()=>enterNode(id,n));}svg.appendChild(g);}
+  root.querySelector('#vd').addEventListener('click',showDeckModal);
+}
+function showDeckModal(){const w=document.createElement('div');w.className='modal';const mc=document.createElement('div');mc.className='modal-content';mc.style.maxWidth='440px';mc.innerHTML=`<div class="speaker">${T('deck')} · ${G.playerDeck.length}</div><div class="hand" id="dl" style="flex-wrap:wrap;max-height:380px;overflow-y:auto"></div>`;const cl=document.createElement('button');cl.textContent=T('close');cl.style.marginTop='8px';cl.addEventListener('click',()=>w.remove());mc.appendChild(cl);w.appendChild(mc);document.body.appendChild(w);G.playerDeck.forEach(c=>mc.querySelector('#dl').appendChild(renderCardEl(c)));}
+
+function enterNode(id,node){G.currentNodeId=id;G.visitedNodes.push(id);G.skippedNodes=G.skippedNodes||[];const map=MAPS[G.currentRoom].nodes;for(const[pk,pn]of Object.entries(map)){if(pn.c&&pn.c.includes(id)&&(G.completedNodes.includes(pk)||G.visitedNodes.includes(pk))){for(const sib of pn.c){if(sib!==id&&!G.skippedNodes.includes(sib)&&!G.visitedNodes.includes(sib)&&!G.completedNodes.includes(sib))G.skippedNodes.push(sib);}}}G.pendingNode={id,...node};const t=node.type;if(t==='battle'||t==='battle_hint')enterBattle({isBoss:false,nodeId:id,grantsHint:t==='battle_hint'});else if(t.startsWith('chest'))enterMemBox(id,t);else if(t==='reading')setScreen('campfire');else if(t==='vault')setScreen('vault');else if(t==='relic')setScreen('relic');else if(t==='fuse')setScreen('fuse');else if(t==='reclass')setScreen('reclass');else if(t==='explore')setScreen('explore');else if(t.startsWith('mystery'))setScreen('mystery',{type:t});else if(t==='locks')setScreen('lockpuzzle');else if(t==='boss')enterBattle({isBoss:true,nodeId:id});}
+
+function enterMemBox(id,type){const H={r1_chestA:{idx:0,text:LANG==='ko'?'찢긴 입고 기록부: 입고일 11월 03일.':'A torn intake log. Entry date: November 03.'},r1_chestB:{idx:2,text:LANG==='ko'?'메모: 다이아몬드(◆), 삼각형(▲). "순서대로."':'A memo: ◆ then ▲. "In order."'},r2_chestA:{idx:3,text:LANG==='ko'?'진열 표찰: property of _ _ _':'Display tag: property of _ _ _'},r2_chestB:{idx:5,text:LANG==='ko'?'전시 유물. 천의 색은 푸르렀다.':'The exhibit cloth. Its color, once. Blue.'}};const h=H[id]||{idx:-1,text:''};setScreen('memorybox',{id,type,text:h.text,hintIdx:h.idx});}
+function renderMemoryBox(root,opts){root.innerHTML=`<div class="center" style="padding-top:40px"><h3>${T('memory_box')}</h3><div class="panel"><div class="speaker">${LANG==='ko'?'기억 조각':'Memory Fragment'}</div><div class="dialogue">${opts.text}</div></div><button class="primary" id="b" style="margin-top:16px">${T('back')}</button></div>`;root.querySelector('#b').addEventListener('click',()=>{if(opts.hintIdx>=0&&!G.collectedHints.includes(opts.hintIdx))G.collectedHints.push(opts.hintIdx);if(!G.completedNodes.includes(opts.id))G.completedNodes.push(opts.id);setScreen('map');});}
+
+function renderCampfire(root){root.innerHTML=`<div class="center" style="padding-top:40px"><h3>${T('campfire')}</h3><div class="panel dialogue">${LANG==='ko'?'잠시 쉰다. 불빛이 흔들린다.':'A brief rest. The flame flickers.'}</div><button id="h" style="display:block;margin:10px auto;width:80%">${T('heal')}</button><button id="u" style="display:block;margin:10px auto;width:80%">${T('upgrade')}</button></div>`;const fin=()=>{G.completedNodes.push(G.currentNodeId);setScreen('map');};root.querySelector('#h').addEventListener('click',()=>{G.playerFragments=Math.min(5,G.playerFragments+1);fin();});root.querySelector('#u').addEventListener('click',()=>{const p=G.playerDeck.filter(c=>c.id!=='faded_memory');if(!p.length){msg('—');return;}const t=p[Math.floor(Math.random()*p.length)];t.attack+=1;msg(Tc(t.id)+' +1 atk');if(G.currentRoom===1&&!G.collectedHints.includes(1))G.collectedHints.push(1);fin();});}
+
+function fuseCards(a,b){const aGen=a.fusionGen||0;const bGen=b.fusionGen||0;if(aGen===1&&bGen===1)return null;const fused=aGen===1?a:(bGen===1?b:null);const other=fused?(fused===a?b:a):null;const gen=fused?2:1;const sigils=gen===1?[a.sigil,b.sigil].filter(Boolean).slice(0,2):(fused.sigils||[fused.sigil].filter(Boolean));const nameOf=c=>c.isFused?c.name:Tc(c.id);const name=gen===1?(LANG==='ko'?`${nameOf(a)}의 ${nameOf(b)}`:`${nameOf(a)}'s ${nameOf(b)}`):(LANG==='ko'?`${fused.name}의 ${nameOf(other)}`:`${fused.name}'s ${nameOf(other)}`);const atk=gen===1?Math.max(a.attack,b.attack):Math.max(fused.attack,other.attack);const hp=gen===1?Math.max(a.maxHp,b.maxHp):Math.max(fused.maxHp,other.maxHp);return{id:'fuse_'+Date.now(),inkCost:Math.max(a.inkCost,b.inkCost),attack:atk,maxHp:hp,currentHp:hp,sigil:sigils[0]||null,sigils,fusionGen:gen,uid:++UID,name,isFused:true};}
+function renderFuse(root){const eligible=(c)=>c&&c.id!=='faded_memory'&&!c.isDeath&&(c.fusionGen||0)<2;const pool=G.playerDeck.map((c,i)=>({c,i})).filter(x=>eligible(x.c));root.innerHTML=`<div class="center" style="padding-top:20px"><h3>${LANG==='ko'?'기억 조합':'Fusion'}</h3><div class="panel dialogue" style="font-size:13px">${LANG==='ko'?'두 장을 선택해 하나로 합치세요. (2세대 불가)':'Pick 2 cards to fuse. (No gen-2 inputs)'}</div><div id="pv" class="panel" style="min-height:60px;margin:10px auto;max-width:360px">—</div><div id="fl" class="hand" style="flex-wrap:wrap;justify-content:center;max-height:340px;overflow-y:auto"></div><div class="row" style="justify-content:center;margin-top:10px"><button id="cf" class="primary" disabled>${LANG==='ko'?'합치기':'Fuse'}</button><button id="sk" style="margin-left:10px">${T('skip')}</button></div></div>`;const fl=root.querySelector('#fl');const pv=root.querySelector('#pv');const cf=root.querySelector('#cf');const sel=[];const refresh=()=>{pv.textContent=sel.length?sel.map(x=>`${Tc(x.c.id)} (${x.c.attack}/${x.c.maxHp})`).join('  +  '):'—';cf.disabled=sel.length!==2;};pool.forEach(x=>{const el=renderCardEl(x.c,{onClick:()=>{const idx=sel.indexOf(x);if(idx>=0){sel.splice(idx,1);el.classList.remove('selected');}else if(sel.length<2){sel.push(x);el.classList.add('selected');}refresh();}});fl.appendChild(el);});root.querySelector('#sk').addEventListener('click',()=>{G.completedNodes.push(G.currentNodeId);setScreen('map');});cf.addEventListener('click',()=>{if(sel.length!==2)return;if((sel[0].c.fusionGen||0)===1&&(sel[1].c.fusionGen||0)===1){msg(LANG==='ko'?'1세대 둘은 합칠 수 없어요':'Cannot fuse two gen-1 cards');return;}const fused=fuseCards(sel[0].c,sel[1].c);if(!fused){msg(LANG==='ko'?'합칠 수 없음':'Cannot fuse');return;}const rm=new Set([sel[0].i,sel[1].i]);G.playerDeck=G.playerDeck.filter((_,i)=>!rm.has(i));G.playerDeck.push(fused);msg((LANG==='ko'?'합침: ':'Fused: ')+fused.name);G.completedNodes.push(G.currentNodeId);setScreen('map');});}
+function renderRelic(root){const keys=Object.keys(ITEMS);const picks=shuffle(keys).slice(0,3);root.innerHTML=`<div class="center" style="padding-top:40px"><h3>${LANG==='ko'?'유물함':'Relic Cache'}</h3><div class="panel dialogue">${LANG==='ko'?'먼지 쌓인 유물. 하나를 고르세요.':'Dusty relics. Pick one.'}</div><div class="row" id="rp" style="justify-content:center;flex-wrap:wrap;margin:16px 0;gap:10px"></div><button id="sk" style="display:block;margin:10px auto">${T('skip')}</button></div>`;const rp=root.querySelector('#rp');picks.forEach(k=>{const b=document.createElement('button');b.className='item-btn';b.style.fontSize='13px';b.style.padding='10px 12px';b.innerHTML=`<div style="font-size:22px">${ITEMS[k].icon}</div><div>${ITEMS[k].name[LANG]}</div>`;b.addEventListener('click',()=>{if(G.items.length>=3){msg(LANG==='ko'?'유물 가득 (3/3)':'Full (3/3)');return;}giveItem(k);G.completedNodes.push(G.currentNodeId);setScreen('map');});rp.appendChild(b);});root.querySelector('#sk').addEventListener('click',()=>{G.completedNodes.push(G.currentNodeId);setScreen('map');});}
+function renderVault(root){const canRestore=G.deletedMsgs.length>0&&G.playerFragments>=1;root.innerHTML=`<div class="center" style="padding-top:40px"><h3>${T('vault')}</h3><div class="panel dialogue">${LANG==='ko'?'유리 진열장 앞. 손을 뻗으면 기억 하나를 되돌릴 수 있다.':'Before a glass case. You could return a memory.'}</div><button id="h" style="display:block;margin:10px auto;width:80%">${T('heal')}</button><button id="r" style="display:block;margin:10px auto;width:80%" ${canRestore?'':'disabled'}>${T('restore')}</button></div>`;const fin=()=>{G.completedNodes.push(G.currentNodeId);setScreen('map');};root.querySelector('#h').addEventListener('click',()=>{G.playerFragments=Math.min(5,G.playerFragments+1);fin();});root.querySelector('#r').addEventListener('click',()=>{G.deletedMsgs.pop();G.playerFragments-=1;saveGame();fin();});}
+
+function renderExplore(root){const r1=G.currentRoom===1;const title=r1?(LANG==='ko'?'접수실':'Reception'):(LANG==='ko'?'복도':'Corridor');const objects=r1?[{label:LANG==='ko'?'접수 데스크':'Reception Desk',style:'left:12%;top:38%;width:110px;height:60px',text:LANG==='ko'?'서랍 안쪽에 찢긴 종이: "입고일 11월 03일."':'Inside the drawer, a torn paper: "Entry: Nov 03."',hint:0},{label:LANG==='ko'?'벽 게시판':'Wall Board',style:'left:60%;top:10%;width:120px;height:70px',text:LANG==='ko'?'공지: "유물은 만지지 마시오. — 관리인"':'Notice: "Do not touch the relics. —The Keeper"'},{label:LANG==='ko'?'낡은 방명록':'Old Guestbook',style:'left:20%;top:14%;width:100px;height:55px',text:LANG==='ko'?'"...J... 2025.11.03."':'"...J... 2025.11.03."'},{label:LANG==='ko'?'선반 상자':'Shelf Box',style:'left:68%;top:48%;width:100px;height:60px',text:G.solvedLocks[0]?(LANG==='ko'?'상자가 열린다. 안에 작은 결정 하나.':'The box opens. A small crystal inside.'):(LANG==='ko'?'잠겨있다.':'Locked.'),grant:G.solvedLocks[0]?'memory_crystal':null},{label:'🔒 '+(LANG==='ko'?'자물쇠':'Locks'),style:'left:38%;top:68%;width:110px;height:55px',goLocks:true}]:[{label:LANG==='ko'?'유리 케이스 A':'Glass Case A',style:'left:10%;top:14%;width:110px;height:60px',text:LANG==='ko'?'"property of _ _ _"':'"property of _ _ _"',hint:3},{label:LANG==='ko'?'유리 케이스 B':'Glass Case B',style:'left:60%;top:14%;width:110px;height:60px',text:G.solvedLocks[3]?(LANG==='ko'?'뚜껑이 열린다. 안에 색 바랜 천.':'Opened. A faded cloth inside.'):(LANG==='ko'?'잠겨있다.':'Locked.')},{label:LANG==='ko'?'벽 메모':'Wall Note',style:'left:18%;top:45%;width:110px;height:55px',text:LANG==='ko'?'"나도 누굴 찾고 있었어."':'"I was looking for someone too."'},{label:LANG==='ko'?'복도 끝 문':'End Door',style:'left:58%;top:45%;width:110px;height:60px',text:LANG==='ko'?'굳게 잠겨있다.':'Sealed shut.'},{label:'🔒 '+(LANG==='ko'?'자물쇠':'Locks'),style:'left:38%;top:70%;width:110px;height:55px',goLocks:true}];root.innerHTML=`<div class="center" style="padding:10px 0"><h3>${title}</h3><div class="dim" style="font-size:11px">${LANG==='ko'?'물건을 탭하세요.':'Tap objects.'}</div></div><div class="room-scene"><div class="wall"></div><div class="floor"></div>${objects.map((o,i)=>`<div class="obj" data-i="${i}" style="${o.style}">${o.label}</div>`).join('')}</div><div class="center"><button id="bk" style="margin-top:8px">${T('back')}</button></div>`;const fin=()=>{if(!G.completedNodes.includes(G.currentNodeId))G.completedNodes.push(G.currentNodeId);setScreen('map');};root.querySelectorAll('.obj').forEach(e=>{e.addEventListener('click',()=>{const o=objects[+e.dataset.i];if(o.goLocks){setScreen('lockpuzzle');return;}if(o.hint!==undefined&&!G.collectedHints.includes(o.hint))G.collectedHints.push(o.hint);if(o.grant&&!G.items.includes(o.grant)&&G.items.length<3){giveItem(o.grant);}modal(o.label,o.text);});});root.querySelector('#bk').addEventListener('click',fin);}
+function renderReclass(root){const sc=G.sacrificeCounter||0;const NORMAL_POOL=['afterimage','memory_shard','lost_memory','night_watcher','archive_rat'];const HIGH_POOL=['old_book','forgotten_dog','echo','reverb_card'];const trades=[{k:'tradeA',label:LANG==='ko'?'일반 카드 1장 → 3장 중 1장 (일반)':'Trade normal → pick 1 of 3 normal',isTrade:'normal',pool:NORMAL_POOL,srcPool:NORMAL_POOL},{k:'tradeB',label:LANG==='ko'?'고급 카드 1장 → 3장 중 1장 (고급) 또는 아이템':'Trade high-tier → pick 1 of 3 high-tier or item',isTrade:'high',pool:HIGH_POOL,srcPool:HIGH_POOL},{k:'frag',cost:3,label:LANG==='ko'?'희생 3 → 기억 조각 +1':'Sac 3 → +1 Fragment',ok:()=>G.playerFragments<5,apply:()=>{G.playerFragments=Math.min(5,G.playerFragments+1);}},{k:'obliv',cost:2,label:LANG==='ko'?'희생 2 → 망각 +2':'Sac 2 → +2 Oblivion',ok:()=>true,apply:()=>{G.oblivionGauge=Math.min(8,G.oblivionGauge+2);}},{k:'restore',cost:5,label:LANG==='ko'?'희생 5 → 지워진 기억 1 복원':'Sac 5 → Restore 1 deleted',ok:()=>G.deletedMsgs.length>0,apply:()=>{G.deletedMsgs.pop();}},{k:'upgrade',cost:4,label:LANG==='ko'?'희생 4 → 카드 1장 +1 공격':'Sac 4 → +1 atk to a card',ok:()=>G.playerDeck.some(c=>c.id!=='faded_memory'),apply:()=>{const p=G.playerDeck.filter(c=>c.id!=='faded_memory');const t=p[Math.floor(Math.random()*p.length)];t.attack+=1;msg(Tc(t.id)+' +1 atk');}},{k:'fog3',add:3,label:LANG==='ko'?'흐릿한 기억 ×3 → 일반 카드 1장':'Fog ×3 → 1 normal card',pool:['afterimage','memory_shard','lost_memory','night_watcher','archive_rat'],isAdd:true},{k:'fog5',add:5,label:LANG==='ko'?'흐릿한 기억 ×5 → 고급 카드 1장':'Fog ×5 → 1 high-tier card',pool:['old_book','forgotten_dog','echo','reverb_card'],isAdd:true}];const fin=()=>{G.completedNodes.push(G.currentNodeId);setScreen('map');};root.innerHTML=`<div class="center" style="padding-top:24px"><h3>${LANG==='ko'?'재분류실':'Reclassification'}</h3><div class="panel dialogue" style="font-size:12px">${LANG==='ko'?'희생을 다시 배분한다. 현재 ':'Re-allocate sacrifice. Counter: '}${sc}/10</div><div id="tr" style="margin:10px auto;max-width:360px"></div><button id="sk" style="display:block;margin:10px auto">${T('skip')}</button></div>`;const tr=root.querySelector('#tr');trades.forEach(t=>{const b=document.createElement('button');b.style.cssText='display:block;width:100%;margin:6px 0;padding:10px;text-align:left';let can,preview;if(t.isAdd){const next=sc+t.add;can=true;preview=` (${LANG==='ko'?'거래 후 카운터':'after'}: ${Math.min(10,next)}/10${next>=10?' ⚠':''})`;}else if(t.isTrade){can=G.playerDeck.some(c=>t.srcPool.includes(c.id));preview='';}else{can=sc>=t.cost&&t.ok();preview='';}b.disabled=!can;b.innerHTML=`<span style="color:${can?'#c8a84b':'#6a5050'}">${t.label}${preview}</span>`;b.addEventListener('click',()=>{if(t.isTrade){const srcs=G.playerDeck.filter(c=>t.srcPool.includes(c.id));const pick=document.createElement('div');pick.className='panel';pick.style.cssText='margin:8px auto;max-width:360px';pick.innerHTML=`<div class="speaker">${LANG==='ko'?'희생할 카드를 고르세요':'Pick a card to sacrifice'}</div>`;const sr=document.createElement('div');sr.style.cssText='display:flex;gap:6px;flex-wrap:wrap;justify-content:center';srcs.forEach(sc2=>{const sb=document.createElement('button');sb.style.cssText='padding:6px 8px;min-width:80px;font-size:11px';sb.innerHTML=`${Tc(sc2.id)}<br><span class="dim" style="font-size:10px">${sc2.attack}/${sc2.maxHp}</span>`;sb.addEventListener('click',()=>{const idx=G.playerDeck.indexOf(sc2);if(idx>=0)G.playerDeck.splice(idx,1);const choices=shuffle([...t.pool]).slice(0,3);const pick2=document.createElement('div');pick2.className='panel';pick2.style.cssText='margin:8px auto;max-width:360px';pick2.innerHTML=`<div class="speaker">${LANG==='ko'?'셋 중 하나를 고르세요':'Pick one of three'}</div>`;const cr=document.createElement('div');cr.style.cssText='display:flex;gap:6px;flex-wrap:wrap;justify-content:center';choices.forEach(id=>{const cb=document.createElement('button');cb.style.cssText='padding:8px 10px;min-width:90px';const cd=CARDS[id];cb.innerHTML=`<div style="font-size:12px">${Tc(id)}</div><div class="dim" style="font-size:10px">${cd.attack}/${cd.maxHp}</div>`;cb.addEventListener('click',()=>{G.playerDeck.push(mkCard(id));msg((LANG==='ko'?'획득: ':'Got: ')+Tc(id));saveGame();fin();});cr.appendChild(cb);});if(t.isTrade==='high'&&G.items.length<3){const ib=document.createElement('button');ib.style.cssText='padding:8px 10px;min-width:90px';ib.innerHTML=`<div style="font-size:12px">${LANG==='ko'?'아이템 1개':'1 item'}</div>`;ib.addEventListener('click',()=>{const keys=Object.keys(ITEMS);const k=keys[Math.floor(Math.random()*keys.length)];giveItem(k);saveGame();fin();});cr.appendChild(ib);}pick2.appendChild(cr);tr.innerHTML='';tr.appendChild(pick2);});sr.appendChild(sb);});pick.appendChild(sr);tr.innerHTML='';tr.appendChild(pick);return;}if(t.isAdd){const choices=shuffle([...t.pool]).slice(0,3);const pick=document.createElement('div');pick.className='panel';pick.style.cssText='margin:8px auto;max-width:360px';pick.innerHTML=`<div class="speaker">${LANG==='ko'?'셋 중 하나를 고르세요':'Pick one of three'}</div>`;const cr=document.createElement('div');cr.style.cssText='display:flex;gap:6px;flex-wrap:wrap;justify-content:center';choices.forEach(id=>{const cb=document.createElement('button');cb.style.cssText='padding:8px 10px;min-width:90px';const cd=CARDS[id];cb.innerHTML=`<div style="font-size:12px">${Tc(id)}</div><div class="dim" style="font-size:10px">${cd.attack}/${cd.maxHp}</div>`;cb.addEventListener('click',()=>{G.playerDeck.push(mkCard(id));msg((LANG==='ko'?'획득: ':'Got: ')+Tc(id));G.sacrificeCounter=sc+t.add;if(G.sacrificeCounter>=10){G.sacrificeCounter=0;G.sacrificeMode=true;G.phoneOpen=true;document.getElementById('phoneOverlay')?.classList.add('open');renderPhone();msg(T('sacrifice_select'));}saveGame();fin();});cr.appendChild(cb);});pick.appendChild(cr);tr.innerHTML='';tr.appendChild(pick);}else{G.sacrificeCounter=sc-t.cost;t.apply();msg(LANG==='ko'?'재분류 완료':'Reclassified');saveGame();fin();}});tr.appendChild(b);});root.querySelector('#sk').addEventListener('click',fin);}
+function renderMystery(root,opts){const txt={mysteryA:{idx:4,text:LANG==='ko'?'7번 케이스. 유리가 뿌옇다. 안에 손목밴드가 있다. 이름은 없다.':'Case #7. The glass is clouded. Inside, a wristband. No name.'},mysteryB:{idx:6,text:LANG==='ko'?'사진 한 장. 네 명. 세 얼굴이 가려져 있다.':'A single photo. Four people. Three faces are covered.'},mysteryC:{idx:-1,text:LANG==='ko'?'노트. 필체가 중간부터 바뀐다.':'A notebook. The handwriting shifts halfway.',rare:'forgotten_dog'}}[opts.type];const rareBtn=txt.rare?`<button class="primary" id="take" style="margin-top:8px">${LANG==='ko'?'기억 받기 ('+Tc(txt.rare)+')':'Take memory ('+Tc(txt.rare)+')'}</button>`:'';root.innerHTML=`<div class="center" style="padding-top:40px"><h3>${T('mystery')}</h3><div class="panel"><div class="dialogue">${txt.text}</div></div>${rareBtn}<button class="primary" id="b" style="margin-top:16px">${T('back')}</button></div>`;const done=()=>{if(txt.idx>=0&&!G.collectedHints.includes(txt.idx))G.collectedHints.push(txt.idx);G.completedNodes.push(G.currentNodeId);setScreen('map');};root.querySelector('#b').addEventListener('click',done);if(txt.rare)root.querySelector('#take').addEventListener('click',()=>{G.playerDeck.push(mkCard(txt.rare));G.playerDeck=shuffle(G.playerDeck);msg((LANG==='ko'?'획득: ':'Gained: ')+Tc(txt.rare));done();});}
+
+// LOCKS
+const LOCKS=[{a:'1103',t:'text'},{a:'ELISE',t:'text'},{a:['◆','▲'],t:'seq',s:['◆','▲','●','■']},{a:'OWN',t:'text'},{a:'7',t:'text'},{a:'BLUE',t:'text'},{a:['●'],t:'seq',s:['◆','▲','●','■']}];
+const LOCK_LABELS=i=>{const ko=['날짜 (4자리)','이름 (5글자)','기호 순서','단어 (3글자)','숫자 (1자리)','색깔','기호'];const en=['Date (4 digits)','Name (5 letters)','Symbol order','Word (3 letters)','Number (1 digit)','Color','Symbol'];return (LANG==='ko'?ko:en)[i];};
+const HINTS=[()=>LANG==='ko'?'입고일: 11월 03일':'Entry date: November 03',()=>LANG==='ko'?'명찰 조각: E _ I _ E':'Badge fragment: E _ I _ E',()=>LANG==='ko'?'다이아몬드, 그 다음 삼각형. 순서대로.':'Diamond, then triangle. In order.',()=>LANG==='ko'?'property of _ _ _':'property of _ _ _',()=>LANG==='ko'?'일곱 번째 줄만 새로 쓰여있다':'Only the seventh line is rewritten',()=>LANG==='ko'?'천의 색. 한때는.':'The cloth. Its color, once.',()=>LANG==='ko'?'넷 중 하나만 남아있다':'Only one of four remains'];
+
+function renderLockPuzzle(root){
+  const range=G.currentRoom===1?[0,1,2]:[3,4,5,6];
+  root.innerHTML=`<h3 class="center">${T('locks')}</h3><div class="panel"><div class="speaker">${T('hints')} · ${G.collectedHints.length}</div><div id="h" class="dialogue" style="font-size:12px"></div></div><div id="lks"></div><button id="b" style="margin:12px 0;display:block;width:100%">${T('back')}</button>`;
+  const hEl=root.querySelector('#h');
+  if(G.collectedHints.length===0)hEl.innerHTML=`<span class="dim">${LANG==='ko'?'힌트 없음':'No hints'}</span>`;
+  G.collectedHints.forEach(i=>{const p=document.createElement('div');p.textContent='· '+HINTS[i]();p.style.marginTop='3px';hEl.appendChild(p);});
+  const lkEl=root.querySelector('#lks');
+  range.forEach(i=>{
+    const l=LOCKS[i];const panel=document.createElement('div');panel.className='panel';
+    if(G.solvedLocks[i]){panel.innerHTML=`<div class="gold">✓ ${LOCK_LABELS(i)} — ${T('solved')}</div>`;}
+    else if(l.t==='text'){
+      panel.innerHTML=`<div class="speaker">${LANG==='ko'?'자물쇠 ':'Lock '}${i+1}</div><div>${LOCK_LABELS(i)}</div><input type="text" id="lk${i}" style="margin-top:6px"/><button class="primary" id="sub${i}" style="margin-top:6px;width:100%">${T('confirm')}</button>`;
+      panel.querySelector('#lk'+i).addEventListener('keydown',ev=>{if(ev.key==='Enter')panel.querySelector('#sub'+i).click();});panel.querySelector('#sub'+i).addEventListener('click',()=>{const input=panel.querySelector('#lk'+i);const v=input.value.toUpperCase().trim();if(v===l.a){G.solvedLocks[i]=true;saveGame();msg(T('solved'));const s=G.currentRoom===1?G.solvedLocks.slice(0,3):G.solvedLocks.slice(3,7);if(s.every(x=>x)){const id=G.currentRoom===1?'r1_locks':'r2_locks';if(!G.completedNodes.includes(id))G.completedNodes.push(id);setTimeout(()=>setScreen('map'),700);}else renderLockPuzzle(root);}else{msg(T('wrong'));input.value='';input.focus();}});
+    }else{
+      const seq=[];panel.innerHTML=`<div class="speaker">${LANG==='ko'?'자물쇠 ':'Lock '}${i+1}</div><div>${LOCK_LABELS(i)}</div><div id="sq${i}" style="font-size:26px;min-height:32px;margin:6px 0;color:var(--text-gold);letter-spacing:8px">·</div>`;
+      const row=document.createElement('div');row.style.display='flex';row.style.flexWrap='wrap';
+      l.s.forEach(s=>{const b=document.createElement('button');b.textContent=s;b.style.cssText='width:44px;height:44px;font-size:20px;margin:2px';b.addEventListener('click',()=>{seq.push(s);panel.querySelector('#sq'+i).textContent=seq.join(' ');});row.appendChild(b);});
+      const cl=document.createElement('button');cl.textContent='↺';cl.style.cssText='width:44px;height:44px;margin:2px';cl.addEventListener('click',()=>{seq.length=0;panel.querySelector('#sq'+i).textContent='·';});row.appendChild(cl);
+      panel.appendChild(row);
+      const sub=document.createElement('button');sub.className='primary';sub.textContent=T('confirm');sub.style.cssText='width:100%;margin-top:6px';sub.addEventListener('click',()=>{if(JSON.stringify(seq)===JSON.stringify(l.a)){G.solvedLocks[i]=true;saveGame();msg(T('solved'));const s=G.currentRoom===1?G.solvedLocks.slice(0,3):G.solvedLocks.slice(3,7);if(s.every(x=>x)){const id=G.currentRoom===1?'r1_locks':'r2_locks';if(!G.completedNodes.includes(id))G.completedNodes.push(id);setTimeout(()=>setScreen('map'),700);}else renderLockPuzzle(root);}else{msg(T('wrong'));seq.length=0;panel.querySelector('#sq'+i).textContent='·';}});panel.appendChild(sub);
+    }
+    lkEl.appendChild(panel);
+  });
+  root.querySelector('#b').addEventListener('click',()=>{const s=G.currentRoom===1?G.solvedLocks.slice(0,3):G.solvedLocks.slice(3,7);if(s.every(x=>x)){const id=G.currentRoom===1?'r1_locks':'r2_locks';if(!G.completedNodes.includes(id))G.completedNodes.push(id);}setScreen('map');});
+}
+
+function renderLoopEnding(root){const pages=LANG==='ko'?['탈출했다.','기숙사 방. 아침.','J의 문자: "야 어제 어디 있었어?"','평범한 하루인 것 같다.','...','핸드폰에 Recall 알림이 떴다.','"두 개의 새로운 기억이 기록되었습니다."']:['Escaped.','The dorm room. Morning.','A message from J: "hey where were you yesterday?"','It feels like an ordinary day.','...','A Recall notification appeared on the phone.','"Two new memories have been recorded."'];let p=0;function draw(){root.innerHTML=`<div style="padding-top:100px;min-height:60vh;display:flex;align-items:center;justify-content:center"><div class="dialogue center" style="font-size:18px;max-width:360px">${pages[p]}</div></div>`;root.addEventListener('click',adv,{once:true});}function adv(){p++;if(p>=pages.length)setScreen('regression');else draw();}draw();}
+
+function renderRegression(root){G.runCount++;G.rememberedCards=[...new Set([...G.rememberedCards,...G.diedThisRun])];G.diedThisRun=[];saveGame();const pages=LANG==='ko'?['기억이 수집되었습니다.','눈을 뜬다.','핸드폰이 손에 있다.','Recall이 켜져 있다.']:['Memory collected.','Eyes open.','The phone is in your hand.','Recall is running.'];let p=0;function draw(){root.innerHTML=`<div style="padding-top:120px;display:flex;align-items:center;justify-content:center;min-height:50vh"><div class="dialogue center" style="font-size:18px">${pages[p]}</div></div>`;}draw();const t=setInterval(()=>{p++;if(p>=pages.length){clearInterval(t);setScreen('title');return;}draw();},1300);root.addEventListener('click',()=>{clearInterval(t);setScreen('title');});}
+
+// DEBUG + SIM
+function showDebug(){const o=document.createElement('div');o.className='debug-overlay';const sl=s=>s.map(c=>c?c.id:'·').join(' | ');o.textContent=[`Screen: ${G.screen}`,`Run: ${G.runCount} Room: ${G.currentRoom} Node: ${G.currentNodeId}`,`Frag P/W: ${G.playerFragments}/${G.wardenFragments}`,`Ink: ${G.currentInk}  망각: ${G.oblivionGauge}/8  🔋${G.battery}%  Sac: ${G.sacrificeCounter}/10`,`Deck/Hand: ${G.playerDeck.length}/${G.playerHand.length}`,`PSlots: ${sl(G.playerSlots)}`,`WSlots: ${sl(G.wardenSlots)}`,`Hints: [${G.collectedHints.join(',')}]`,`Locks: [${G.solvedLocks.map(x=>x?'✓':'✗').join(',')}]`,`Remembered: [${G.rememberedCards.join(',')}]`,`DiedThisRun: [${G.diedThisRun.join(',')}]`,`DeletedMsgs: ${G.deletedMsgs.length}/${J_MSGS.length}`,'','(click to close)'].join('\n');o.addEventListener('click',()=>o.remove());document.body.appendChild(o);}
+
+function runSim(){const log=[];let pass=0;function reset(){G.playerSlots=[null,null,null,null];G.wardenSlots=[null,null,null,null];G.playerFragments=5;G.wardenFragments=5;G.currentInk=0;G.battleDiscard=[];G.playerDeck=[];G.playerHand=[];}
+  function a(cond,name,d){if(cond){log.push(`✓ ${name}`);pass++;}else log.push(`✗ ${name} — ${d||''}`);}
+  reset();G.playerSlots[0]=mkCard('echo');G.wardenSlots[0]=mkCard('forgotten_dog');const preFrag=G.wardenFragments;resolveCombat('player');a(G.wardenSlots[0]?.currentHp===1&&G.wardenFragments===preFrag,'T1 lane combat blocks fragment damage');
+  reset();G.wardenSlots[0]=mkCard('afterimage');resolveCombat('warden');a(G.playerFragments===4,'T2 empty→frag');
+  reset();G.playerSlots[0]=mkCard('afterimage');resolveCombat('player');a(G.wardenFragments===4,'T3 empty warden→frag');
+  reset();G.wardenSlots[0]=mkCard('faded_memory');G.playerSlots[0]=mkCard('afterimage');G.oblivionGauge=0;resolveCombat('player');a(G.wardenSlots[0]===null&&G.oblivionGauge===1,'T4 death clears + oblivion +1');
+  reset();const sh=mkCard('memory_shard');sh.currentHp=1;G.playerSlots[0]=sh;G.wardenSlots[0]=mkCard('echo');G.playerFragments=3;resolveCombat('warden');a(G.playerFragments===4,'T5 shatter',`frag=${G.playerFragments}`);
+  reset();G.playerSlots[0]=mkCard('night_watcher');G.wardenSlots[0]=mkCard('echo');resolveCombat('warden');a(G.playerSlots[0]&&G.playerSlots[0].currentHp===1,'T6 vigilance');
+  reset();G.playerSlots[0]=mkCard('reverb_card');G.wardenSlots[0]=mkCard('afterimage');G.playerFragments=3;resolveCombat('warden');a(G.playerSlots[0]?.currentHp===1&&G.playerFragments===4,'T7 reverb');
+  reset();G.playerSlots[0]=mkCard('archive_rat');G.wardenSlots[0]=mkCard('old_book');G.oblivionGauge=0;resolveCombat('player');a(G.playerSlots[0]===null&&G.oblivionGauge>=1,'T8 ephemeral self-destruct + oblivion');
+  reset();G.oblivionGauge=2;const c=mkCard('afterimage');const pre=G.oblivionGauge;G.oblivionGauge-=c.inkCost;a(G.oblivionGauge===pre-c.inkCost&&G.oblivionGauge>=0,'T9 oblivion spend');
+  reset();G.sacrificeCounter=9;G.sacrificeCounter+=1;const triggered=G.sacrificeCounter>=10;if(triggered)G.sacrificeCounter=0;a(triggered&&G.sacrificeCounter===0,'T10 counter→10 resets');
+  log.push('');log.push(`${pass}/10 passed`);console.log(log.join('\n'));const o=document.createElement('div');o.className='sim-log';o.textContent=log.join('\n')+'\n\n(click to close)';o.addEventListener('click',()=>o.remove());document.body.appendChild(o);}
+
+window.addEventListener('keydown',e=>{const t=e.target;if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable))return;if(e.key==='d'||e.key==='D')showDebug();if((e.key==='t'||e.key==='T')&&G.screen==='title')runSim();});
+
+loadGame();
+setScreen('title');
+window.G=G;
+</script>
+</body>
+</html>
