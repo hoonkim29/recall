@@ -622,7 +622,14 @@ function checkWinLose(){
   if(G.wardenFragments<=0){G.battlePhase='over';const bossDefeatLine=G.isBossBattle?(G.currentRoom===1?(LANG==='ko'?'...그래요. 가도 돼요. 하지만 다음 방은 더 깊어요.':"...All right. Go. But the next room is deeper."):(LANG==='ko'?'...가져가요. 뭘 찾으러 왔든.':"...Take it. Whatever you came for.")):null;const afterModal=()=>setTimeout(()=>{restoreSlotsToDeck();if(G.isBossBattle){if(G.currentRoom===1){setScreen('cutscene',{text:LANG==='ko'?'"문이 생겼다. 원래 없던 자리에."':'"A door appeared. Where none had been."',next:()=>{G.currentRoom=2;G.currentNodeId='r2_start';G.visitedNodes=['r2_start'];G.completedNodes=[];setScreen('map');}});}else{setScreen('loopending');}}else{setScreen('victory');}},400);if(bossDefeatLine)setTimeout(()=>modal(T(G.currentRoom===1?'elise':'owen').toUpperCase(),bossDefeatLine,afterModal),300);else afterModal();return true;}
   if(G.playerFragments<=0){
     if(G.battery>50){
-      G.battery=50;G.playerFragments=3;G.playerSlots=[null,null,null,null];G.wardenSlots=[null,null,null,null];G.playerHand=[];G.currentInk=1;G.battlePhase='draw';document.body.classList.add('battery-flicker');setTimeout(()=>document.body.classList.remove('battery-flicker'),1500);
+      G.battery=50;G.playerFragments=5;
+      // Rebuild deck: recycle discard + slots + hand (non-faded) back into deck and reshuffle
+      const recycled=[...G.battleDiscard,...G.playerSlots.filter(Boolean),...G.playerHand].filter(c=>c.id!=='faded_memory').map(c=>({...c,currentHp:c.maxHp,turnsSurvived:0}));
+      G.playerDeck=shuffle([...G.playerDeck,...recycled]);
+      G.battleDiscard=[];G.playerSlots=[null,null,null,null];G.wardenSlots=[null,null,null,null];G.playerHand=[];
+      // Deal 3 fresh cards
+      for(let i=0;i<3&&G.playerDeck.length;i++)G.playerHand.push(G.playerDeck.pop());
+      G.currentInk=1;G.battlePhase='draw';document.body.classList.add('battery-flicker');setTimeout(()=>document.body.classList.remove('battery-flicker'),1500);
       const r=G.runCount;const isElise=G.currentRoom===1;const line=isElise?(r===0?(LANG==='ko'?'배터리가 절반이네요. 오래 버티셨어요.':"Battery's at half. You've held on a while."):(LANG==='ko'?'또 여기까지예요. 익숙해지셨나요?':'Here again. Getting used to it?')):(r===0?(LANG==='ko'?'...':'...'):(LANG==='ko'?'...절반이 남았군요. 저도 그랬어요.':'...Half left. I was, too.'));
       setTimeout(()=>modal(T(G.currentRoom===1?'elise':'owen').toUpperCase(),line,()=>showScreen('battle',{_started:true,_greeted:true})),400);
       return true;
