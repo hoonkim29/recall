@@ -16,14 +16,15 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0;background:var(--bg-deep);color:var(--text-main);font-family:'Crimson Text','Noto Sans KR',serif;font-size:14px;overflow-x:hidden}
 body{background-color:#0a0608;min-height:100vh;background-repeat:no-repeat;background-position:center;background-attachment:fixed;transition:background-image .4s}
-body.bg-title,body.bg-title-vault,body.bg-battle-r1,body.bg-battle-r2{background-color:#0a0608;background-repeat:no-repeat;background-position:center center;background-size:contain}
+body.bg-title,body.bg-title-vault,body.bg-battle-r1,body.bg-battle-r2{background-color:#0a0608;background-repeat:no-repeat;background-position:center center;background-size:cover;background-attachment:scroll}
 body.bg-title{background-image:url("image/dorm_card.jpg")}
 body.bg-title-vault{background-image:url("image/dorm_card_vault.jpg")}
 body.bg-battle-r1{background-image:url("image/reception_table.png")}
 body.bg-battle-r2{background-image:url("image/corridor_table.png")}
 body.bg-title::after,body.bg-title-vault::after,body.bg-battle-r1::after,body.bg-battle-r2::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:2;background:linear-gradient(to bottom,rgba(0,0,0,0.08) 0%,rgba(0,0,0,0.18) 40%,rgba(0,0,0,0.38) 85%,rgba(0,0,0,0.55) 100%)}
 body::before{content:"";position:fixed;inset:0;pointer-events:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/><feColorMatrix values='0 0 0 0 0.7  0 0 0 0 0.55  0 0 0 0 0.3  0 0 0 0.05 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");opacity:0.5;z-index:1;mix-blend-mode:overlay}
-#app{max-width:520px;margin:0 auto;min-height:100vh;padding:14px;position:relative;z-index:3}
+body{min-height:100vh;display:flex;flex-direction:column;justify-content:center}
+#app{max-width:520px;margin:0 auto;width:100%;padding:14px;position:relative;z-index:3;box-sizing:border-box}
 h1,h2,h3{font-family:'Cinzel',serif;color:var(--text-gold);margin:6px 0;font-weight:600;letter-spacing:0.1em}
 h1{font-size:46px;letter-spacing:0.3em;text-shadow:0 0 16px rgba(200,168,75,0.4)}
 button{background:linear-gradient(to bottom,var(--bg-panel),var(--bg-card));color:var(--text-main);border:1.5px solid var(--border-warm);border-radius:4px;padding:10px 14px;font-size:15px;cursor:pointer;font-family:inherit;letter-spacing:0.04em;transition:all .2s}
@@ -116,6 +117,10 @@ input[type=text]:focus{outline:none;border-color:var(--border-gold)}
 .phone-btn .pm-msg.me{color:var(--text-main);text-align:right}
 .phone-btn.pulse{animation:pmpulse 0.9s ease-in-out infinite}
 @keyframes pmpulse{0%,100%{box-shadow:0 6px 16px rgba(0,0,0,0.6),0 0 0 rgba(200,80,80,0)}50%{box-shadow:0 6px 16px rgba(0,0,0,0.6),0 0 18px rgba(200,80,80,0.8)}}
+.phone-btn .mobile-icon{display:none}
+.phone-drag-handle{display:none}
+.phone-unread-dot{position:absolute;top:6px;right:6px;width:10px;height:10px;border-radius:50%;background:#e24848;border:2px solid #1a1418;box-shadow:0 0 6px rgba(226,72,72,0.7);display:none}
+.phone-btn.has-unread .phone-unread-dot{display:block}
 @keyframes atk-rush{0%{transform:translateY(0)}30%{transform:translateY(-18px)}60%{transform:translateY(-110px)}100%{transform:translateY(0)}}
 @keyframes atk-rush-down{0%{transform:translateY(0)}30%{transform:translateY(18px)}60%{transform:translateY(110px)}100%{transform:translateY(0)}}
 @keyframes atk-wave{0%,100%{opacity:1;filter:brightness(1)}40%{opacity:0.4;filter:brightness(1.8) hue-rotate(-30deg)}70%{opacity:0.7}}
@@ -130,6 +135,12 @@ input[type=text]:focus{outline:none;border-color:var(--border-gold)}
 .card.facedown::after{content:"◈";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:36px;color:#8a6a4a;text-shadow:0 0 8px rgba(138,106,74,0.4);letter-spacing:0.1em}
 .card.warden-dealing{animation:warden-deal .5s ease-out forwards;transform-origin:center}
 .card.warden-flipping{animation:warden-flip .55s ease-in-out forwards;transform-origin:center}
+.warden-plan-preview{margin-top:6px;display:flex;justify-content:center;align-items:center;gap:6px;min-height:56px}
+.plan-silhouette{width:44px;height:56px;border:1.5px dashed #7a4a58;border-radius:5px;background:linear-gradient(135deg,rgba(30,18,24,0.7),rgba(14,8,12,0.7));display:flex;flex-direction:column;align-items:center;justify-content:center;padding:3px;box-shadow:inset 0 0 8px rgba(0,0,0,0.4)}
+.plan-silhouette .plan-art{width:28px;height:28px;opacity:0.55;filter:grayscale(0.7) brightness(0.85)}
+.plan-silhouette .plan-art *{stroke:#a88080!important;fill:#a88080!important}
+.plan-silhouette .plan-stats{font-size:9px;color:#d0a0a0;letter-spacing:0.5px;margin-top:2px;font-weight:600}
+.plan-empty{font-size:10px;color:#6a4a4a;font-style:italic}
 .tut-mask{position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:500;pointer-events:auto;animation:fadeIn .3s}
 .tut-highlight{position:fixed;border:2px solid var(--border-gold);border-radius:8px;box-shadow:0 0 0 9999px rgba(0,0,0,0.72),0 0 22px rgba(200,168,75,0.85),inset 0 0 18px rgba(200,168,75,0.25);z-index:502;pointer-events:none;transition:all .3s;animation:tut-pulse 1.6s ease-in-out infinite;background:transparent}
 @keyframes tut-pulse{0%,100%{box-shadow:0 0 0 9999px rgba(0,0,0,0.72),0 0 16px rgba(200,168,75,0.6),inset 0 0 14px rgba(200,168,75,0.15)}50%{box-shadow:0 0 0 9999px rgba(0,0,0,0.72),0 0 30px rgba(200,168,75,1),inset 0 0 22px rgba(200,168,75,0.35)}}
@@ -153,6 +164,38 @@ input[type=text]:focus{outline:none;border-color:var(--border-gold)}
 .phone-name{font-family:'Cinzel',serif;color:var(--text-bright);font-size:14px}
 .phone-close{margin-left:auto;background:none;border:none;color:var(--text-dim);font-size:22px;cursor:pointer}
 .phone-body{flex:1;overflow-y:auto;padding:10px;font-family:'Noto Sans KR','Crimson Text',serif;display:flex;flex-direction:column}
+@media (max-width:520px){
+  #app{padding:4px 4px 16px;max-width:100vw}
+  .side-fans{display:none!important}
+  .card,.slot{width:76px!important;height:106px!important;margin:1px!important}
+  .card{padding:2px!important;border-radius:5px!important;border-width:1px!important}
+  .card .name{font-size:9px!important;padding:1px 14px 1px 2px!important;min-height:14px!important;line-height:1.1}
+  .card .cost{width:14px!important;height:14px!important;font-size:8px!important;top:2px!important;right:2px!important}
+  .card .stats{font-size:10px!important;padding:1px 2px 0!important}
+  .card .sigil{font-size:6px!important}
+  .slot{font-size:9px!important}
+  .row{gap:0!important;padding:2px 0!important;justify-content:center}
+  .panel{padding:5px 2px!important;margin:0 0 4px!important}
+  .action-bar{flex-wrap:wrap;gap:3px 6px!important;font-size:10px!important;padding:4px 2px!important}
+  .action-bar>*{font-size:10px!important}
+  .action-bar .ink{font-size:11px!important}
+  .action-bar button{padding:6px 10px!important;min-height:32px}
+  h1{font-size:30px!important;letter-spacing:0.2em!important}
+  h2{font-size:18px!important}
+  h3{font-size:16px!important}
+  .tut-dialog{max-width:calc(100vw - 32px)!important;font-size:13px!important;padding:11px 14px!important}
+  .tut-dialog button{font-size:13px!important;padding:9px!important;min-height:40px}
+  .fragments{font-size:13px!important;letter-spacing:2px!important}
+  .phone-btn{width:44px!important;height:44px!important;padding:0!important;border-radius:22px!important;display:flex!important;align-items:center;justify-content:center;right:10px!important;bottom:auto!important;top:10px!important;z-index:160}
+  .phone-btn .mobile-icon{font-size:22px!important}
+  .phone-btn .pm-head,.phone-btn .pm-pips,.phone-btn .pm-name,.phone-btn .pm-msg{display:none!important}
+  .phone-btn .mobile-icon{display:flex!important;align-items:center;justify-content:center;font-size:26px;width:100%;height:100%;color:var(--text-gold)}
+  .phone-overlay{top:auto!important;right:0!important;bottom:0!important;left:0!important;width:100%!important;max-width:100%!important;height:85vh!important;border-left:none!important;border-top:1.5px solid var(--border-gold)!important;border-radius:16px 16px 0 0!important;transform:translateY(100%)!important}
+  .phone-overlay.open{transform:translateY(0)!important}
+  .phone-drag-handle{display:block!important;width:40px;height:4px;background:var(--border-warm);border-radius:2px;margin:8px auto}
+  .phone-body{padding:14px;font-size:15px}
+  .chat-bubble{max-width:82%;font-size:15px;padding:10px 14px;margin:5px 0;line-height:1.5}
+}
 .chat-bubble{max-width:75%;padding:7px 11px;margin:3px 0;border-radius:10px;font-size:15px;line-height:1.6;word-break:break-word}
 .chat-bubble.j{background:#2a1f24;color:var(--text-bright);border-bottom-left-radius:2px;align-self:flex-start}
 .chat-bubble.me{background:#3a3030;color:var(--text-bright);border-bottom-right-radius:2px;align-self:flex-end;text-align:right}
@@ -210,14 +253,14 @@ function mkCard(id,remembered=false){const b=CARDS[id];const c={id,inkCost:b.ink
 function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 
 const J_MSGS=[
-{s:'J',t:'오늘 고마웠어'},{s:'me',t:'뭐가'},{s:'J',t:'그냥 다'},{s:'me',t:'ㅋㅋ뭔 말이야'},{s:'J',t:'됐어 자'},{s:'me',t:'ㅋㅋ잘자'},
-{s:'me',t:'어제 내가 이상한 말 한 것 같아서'},{s:'J',t:'아니야'},{s:'J',t:'나도 사실 좀 그랬어'},{s:'me',t:'뭐가'},{s:'J',t:'그냥'},{s:'me',t:'뭔데'},
-{s:'J',t:'오빠 사랑해',lock:'last'},
-{s:'J',t:'나 요즘 좀 힘든 것 같아'},{s:'me',t:'왜? 무슨 일 있어?'},{s:'J',t:'그냥 다 모르겠어'},{s:'me',t:'나 지금 나갈 수 있어'},{s:'me',t:'어디야'},{s:'J',t:'괜찮아 별거 아니야'},{s:'me',t:'별거 아닌 거 맞아?'},{s:'J',t:'응'},{s:'me',t:'그래도 나가'},{s:'me',t:'나 심심해'},
-{s:'J',t:'괜찮아?'},{s:'me',t:'응'},{s:'J',t:'진짜로?'},{s:'me',t:'응 그냥 피곤했나봐'},{s:'J',t:'알겠어'},{s:'J',t:'나 여기 있어',lock:'r1lock2'},
-{s:'J',t:'나 오늘 시험 완전 망했어'},{s:'me',t:'얼마나?'},{s:'J',t:'그냥 다 틀린 것 같아 ㅠ'},{s:'me',t:'괜찮아 나도 망했어'},{s:'J',t:'ㅋㅋㅋ우리 같이 망했다'},{s:'me',t:'밥이나 먹으러 가자'},
-{s:'J',t:'오늘 하늘 진짜 예쁘다',lock:'r2chestA'},{s:'me',t:'어디서'},{s:'J',t:'공대 앞'},{s:'J',t:'[사진]',lock:'r2chestA'},{s:'me',t:'진짜네'},
-{s:'J',t:'야 요즘 Recall이라는 앱 유행하던데 알아?'},{s:'me',t:'모르는데'},{s:'J',t:'진짜 신기한 게임이야 한번 해봐'},{s:'J',t:'나 어제 밤새했는데 멈출 수가 없었음'},{s:'me',t:'나중에'},{s:'J',t:'ㅋㅋ알겠어'},{s:'J',t:'오늘 저녁 같이 먹을 수 있어?'},{s:'me',t:'오늘 좀 바쁠 것 같아'},{s:'J',t:'그래 다음에'}];
+{s:'J',t:'오빠 오늘 진짜 고마웠어 🥺'},{s:'me',t:'뭐가~'},{s:'J',t:'그냥 다,, 곁에 있어줘서'},{s:'me',t:'ㅋㅋ뭐야 갑자기'},{s:'J',t:'아 됐다 몰라 잘게'},{s:'me',t:'잘자 내꺼ㅋㅋ 꿈에서 봐'},
+{s:'me',t:'어제 내가 뭔가 이상한 말 한 것 같아서.. 미안'},{s:'J',t:'아냐~ 오빠 잘못 아니야'},{s:'J',t:'사실 나도 그날 좀 예민했어'},{s:'me',t:'왜? 무슨 일 있었어?'},{s:'J',t:'ㅎㅎ 그냥'},{s:'me',t:'말해봐 듣고있어'},
+{s:'J',t:'오빠 사랑해 💛',lock:'last'},
+{s:'J',t:'오빠.. 나 요즘 좀 힘든 것 같아'},{s:'me',t:'왜 왜 무슨 일이야??'},{s:'J',t:'모르겠어 그냥 다 이상해'},{s:'me',t:'나 지금 바로 나갈게'},{s:'me',t:'어디야? 데리러 갈게'},{s:'J',t:'아니야 진짜 괜찮아'},{s:'me',t:'괜찮은 사람이 이런 말 해?'},{s:'J',t:'..응 미안'},{s:'me',t:'미안할 거 없어 그냥 나가자'},{s:'me',t:'너랑 같이 있고싶어'},
+{s:'J',t:'오빠 오늘 연락이 좀 뜸하네'},{s:'me',t:'ㅇㅇ 바빴어 미안'},{s:'J',t:'진짜 바쁜거 맞지..?'},{s:'me',t:'응 진짜 그냥 정신없었어'},{s:'J',t:'알겠어..'},{s:'J',t:'나 여기 있어 언제든 와도 돼',lock:'r1lock2'},
+{s:'J',t:'오빠ㅠㅠ 나 시험 완전 망한 것 같아'},{s:'me',t:'얼마나 망했는데?'},{s:'J',t:'그냥 다 틀린 느낌 ㅠㅠ'},{s:'me',t:'야 괜찮아 나도 망했어 ㅋㅋㅋ'},{s:'J',t:'ㅋㅋㅋㅋ 같이 망해서 좋아'},{s:'me',t:'망친 기념으로 맛있는 거 먹으러 가자'},
+{s:'J',t:'오빠 하늘 좀 봐봐 진짜 예뻐',lock:'r2chestA'},{s:'me',t:'어디서?'},{s:'J',t:'공대 앞 벤치 ㅎㅎ'},{s:'J',t:'[사진]',lock:'r2chestA'},{s:'me',t:'와 진짜네 너도 같이 찍어줘'},
+{s:'J',t:'오빠 요즘 Recall이라는 앱 들어봤어?'},{s:'me',t:'몰라 뭔데'},{s:'J',t:'엄청 유행인데 기억으로 카드 게임 같은 거 하는 거야'},{s:'J',t:'나 어제 밤새 했잖아 ㅋㅋ 못 멈춰'},{s:'me',t:'그래? 나중에 해볼게'},{s:'J',t:'ㅋㅋ 약속 꼭 지켜'},{s:'J',t:'근데 오빠 오늘 저녁 같이 먹을 수 있어?'},{s:'me',t:'아 오늘은 좀 바쁠 것 같은데..'},{s:'J',t:'흐음.. 그래 다음에 😔'}];
 
 const G={runCount:0,screen:'title',solvedLocks:[false,false,false,false,false,false,false],rememberedCards:[],
 diedThisRun:[],playerDeck:[],deletedMsgs:[],sacrificeCounter:0,deathCards:[],items:[],runStats:{cardUsageCount:{},lastDeadCard:null,cardFieldSurvival:{}},currentRoom:1,currentNodeId:'start',completedNodes:[],collectedHints:[],visitedNodes:['start'],
@@ -286,10 +329,10 @@ function fragsHtml(c,side){c=Math.max(0,Math.min(5,c));return `<div class="fragm
 // PHONE
 function isMsgLocked(m){if(!m.lock)return false;if(m.lock==='last')return true;if(m.lock==='r1lock2')return !G.solvedLocks[1];if(m.lock==='r2chestA')return !G.completedNodes.includes('r2_chestA');return true;}
 function visMsgs(){return J_MSGS.map((m,i)=>({...m,idx:i})).filter(m=>!G.deletedMsgs.includes(m.idx));}
-function renderPhoneMini(){const b=document.querySelector('.phone-btn');if(!b)return;const vis=visMsgs();const allDel=vis.length===0;const name=allDel?(LANG==='ko'?'알 수 없는 번호':'Unknown'):'J';const sc=G.sacrificeCounter||0;const pips='●'.repeat(sc)+'○'.repeat(10-sc);const last2=vis.slice(-2);const msgsHtml=last2.map(m=>{const s=m.s||m.sender;const t=m.t||m.text||'';return `<div class="pm-msg ${s==='me'?'me':''}">${s==='me'?'':'J: '}${t.length>14?t.slice(0,14)+'…':t}</div>`;}).join('')||`<div class="pm-msg" style="text-align:center;opacity:0.4">— — —</div>`;b.innerHTML=`<div class="pm-head"><span>🔋${G.battery}%</span><span>📱</span></div><div class="pm-pips">${pips}</div><div class="pm-name">${name}</div>${msgsHtml}`;b.classList.toggle('pulse',G.sacrificeMode||sc>=9);}
-function addPhone(){removePhone();const b=document.createElement('button');b.className='phone-btn';b.addEventListener('click',togglePhone);document.body.appendChild(b);const bd=document.createElement('div');bd.className='phone-backdrop';bd.id='phoneBackdrop';bd.addEventListener('click',()=>{if(G.phoneOpen&&!G.sacrificeMode)togglePhone();});document.body.appendChild(bd);const o=document.createElement('div');o.className='phone-overlay';o.id='phoneOverlay';o.addEventListener('click',e=>e.stopPropagation());document.body.appendChild(o);renderPhone();renderPhoneMini();}
+function renderPhoneMini(){const b=document.querySelector('.phone-btn');if(!b)return;const vis=visMsgs();const allDel=vis.length===0;const name=allDel?(LANG==='ko'?'알 수 없는 번호':'Unknown'):'J';const sc=G.sacrificeCounter||0;const pips='●'.repeat(sc)+'○'.repeat(10-sc);const last2=vis.slice(-2);const msgsHtml=last2.map(m=>{const s=m.s||m.sender;const t=m.t||m.text||'';return `<div class="pm-msg ${s==='me'?'me':''}">${s==='me'?'':'J: '}${t.length>14?t.slice(0,14)+'…':t}</div>`;}).join('')||`<div class="pm-msg" style="text-align:center;opacity:0.4">— — —</div>`;const unreadKeys=(G.unreadMsgs||[]).length;const hasUnread=unreadKeys>0||G.sacrificeMode||sc>=9;b.innerHTML=`<span class="mobile-icon">📱</span><span class="phone-unread-dot"></span><div class="pm-head"><span>🔋${G.battery}%</span><span>📱</span></div><div class="pm-pips">${pips}</div><div class="pm-name">${name}</div>${msgsHtml}`;b.classList.toggle('pulse',G.sacrificeMode||sc>=9);b.classList.toggle('has-unread',hasUnread);}
+function addPhone(){removePhone();const b=document.createElement('button');b.className='phone-btn';b.addEventListener('click',togglePhone);document.body.appendChild(b);const bd=document.createElement('div');bd.className='phone-backdrop';bd.id='phoneBackdrop';bd.addEventListener('click',()=>{if(G.phoneOpen&&!G.sacrificeMode)togglePhone();});document.body.appendChild(bd);const o=document.createElement('div');o.className='phone-overlay';o.id='phoneOverlay';o.addEventListener('click',e=>e.stopPropagation());let touchStartY=null;o.addEventListener('touchstart',e=>{touchStartY=e.touches[0].clientY;},{passive:true});o.addEventListener('touchmove',e=>{if(touchStartY==null)return;const dy=e.touches[0].clientY-touchStartY;if(dy>60&&window.innerWidth<=520&&!G.sacrificeMode){touchStartY=null;togglePhone();}},{passive:true});o.addEventListener('touchend',()=>{touchStartY=null;},{passive:true});document.body.appendChild(o);renderPhone();renderPhoneMini();}
 function togglePhone(){const o=document.getElementById('phoneOverlay');if(!o)return;if(G.sacrificeMode){msg(LANG==='ko'?'기억을 선택하세요':'Choose a memory');return;}G.phoneOpen=!G.phoneOpen;o.classList.toggle('open',G.phoneOpen);document.getElementById('phoneBackdrop')?.classList.toggle('open',G.phoneOpen);renderPhone();}
-function renderPhone(){renderPhoneMini();const o=document.getElementById('phoneOverlay');if(!o)return;const vis=visMsgs();const allGone=vis.length===0;const name=allGone?T('unknown'):'J';o.innerHTML=`<div class="phone-header"><div class="phone-avatar${allGone?' empty':''}"></div><div class="phone-name">${name}</div><button class="phone-close">×</button></div><div class="phone-body" id="pb"></div>`;o.querySelector('.phone-close').addEventListener('click',togglePhone);const body=o.querySelector('#pb');if(allGone){body.innerHTML=`<div class="dim center" style="margin-top:40px">${T('empty_chat')}</div>`;return;}const isLastLove=vis.length===1&&vis[0].lock==='last';vis.forEach(m=>{const bub=document.createElement('div');bub.className='chat-bubble '+m.s;const locked=isMsgLocked(m)&&m.lock!=='last';const isLove=m.lock==='last';const showLock=locked||(isLove&&!isLastLove);bub.textContent=(showLock?'🔒 ':'')+m.t;if(locked)bub.classList.add('locked');if(isLove&&!isLastLove)bub.classList.add('locked');if(isLove&&isLastLove)bub.classList.add('love');if(G.sacrificeMode&&!locked&&(!isLove||isLastLove)){bub.classList.add('selectable');bub.addEventListener('click',()=>onDeleteMsg(m.idx,isLove&&isLastLove));}body.appendChild(bub);});body.scrollTop=body.scrollHeight;}
+function renderPhone(){renderPhoneMini();const o=document.getElementById('phoneOverlay');if(!o)return;const vis=visMsgs();const allGone=vis.length===0;const name=allGone?T('unknown'):'J';o.innerHTML=`<div class="phone-drag-handle"></div><div class="phone-header"><div class="phone-avatar${allGone?' empty':''}"></div><div class="phone-name">${name}</div><button class="phone-close">×</button></div><div class="phone-body" id="pb"></div>`;o.querySelector('.phone-close').addEventListener('click',togglePhone);const body=o.querySelector('#pb');if(allGone){body.innerHTML=`<div class="dim center" style="margin-top:40px">${T('empty_chat')}</div>`;return;}const isLastLove=vis.length===1&&vis[0].lock==='last';vis.forEach(m=>{const bub=document.createElement('div');bub.className='chat-bubble '+m.s;const locked=isMsgLocked(m)&&m.lock!=='last';const isLove=m.lock==='last';const showLock=locked||(isLove&&!isLastLove);bub.textContent=(showLock?'🔒 ':'')+m.t;if(locked)bub.classList.add('locked');if(isLove&&!isLastLove)bub.classList.add('locked');if(isLove&&isLastLove)bub.classList.add('love');if(G.sacrificeMode&&!locked&&(!isLove||isLastLove)){bub.classList.add('selectable');bub.addEventListener('click',()=>onDeleteMsg(m.idx,isLove&&isLastLove));}body.appendChild(bub);});body.scrollTop=body.scrollHeight;}
 function onDeleteMsg(idx,isLove){if(isLove){const w=document.createElement('div');w.className='modal';const mc=document.createElement('div');mc.className='modal-content';mc.innerHTML=`<div class="dialogue">${T('love_warning')}</div>`;const d=document.createElement('button');d.className='primary';d.textContent=T('delete');d.style.marginRight='8px';const bk=document.createElement('button');bk.textContent=T('back_btn');d.addEventListener('click',()=>{w.remove();doDelMsg(idx);});bk.addEventListener('click',()=>w.remove());mc.appendChild(d);mc.appendChild(bk);w.appendChild(mc);document.body.appendChild(w);return;}doDelMsg(idx);}
 function doDelMsg(idx){G.deletedMsgs.push(idx);saveGame();G.sacrificeMode=false;G.phoneOpen=false;document.getElementById('phoneOverlay')?.classList.remove('open');renderPhone();if(G.screen==='battle')showScreen('battle',{_started:true,_greeted:true});}
 
@@ -315,14 +358,14 @@ function runTutorialSequence(stage){
       textEn:'Welcome. You and your opponent deplete each other\'s <b>fragments (✦)</b>. Reduce theirs to zero to win.',
       onDone:()=>runTutorialSequence('ink')
     },
-    ink:{target:'.battle-ink',textKo:'<b>💧 잉크</b>입니다. 이번 턴에 카드를 놓을 때 쓰는 자원이에요. 턴마다 다시 차오릅니다.',textEn:'This is <b>💧 Ink</b>. Spent to place cards this turn. Refills each turn.',onDone:()=>runTutorialSequence('hand')},
+    ink:{target:'.battle-ink',textKo:'<b>💧 잉크</b>입니다. 카드를 놓을 때 쓰는 자원. <b>시작 잉크는 0</b>이에요 — 기억을 <b>희생</b>해야 잉크가 생겨요. 기억을 잃는 대가로 움직일 수 있다는 뜻이죠.',textEn:'This is <b>💧 Ink</b>. Starts at 0 — you must <b>sacrifice</b> memories to get it. You move by losing memories.',onDone:()=>runTutorialSequence('hand')},
     hand:{target:'#hand',textKo:'<b>손패</b>입니다. 각 카드의 파란 숫자(좌상단)는 배치 비용, ⚔는 공격력, ❤는 체력이에요.',textEn:'Your <b>hand</b>. Blue number = cost, ⚔ = attack, ❤ = HP.',onDone:()=>runTutorialSequence('field')},
     field:{target:'.battle-field',textKo:'<b>배틀 필드</b> — 위는 상대(엘리제), 아래는 당신. 같은 레인 카드끼리 싸우고, 빈 레인 공격은 상대 조각을 직접 깎아요.',textEn:'<b>Battle field</b> — top is the warden, bottom is you. Same-lane cards fight; empty-lane hits go directly to fragments.',onDone:()=>runTutorialSequence('frags')},
-    frags:{target:'.fragments.warden',textKo:'<b>상대의 조각</b>입니다. 이걸 0으로 만들면 승리해요. 당신의 조각은 아래에 있어요.',textEn:'<b>Warden\'s fragments</b>. Reduce to zero to win. Yours are below.',onDone:()=>runTutorialSequence('placeAction')},
-    placeAction:{target:null,textKo:'이제 <b>잔상</b> 카드를 눌러서 빈 슬롯에 놓아보세요. (잔상은 ⚔1의 공격 카드예요)',textEn:'Now click the <b>Afterimage</b> card and place it in an empty slot. (Afterimage has ⚔1)',waitForAction:true,highlightCard:'afterimage'},
-    inkSpent:{target:'.battle-ink',textKo:'잉크 1이 소모됐죠? 카드의 배치 비용만큼 차감돼요.',textEn:'Ink dropped by 1 — equal to the card\'s cost.',onDone:()=>runTutorialSequence('fadedIntro')},
-    fadedIntro:{target:null,textKo:'이번엔 <b>흐릿한 기억</b>을 놓아보세요. 공격력은 0이지만, 놓은 뒤 <b>다시 누르면 희생</b>되어 잉크 +1과 기억 카운터 +1을 줍니다.',textEn:'Now place a <b>Faded Memory</b> (⚔0). After placing, <b>click it again to sacrifice</b> for +1 ink and +1 memory counter.',waitForAction:true,highlightCard:'faded_memory'},
-    sacFeedback:{target:'.battle-ink',textKo:'잉크가 회복됐고, 기억 카운터가 1 올라갔어요. 10개 모으면 기억 삭제 모드가 열려요.',textEn:'Ink restored, memory counter +1. Reach 10 to unlock delete mode.',onDone:()=>runTutorialSequence('endTurn')},
+    frags:{target:'.fragments.warden',textKo:'<b>상대의 조각</b>입니다. 이걸 0으로 만들면 승리해요. 당신의 조각은 아래에 있어요.',textEn:'<b>Warden\'s fragments</b>. Reduce to zero to win. Yours are below.',onDone:()=>runTutorialSequence('fadedIntro')},
+    fadedIntro:{target:null,textKo:'먼저 <b>흐릿한 기억</b>(⚔0)을 놓고, <b>다시 눌러서 희생</b>하세요. 잉크 +1과 기억 카운터 +1이 생겨요.',textEn:'First place a <b>Faded Memory</b> (⚔0), then <b>click it again to sacrifice</b>. Gain +1 ink and +1 memory counter.',waitForAction:true,highlightCard:'faded_memory'},
+    sacFeedback:{target:'.battle-ink',textKo:'잉크가 생겼어요! 기억 카운터도 1 올라갔고. 10개 모으면 기억 삭제 모드가 열려요.',textEn:'Ink appeared! Memory counter +1. Reach 10 to unlock delete mode.',onDone:()=>runTutorialSequence('placeAction')},
+    placeAction:{target:null,textKo:'이제 잉크 1로 <b>잔상</b> 카드를 놓을 수 있어요. 눌러서 빈 슬롯에 배치해보세요.',textEn:'Now with 1 ink you can place the <b>Afterimage</b> card. Tap it into an empty slot.',waitForAction:true,highlightCard:'afterimage'},
+    inkSpent:{target:'.battle-ink',textKo:'잉크 1이 소모됐죠? 카드의 배치 비용만큼 차감돼요.',textEn:'Ink dropped by 1 — equal to the card\'s cost.',onDone:()=>runTutorialSequence('endTurn')},
     endTurn:{target:'#bell',textKo:'이제 <b>턴 종료</b>를 눌러 전투를 시작해요. 당신의 카드가 먼저 공격하고, 그 다음 상대가 공격해요. <b>경계(vigilance)</b> sigil이 붙은 카드는 받는 피해를 1 줄여서, 공격력 1 카드로는 상처를 못 내요. 이때 "🛡 차단" 표시가 떠요.',textEn:'Press <b>End Turn</b>. Your cards attack first, then the warden. Cards with <b>vigilance</b> reduce incoming damage by 1 — a 1-atk card won\'t hurt them, shown as "🛡 BLOCK".',waitForAction:true},
     attackResult:{target:'.fragments.warden',textKo:'빈 레인을 공격했기 때문에 상대 조각이 깎였어요. ✦ 하나가 줄었죠?',textEn:'Since you hit an empty lane, a warden fragment dropped. ✦ is down by one.',onDone:()=>{tutorialClose();G.tutorialStage='done';}}
   };
@@ -360,9 +403,16 @@ function tutorialStep(opts){
   let dx,dy;
   if (hlRect){
     const spaceBelow=vh-hlRect.bottom,spaceAbove=hlRect.top;
-    if (spaceBelow>=dr.height+20) dy=hlRect.bottom+12;
-    else if (spaceAbove>=dr.height+20) dy=hlRect.top-dr.height-12;
-    else dy=Math.max(12,vh-dr.height-12);
+    // Prefer ABOVE the target for waitForAction so user sees card clearly below dialog
+    if (waitForAction){
+      if (spaceAbove>=dr.height+20) dy=hlRect.top-dr.height-12;
+      else if (spaceBelow>=dr.height+20) dy=hlRect.bottom+12;
+      else dy=Math.max(12,Math.min(vh-dr.height-12, hlRect.top<vh/2?hlRect.bottom+12:hlRect.top-dr.height-12));
+    } else {
+      if (spaceBelow>=dr.height+20) dy=hlRect.bottom+12;
+      else if (spaceAbove>=dr.height+20) dy=hlRect.top-dr.height-12;
+      else dy=Math.max(12,vh-dr.height-12);
+    }
     dx=Math.max(12,Math.min(vw-dr.width-12,hlRect.left+hlRect.width/2-dr.width/2));
   } else {
     dx=(vw-dr.width)/2; dy=(vh-dr.height)/2;
@@ -378,7 +428,7 @@ function tutorialStep(opts){
 
 // BATTLE
 function enterBattle(opts){
-  G.isBossBattle=!!opts.isBoss;G.playerFragments=5;G.wardenFragments=5;G.currentInk=1;G.oblivionGauge=0;G.turnCount=0;G.battleDiscard=[];G.resonanceActive=false;G.lowFragWarned=false;if(G.battery==null)G.battery=100;
+  G.isBossBattle=!!opts.isBoss;G.playerFragments=5;G.wardenFragments=5;G.currentInk=0;G.oblivionGauge=0;G.turnCount=0;G.battleDiscard=[];G.resonanceActive=false;G.lowFragWarned=false;if(G.battery==null)G.battery=100;
   G.playerSlots=[null,null,null,null];G.wardenSlots=[null,null,null,null];G.playerHand=[];G.selectedHandIdx=null;G.battlePhase='play';
   G.playerDeck=shuffle(G.playerDeck);
   for(let i=0;i<3;i++){if(G.playerDeck.length)G.playerHand.push(G.playerDeck.pop());}
@@ -401,7 +451,7 @@ function renderBattle(root,opts){
   root.innerHTML=`
     <div class="panel battle-field" style="border-color:#3a1e24">
       <div class="center cinzel" style="font-size:11px;color:#b88080">${wardenName}${G.isBossBattle?' · '+T('boss'):''}</div>
-      <div class="center" style="margin-top:4px;display:flex;justify-content:center;gap:4px" title="다음 턴 배치 예고">${(G.wardenNextPlan||[]).map(c=>`<div style="width:34px;height:48px;border:1px dashed #5a3848;border-radius:4px;background:linear-gradient(135deg,#1a0e14,#0a0608);opacity:0.7;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:9px;color:#7a5858"><span style="opacity:0.6">▨</span><span style="color:#a88080">${c.attack}/${c.currentHp}</span></div>`).join('')||'<span style="font-size:10px;color:#6a4a4a">—</span>'}</div>
+      <div class="center warden-plan-preview" title="다음 턴 배치 예고">${(G.wardenNextPlan||[]).map(c=>`<div class="plan-silhouette"><svg class="plan-art" viewBox="0 0 60 60"><use href="#${ART[c.id]||'art-faded_memory'}"/></svg><div class="plan-stats">⚔${c.attack} ❤${c.currentHp}</div></div>`).join('')||`<span class="plan-empty">${LANG==='ko'?'다음 턴 예정 없음':'No plan'}</span>`}</div>
       ${fragsHtml(G.wardenFragments,'warden')}
       <div class="row" id="ws"></div>
     </div>
@@ -414,7 +464,8 @@ function renderBattle(root,opts){
         <span style="color:#a88cd8;font-size:11px">망각 ${G.oblivionGauge}/8</span>
         <span style="color:#6ab0e0;font-size:10px">🔋${G.battery}%</span>
         <span style="color:#c8a84b;font-size:10px">${'●'.repeat(G.sacrificeCounter)}${'○'.repeat(10-G.sacrificeCounter)}</span>
-        <span class="dim" style="font-size:11px">${T('turn')} ${G.turnCount+1} · ${T('deck')} ${G.playerDeck.length}</span>
+        <span style="font-size:12px;color:var(--text-bright)">📖 <b>${G.playerDeck.length}</b></span>
+        <span class="dim" style="font-size:11px">${T('turn')} ${G.turnCount+1}</span>
         <span style="font-size:12px">${G.items.map((id,i)=>`<button class="item-btn" data-i="${i}" title="${ITEMS[id].name[LANG]}">${ITEMS[id].icon}</button>`).join('')}</span>
         <button id="cncd" title="${LANG==='ko'?'항복':'Concede'}" style="font-size:12px;padding:4px 8px;border-color:#5a3848;color:#a88080">🏳️</button>
         <button class="primary" id="bell" ${drawPhase?'disabled':''}>${T('ring_bell')}</button>
@@ -449,7 +500,7 @@ function renderBattle(root,opts){
 function requestSacrifice(slotIdx){if(G.battlePhase!=='play')return;G.currentInk+=1;G.playerSlots[slotIdx]=null;G.sacrificeCounter+=1;saveGame();if(G.sacrificeCounter>=10){G.sacrificeCounter=0;saveGame();G.sacrificeMode=true;G.phoneOpen=true;document.getElementById('phoneOverlay')?.classList.add('open');renderPhone();msg(T('sacrifice_select'));}else{msg(`💧+1 · ${G.sacrificeCounter}/10`);}if(G.screen==='battle')showScreen('battle',{_started:true,_greeted:true});if(G.runCount===0&&G.tutorialStage==='fadedIntro'){setTimeout(()=>runTutorialSequence('sacFeedback'),400);}}
 
 function playCard(handIdx,slotIdx){const c=G.playerHand[handIdx];if(!c)return;if(G.playerSlots[slotIdx]){msg(LANG==='ko'?'슬롯 사용 중':'Slot occupied');return;}if(c.inkCost>G.currentInk+G.oblivionGauge){msg(LANG==='ko'?'자원 부족':'Not enough resources');return;}let cost=c.inkCost;const inkUsed=Math.min(G.currentInk,cost);G.currentInk-=inkUsed;cost-=inkUsed;if(cost>0){G.oblivionGauge-=cost;msg(LANG==='ko'?`망각 ${cost} 소모`:`Oblivion -${cost}`);}if(c.id!=='faded_memory')G.runStats.cardUsageCount[c.id]=(G.runStats.cardUsageCount[c.id]||0)+1;G.playerSlots[slotIdx]=c;G.playerHand.splice(handIdx,1);G.selectedHandIdx=null;
-if(G.runCount===0){if(G.tutorialStage==='placeAction'&&c.id==='afterimage'){setTimeout(()=>runTutorialSequence('inkSpent'),500);}else if(G.tutorialStage==='fadedIntro'&&c.id==='faded_memory'){/* wait for sacrifice click */}}if(c.sigil==='talking'){const ko=['...어디지? 나 어디 있는 거야?','또 여기야. 몇 번째인지 알고 있어?','저 사서 있잖아. 처음엔 달랐어.','자물쇠 말이야. 날짜를 봐.'];const en=['...where am I? Where is this?','Again here. Do you know how many times?','That receptionist... she was different at first.','The locks. Look at the dates.'];const idx=Math.min(G.runCount,3);setTimeout(()=>modal(LANG==='ko'?'길 잃은 기억':'Lost Memory',LANG==='ko'?ko[idx]:en[idx]),150);}showScreen('battle',{_started:true,_greeted:true});}
+if(G.runCount===0){if(G.tutorialStage==='placeAction'&&c.id==='afterimage'){setTimeout(()=>runTutorialSequence('inkSpent'),500);}}if(c.sigil==='talking'){const ko=['...어디지? 나 어디 있는 거야?','또 여기야. 몇 번째인지 알고 있어?','저 사서 있잖아. 처음엔 달랐어.','자물쇠 말이야. 날짜를 봐.'];const en=['...where am I? Where is this?','Again here. Do you know how many times?','That receptionist... she was different at first.','The locks. Look at the dates.'];const idx=Math.min(G.runCount,3);setTimeout(()=>modal(LANG==='ko'?'길 잃은 기억':'Lost Memory',LANG==='ko'?ko[idx]:en[idx]),150);}showScreen('battle',{_started:true,_greeted:true});}
 
 function flashHit(side,idx){const sel=`.${side}-slot[data-slot="${idx}"]`;const el=document.querySelector(sel);if(el)el.classList.add('hit');setTimeout(()=>el&&el.classList.remove('hit'),250);}
 function showBlocked(side,idx){const sel=`.${side}-slot[data-slot="${idx}"]`;const el=document.querySelector(sel);if(!el)return;const r=el.getBoundingClientRect();const tag=document.createElement('div');tag.innerHTML=`🛡 ${LANG==='ko'?'차단':'BLOCK'}`;tag.className='block-tag';tag.style.cssText=`position:fixed;left:${r.left+r.width/2-58}px;top:${r.top+r.height/2-22}px;background:linear-gradient(135deg,rgba(110,70,88,0.98),rgba(70,42,56,0.98));color:#ffd778;padding:8px 18px;border-radius:8px;font-family:'Cinzel',serif;font-weight:700;font-size:17px;letter-spacing:0.18em;z-index:600;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,0.85),0 0 24px rgba(255,215,120,0.45);border:2px solid #c8a84b;text-shadow:0 0 10px rgba(255,215,120,0.6);animation:block-pop 1.4s ease-out forwards;white-space:nowrap`;document.body.appendChild(tag);setTimeout(()=>tag.remove(),1400);}
