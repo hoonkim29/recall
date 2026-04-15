@@ -153,8 +153,8 @@ input[type=text]:focus{outline:none;border-color:var(--border-gold)}
 .tut-dialog button{margin-top:10px;width:100%;font-size:13px;padding:8px}
 .tut-outline{position:fixed;border:2px solid var(--border-gold);border-radius:8px;z-index:502;pointer-events:none;background:transparent;animation:tut-outline-pulse 1.6s ease-in-out infinite}
 @keyframes tut-outline-pulse{0%,100%{box-shadow:0 0 14px rgba(200,168,75,0.7),inset 0 0 12px rgba(200,168,75,0.15)}50%{box-shadow:0 0 28px rgba(200,168,75,1),inset 0 0 20px rgba(200,168,75,0.3)}}
-.tut-lit{border-color:var(--border-gold)!important;animation:tut-lit-pulse 1.6s ease-in-out infinite;position:relative;z-index:60}
-.slot.tut-lit{background:linear-gradient(135deg,#3a2a14,#1e1408)!important;color:var(--text-gold)!important}
+.tut-lit{outline:2px solid var(--border-gold)!important;outline-offset:2px;animation:tut-lit-pulse 1.6s ease-in-out infinite;position:relative;z-index:60}
+.slot.tut-lit{background:linear-gradient(135deg,#5a4220,#2e1f0c)!important;color:var(--text-gold)!important;border-color:var(--border-gold)!important}
 .panel.tut-lit-panel{background:linear-gradient(to bottom,rgba(50,38,22,0.95),rgba(34,24,12,0.95))!important;border-color:var(--border-gold)!important;box-shadow:inset 0 0 24px rgba(200,168,75,0.18),0 0 18px rgba(200,168,75,0.35)!important}
 .card.tut-lit{box-shadow:0 0 18px rgba(200,168,75,0.95),inset 0 0 14px rgba(200,168,75,0.3)!important}
 @keyframes tut-lit-pulse{0%,100%{box-shadow:0 0 14px rgba(200,168,75,0.75),inset 0 0 18px rgba(200,168,75,0.35)}50%{box-shadow:0 0 30px rgba(200,168,75,1),inset 0 0 28px rgba(200,168,75,0.6)}}
@@ -412,7 +412,7 @@ function showSigilTutorial(sigil,onDone){tutorialClose();const emoji=SIGIL_EMOJI
 function visibleSigils(){const cards=[...G.playerSlots,...G.wardenSlots.filter(c=>c&&!c._facedown),...(G.playerHand||[])];const seen=new Set();cards.forEach(c=>{if(!c)return;const sigs=c.sigils&&c.sigils.length?c.sigils:(c.sigil?[c.sigil]:[]);sigs.forEach(s=>seen.add(s));});return [...seen];}
 function maybeShowNewSigil(onDone){G.seenSigils=G.seenSigils||[];const vis=visibleSigils();for(const s of vis){if(!G.seenSigils.includes(s)){G.seenSigils.push(s);saveGame();showSigilTutorial(s,onDone);return true;}}return false;}
 window.addEventListener('resize',()=>{if(_lastTutOpts&&G.screen==='battle'){const o=_lastTutOpts;setTimeout(()=>tutorialStep(o),50);}});
-function tutorialActive(){return !!document.querySelector('.tut-mask');}
+function tutorialActive(){return !!document.querySelector('.tut-dialog');}
 function runTutorialSequence(stage){
   if(G.runCount!==0)return;
   if(G.screen!=='battle'){tutorialClose();return;}
@@ -430,7 +430,7 @@ function runTutorialSequence(stage){
     fadedIntro:{target:null,outlineTargets:['hand:faded_memory','emptyPlayerSlots'],dialogAnchor:'#ps',textKo:'<b>흐릿한 기억</b>(⚔0)을 손패에서 골라 <b>빈 슬롯</b>에 배치하세요.',textEn:'Pick the <b>Faded Memory</b> (⚔0) from your hand and place it on an <b>empty slot</b>.',waitForAction:true},
     fadedSacrifice:{target:null,textKo:'이제 놓은 카드를 <b>다시 눌러 희생</b>하세요. 💧+1과 기억 카운터 +1이 생겨요.',textEn:'Now <b>tap the placed card again to sacrifice</b> it. Gain 💧+1 and +1 memory counter.',waitForAction:true,highlightPlayerSlotWith:'faded_memory'},
     sacFeedback:{target:'.battle-ink',textKo:'잉크가 생겼어요! 기억 카운터도 1 올라갔고. 10개 모으면 기억 삭제 모드가 열려요.',textEn:'Ink appeared! Memory counter +1. Reach 10 to unlock delete mode.',onDone:()=>runTutorialSequence('placeAction')},
-    placeAction:{target:null,textKo:'이제 잉크 1로 <b>잔상</b> 카드를 놓을 수 있어요. 눌러서 빈 슬롯에 배치해보세요.',textEn:'Now with 1 ink you can place the <b>Afterimage</b> card. Tap it into an empty slot.',waitForAction:true,highlightCard:'afterimage'},
+    placeAction:{target:null,outlineTargets:['hand:afterimage','emptyPlayerSlots'],dialogAnchor:'#ps',textKo:'이제 잉크 1로 <b>잔상</b> 카드를 놓을 수 있어요. 눌러서 빈 슬롯에 배치해보세요.',textEn:'Now with 1 ink you can place the <b>Afterimage</b> card. Tap it into an empty slot.',waitForAction:true},
     inkSpent:{target:'.battle-ink',textKo:'잉크 1이 소모됐죠? 카드의 배치 비용만큼 차감돼요.',textEn:'Ink dropped by 1 — equal to the card\'s cost.',onDone:()=>runTutorialSequence('endTurn')},
     endTurn:{target:'#bell',textKo:'이제 <b>턴 종료</b>를 눌러 전투를 시작해요. 당신의 카드가 먼저 공격하고, 그 다음 상대가 공격해요. <b>경계(vigilance)</b> sigil이 붙은 카드는 받는 피해를 1 줄여서, 공격력 1 카드로는 상처를 못 내요. 이때 "🛡 차단" 표시가 떠요.',textEn:'Press <b>End Turn</b>. Your cards attack first, then the warden. Cards with <b>vigilance</b> reduce incoming damage by 1 — a 1-atk card won\'t hurt them, shown as "🛡 BLOCK".',waitForAction:true},
     attackResult:{target:'.fragments.warden',textKo:'빈 레인을 공격했기 때문에 상대 조각이 깎였어요. ✦ 하나가 줄었죠?',textEn:'Since you hit an empty lane, a warden fragment dropped. ✦ is down by one.',onDone:()=>{tutorialClose();G.tutorialStage='done';}}
@@ -444,48 +444,21 @@ function tutorialStep(opts){
   if(G.screen!=='battle')return;
   _lastTutOpts=opts;
   const {target,textKo,textEn,buttonKo='계속',buttonEn='Continue',waitForAction,onDone,highlightCard,highlightPlayerSlotWith,outlineTargets,dialogAnchor}=opts;
-  let highlight=null,hlRect=null,mask=null;
-  let resolvedTarget=target;
-  if (highlightCard && !target){
-    const idx=G.playerHand.findIndex(c=>c.id===highlightCard);
-    if (idx>=0) resolvedTarget=document.querySelectorAll('#hand .card')[idx];
-  }
-  if (highlightPlayerSlotWith && !resolvedTarget){
-    const idx=G.playerSlots.findIndex(c=>c&&c.id===highlightPlayerSlotWith);
-    if (idx>=0) resolvedTarget=document.querySelector(`.player-slot[data-slot="${idx}"]`);
-  }
-  if (outlineTargets && !resolvedTarget){
-    const litEls=[];
-    outlineTargets.forEach(sel=>{
-      if (typeof sel==='string' && sel.startsWith('hand:')){
-        const cid=sel.slice(5);
-        const idx=G.playerHand.findIndex(c=>c.id===cid);
-        if (idx>=0){const el=document.querySelectorAll('#hand .card')[idx];if(el)litEls.push(el);}
-      } else if (sel==='emptyPlayerSlots'){
-        document.querySelectorAll('.player-slot').forEach((el,i)=>{if(!G.playerSlots[i])litEls.push(el);});
-        const panel=document.querySelector('#ps')?.closest('.panel.battle-field');if(panel)panel.classList.add('tut-lit-panel');
-      } else {
-        const el=document.querySelector(sel);if(el)litEls.push(el);
-      }
-    });
-    litEls.forEach(el=>el.classList.add('tut-lit'));
-    if (dialogAnchor){
-      const el=document.querySelector(dialogAnchor);
-      if (el) hlRect=el.getBoundingClientRect();
-    }
-  }
-  if (resolvedTarget){
-    const el=typeof resolvedTarget==='string'?document.querySelector(resolvedTarget):resolvedTarget;
-    if (el){
-      const r=el.getBoundingClientRect();hlRect=r;
-      highlight=document.createElement('div');highlight.className='tut-highlight';
-      highlight.style.left=(r.left-4)+'px';highlight.style.top=(r.top-4)+'px';
-      highlight.style.width=(r.width+8)+'px';highlight.style.height=(r.height+8)+'px';
-      document.body.appendChild(highlight);
-    }
-  } else {
-    mask=document.createElement('div');mask.className='tut-mask';document.body.appendChild(mask);
-  }
+  let hlRect=null;
+  // Unified: collect DOM elements to light up via .tut-lit (no dark overlay)
+  const litEls=[];
+  if (target){const el=typeof target==='string'?document.querySelector(target):target;if(el)litEls.push(el);}
+  if (highlightCard){const idx=G.playerHand.findIndex(c=>c.id===highlightCard);if(idx>=0){const el=document.querySelectorAll('#hand .card')[idx];if(el)litEls.push(el);}}
+  if (highlightPlayerSlotWith){const idx=G.playerSlots.findIndex(c=>c&&c.id===highlightPlayerSlotWith);if(idx>=0){const el=document.querySelector(`.player-slot[data-slot="${idx}"]`);if(el)litEls.push(el);}}
+  if (outlineTargets){outlineTargets.forEach(sel=>{
+    if (typeof sel==='string' && sel.startsWith('hand:')){const cid=sel.slice(5);const idx=G.playerHand.findIndex(c=>c.id===cid);if(idx>=0){const el=document.querySelectorAll('#hand .card')[idx];if(el)litEls.push(el);}}
+    else if (sel==='emptyPlayerSlots'){document.querySelectorAll('.player-slot').forEach((el,i)=>{if(!G.playerSlots[i])litEls.push(el);});const panel=document.querySelector('#ps')?.closest('.panel.battle-field');if(panel)panel.classList.add('tut-lit-panel');}
+    else {const el=document.querySelector(sel);if(el)litEls.push(el);}
+  });}
+  litEls.forEach(el=>el.classList.add('tut-lit'));
+  // Anchor for dialog positioning
+  if (dialogAnchor){const el=document.querySelector(dialogAnchor);if(el)hlRect=el.getBoundingClientRect();}
+  else if (litEls.length){hlRect=litEls[0].getBoundingClientRect();}
   const dialog=document.createElement('div');dialog.className='tut-dialog';
   dialog.innerHTML=`<div class="tut-label">${LANG==='ko'?'안내':'Guide'}</div><div>${LANG==='ko'?textKo:textEn}</div>${waitForAction?'':`<button class="primary">${LANG==='ko'?buttonKo:buttonEn}</button>`}`;
   document.body.appendChild(dialog);
@@ -513,9 +486,7 @@ function tutorialStep(opts){
   if (!waitForAction){
     dialog.querySelector('button').addEventListener('click',()=>{tutorialClose();onDone&&onDone();});
   }
-  // highlight always pointer-events:none; mask may be null if target present
-  if (waitForAction && mask) mask.style.pointerEvents='none';
-  return {mask,highlight,dialog,close:tutorialClose};
+  return {dialog,close:tutorialClose};
 }
 
 // BATTLE
