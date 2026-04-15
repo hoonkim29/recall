@@ -147,6 +147,14 @@ input[type=text]:focus{outline:none;border-color:var(--border-gold)}
 .tut-dialog{position:fixed;background:linear-gradient(to bottom,#2a1e28,#1a1418);border:1.5px solid var(--border-gold);border-radius:8px;padding:14px 16px;color:var(--text-main);font-size:14px;line-height:1.5;max-width:300px;z-index:502;box-shadow:0 8px 24px rgba(0,0,0,0.8);animation:fadeIn .3s}
 .tut-dialog .tut-label{font-family:'Cinzel',serif;color:var(--text-gold);font-size:11px;letter-spacing:0.15em;margin-bottom:6px;text-transform:uppercase}
 .tut-dialog button{margin-top:10px;width:100%;font-size:13px;padding:8px}
+body.screen-battle{height:100dvh;min-height:0;overflow:hidden;justify-content:flex-start}
+body.screen-battle #app{height:100dvh;max-height:100dvh;overflow:hidden;display:flex;flex-direction:column;padding:6px 6px 4px;gap:0}
+body.screen-battle #app>.screen{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;gap:2px;overflow:hidden}
+body.screen-battle .panel{margin:1px 0;flex-shrink:0}
+body.screen-battle .panel.battle-field{padding:4px 6px}
+body.screen-battle .divider{margin:1px 0;height:1px}
+body.screen-battle .row{padding:1px 0}
+body.screen-battle .hand{min-height:0;flex-shrink:0}
 .player-slot.atk-rush,.card.player-slot.atk-rush{animation:atk-rush 0.5s ease-in-out;z-index:10}
 .warden-slot.atk-rush,.card.warden-slot.atk-rush{animation:atk-rush-down 0.5s ease-in-out;z-index:10}
 .atk-wave{animation:atk-wave 0.6s ease-in-out;z-index:10}
@@ -167,7 +175,16 @@ input[type=text]:focus{outline:none;border-color:var(--border-gold)}
 @media (max-width:520px){
   #app{padding:4px 4px 16px;max-width:100vw}
   .side-fans{display:none!important}
-  .card,.slot{width:76px!important;height:106px!important;margin:1px!important}
+  .card,.slot{width:72px!important;height:98px!important;margin:1px!important}
+  body.screen-battle .card,body.screen-battle .slot{width:68px!important;height:92px!important;margin:1px!important}
+  body.screen-battle .hand{min-height:0!important}
+  body.screen-battle .warden-plan-preview{min-height:38px!important;gap:3px!important}
+  body.screen-battle .plan-silhouette{width:32px!important;height:40px!important}
+  body.screen-battle .plan-silhouette .plan-art{width:20px!important;height:20px!important}
+  body.screen-battle .plan-silhouette .plan-stats{font-size:8px!important}
+  body.screen-battle .fragments{font-size:12px!important;margin:1px 0!important}
+  body.screen-battle .action-bar{padding:2px!important;gap:2px 4px!important}
+  body.screen-battle .action-bar button{padding:4px 8px!important;min-height:26px!important}
   .card{padding:2px!important;border-radius:5px!important;border-width:1px!important}
   .card .name{font-size:9px!important;padding:1px 14px 1px 2px!important;min-height:14px!important;line-height:1.1}
   .card .cost{width:14px!important;height:14px!important;font-size:8px!important;top:2px!important;right:2px!important}
@@ -282,7 +299,7 @@ function buildStarterDeck(){const ids=['afterimage','afterimage','memory_shard',
 function buildWardenDeck(which){const D={elise_normal:['faded_memory','faded_memory','faded_memory','faded_memory','afterimage','afterimage','night_watcher','memory_shard'],elise_boss:['faded_memory','faded_memory','afterimage','afterimage','afterimage','night_watcher','night_watcher','memory_shard','memory_shard','forgotten_dog','forgotten_dog','echo'],owen_normal:['faded_memory','faded_memory','faded_memory','afterimage','afterimage','old_book','old_book','reverb_card'],owen_boss:['faded_memory','faded_memory','afterimage','afterimage','old_book','old_book','old_book','reverb_card','reverb_card','forgotten_dog','forgotten_dog','echo']};return shuffle(D[which].map(id=>mkCard(id)));}
 
 const appEl=()=>document.getElementById('app');
-function setScreen(n,o){G.screen=n;showScreen(n,o);}
+function setScreen(n,o){G.screen=n;document.body.classList.toggle('screen-battle',n==='battle');showScreen(n,o);}
 function showScreen(name,opts={}){
   const root=appEl();
   if(name!=='battle'&&typeof tutorialClose==='function')tutorialClose();
@@ -346,7 +363,8 @@ function renderCutscene(root,opts){root.innerHTML=`<div style="padding-top:100px
 
 function startNewRun(){G.playerFragments=5;G.battery=100;G.oblivionGauge=0;G.currentRoom=1;G.currentNodeId='start';G.completedNodes=[];G.collectedHints=[];G.visitedNodes=['start'];G.skippedNodes=[];G.pendingNode=null;G.tutorialShown={};G.playerDeck=buildStarterDeck();G.battleDiscard=[];G.diedThisRun=[];G.runStats={cardUsageCount:{},lastDeadCard:null,cardFieldSurvival:{}};}
 function tutorialTip(key,textKo,textEn){if(G.runCount!==0)return;G.tutorialShown=G.tutorialShown||{};if(G.tutorialShown[key])return;G.tutorialShown[key]=true;setTimeout(()=>modal(LANG==='ko'?'안내':'Guide',LANG==='ko'?textKo:textEn),200);}
-function tutorialClose(){document.querySelectorAll('.tut-mask,.tut-highlight,.tut-dialog').forEach(e=>e.remove());}
+function tutorialClose(){document.querySelectorAll('.tut-mask,.tut-highlight,.tut-dialog').forEach(e=>e.remove());_lastTutOpts=null;}
+window.addEventListener('resize',()=>{if(_lastTutOpts&&G.screen==='battle'){const o=_lastTutOpts;setTimeout(()=>tutorialStep(o),50);}});
 function tutorialActive(){return !!document.querySelector('.tut-mask');}
 function runTutorialSequence(stage){
   if(G.runCount!==0)return;
@@ -362,7 +380,8 @@ function runTutorialSequence(stage){
     hand:{target:'#hand',textKo:'<b>손패</b>입니다. 각 카드의 파란 숫자(좌상단)는 배치 비용, ⚔는 공격력, ❤는 체력이에요.',textEn:'Your <b>hand</b>. Blue number = cost, ⚔ = attack, ❤ = HP.',onDone:()=>runTutorialSequence('field')},
     field:{target:'.battle-field',textKo:'<b>배틀 필드</b> — 위는 상대(엘리제), 아래는 당신. 같은 레인 카드끼리 싸우고, 빈 레인 공격은 상대 조각을 직접 깎아요.',textEn:'<b>Battle field</b> — top is the warden, bottom is you. Same-lane cards fight; empty-lane hits go directly to fragments.',onDone:()=>runTutorialSequence('frags')},
     frags:{target:'.fragments.warden',textKo:'<b>상대의 조각</b>입니다. 이걸 0으로 만들면 승리해요. 당신의 조각은 아래에 있어요.',textEn:'<b>Warden\'s fragments</b>. Reduce to zero to win. Yours are below.',onDone:()=>runTutorialSequence('fadedIntro')},
-    fadedIntro:{target:null,textKo:'먼저 <b>흐릿한 기억</b>(⚔0)을 놓고, <b>다시 눌러서 희생</b>하세요. 잉크 +1과 기억 카운터 +1이 생겨요.',textEn:'First place a <b>Faded Memory</b> (⚔0), then <b>click it again to sacrifice</b>. Gain +1 ink and +1 memory counter.',waitForAction:true,highlightCard:'faded_memory'},
+    fadedIntro:{target:null,textKo:'<b>흐릿한 기억</b>(⚔0)을 골라 <b>빈 슬롯</b>에 배치하세요.',textEn:'Select the <b>Faded Memory</b> (⚔0) and place it in an <b>empty slot</b>.',waitForAction:true,highlightCard:'faded_memory'},
+    fadedSacrifice:{target:null,textKo:'이제 놓은 카드를 <b>다시 눌러 희생</b>하세요. 💧+1과 기억 카운터 +1이 생겨요.',textEn:'Now <b>tap the placed card again to sacrifice</b> it. Gain 💧+1 and +1 memory counter.',waitForAction:true,highlightPlayerSlotWith:'faded_memory'},
     sacFeedback:{target:'.battle-ink',textKo:'잉크가 생겼어요! 기억 카운터도 1 올라갔고. 10개 모으면 기억 삭제 모드가 열려요.',textEn:'Ink appeared! Memory counter +1. Reach 10 to unlock delete mode.',onDone:()=>runTutorialSequence('placeAction')},
     placeAction:{target:null,textKo:'이제 잉크 1로 <b>잔상</b> 카드를 놓을 수 있어요. 눌러서 빈 슬롯에 배치해보세요.',textEn:'Now with 1 ink you can place the <b>Afterimage</b> card. Tap it into an empty slot.',waitForAction:true,highlightCard:'afterimage'},
     inkSpent:{target:'.battle-ink',textKo:'잉크 1이 소모됐죠? 카드의 배치 비용만큼 차감돼요.',textEn:'Ink dropped by 1 — equal to the card\'s cost.',onDone:()=>runTutorialSequence('endTurn')},
@@ -372,15 +391,21 @@ function runTutorialSequence(stage){
   const s=steps[stage];if(!s){tutorialClose();return;}
   setTimeout(()=>tutorialStep(s),250);
 }
+let _lastTutOpts=null;
 function tutorialStep(opts){
   tutorialClose();
   if(G.screen!=='battle')return;
-  const {target,textKo,textEn,buttonKo='계속',buttonEn='Continue',waitForAction,onDone,highlightCard}=opts;
+  _lastTutOpts=opts;
+  const {target,textKo,textEn,buttonKo='계속',buttonEn='Continue',waitForAction,onDone,highlightCard,highlightPlayerSlotWith}=opts;
   let highlight=null,hlRect=null,mask=null;
   let resolvedTarget=target;
   if (highlightCard && !target){
     const idx=G.playerHand.findIndex(c=>c.id===highlightCard);
     if (idx>=0) resolvedTarget=document.querySelectorAll('#hand .card')[idx];
+  }
+  if (highlightPlayerSlotWith && !resolvedTarget){
+    const idx=G.playerSlots.findIndex(c=>c&&c.id===highlightPlayerSlotWith);
+    if (idx>=0) resolvedTarget=document.querySelector(`.player-slot[data-slot="${idx}"]`);
   }
   if (resolvedTarget){
     const el=typeof resolvedTarget==='string'?document.querySelector(resolvedTarget):resolvedTarget;
@@ -501,10 +526,10 @@ function renderBattle(root,opts){
   }
 }
 
-function requestSacrifice(slotIdx){if(G.battlePhase!=='play')return;G.currentInk+=1;G.playerSlots[slotIdx]=null;G.sacrificeCounter+=1;saveGame();if(G.sacrificeCounter>=10){G.sacrificeCounter=0;saveGame();G.sacrificeMode=true;G.phoneOpen=true;document.getElementById('phoneOverlay')?.classList.add('open');renderPhone();msg(T('sacrifice_select'));}else{msg(`💧+1 · ${G.sacrificeCounter}/10`);}if(G.screen==='battle')showScreen('battle',{_started:true,_greeted:true});if(G.runCount===0&&G.tutorialStage==='fadedIntro'){setTimeout(()=>runTutorialSequence('sacFeedback'),400);}}
+function requestSacrifice(slotIdx){if(G.battlePhase!=='play')return;G.currentInk+=1;G.playerSlots[slotIdx]=null;G.sacrificeCounter+=1;saveGame();if(G.sacrificeCounter>=10){G.sacrificeCounter=0;saveGame();G.sacrificeMode=true;G.phoneOpen=true;document.getElementById('phoneOverlay')?.classList.add('open');renderPhone();msg(T('sacrifice_select'));}else{msg(`💧+1 · ${G.sacrificeCounter}/10`);}if(G.screen==='battle')showScreen('battle',{_started:true,_greeted:true});if(G.runCount===0&&(G.tutorialStage==='fadedIntro'||G.tutorialStage==='fadedSacrifice')){setTimeout(()=>runTutorialSequence('sacFeedback'),400);}}
 
 function playCard(handIdx,slotIdx){const c=G.playerHand[handIdx];if(!c)return;if(G.playerSlots[slotIdx]){msg(LANG==='ko'?'슬롯 사용 중':'Slot occupied');return;}if(c.inkCost>G.currentInk+G.oblivionGauge){msg(LANG==='ko'?'자원 부족':'Not enough resources');return;}let cost=c.inkCost;const inkUsed=Math.min(G.currentInk,cost);G.currentInk-=inkUsed;cost-=inkUsed;if(cost>0){G.oblivionGauge-=cost;msg(LANG==='ko'?`망각 ${cost} 소모`:`Oblivion -${cost}`);}if(c.id!=='faded_memory')G.runStats.cardUsageCount[c.id]=(G.runStats.cardUsageCount[c.id]||0)+1;G.playerSlots[slotIdx]=c;G.playerHand.splice(handIdx,1);G.selectedHandIdx=null;
-if(G.runCount===0){if(G.tutorialStage==='placeAction'&&c.id==='afterimage'){setTimeout(()=>runTutorialSequence('inkSpent'),500);}}if(c.sigil==='talking'){const ko=['...어디지? 나 어디 있는 거야?','또 여기야. 몇 번째인지 알고 있어?','저 사서 있잖아. 처음엔 달랐어.','자물쇠 말이야. 날짜를 봐.'];const en=['...where am I? Where is this?','Again here. Do you know how many times?','That receptionist... she was different at first.','The locks. Look at the dates.'];const idx=Math.min(G.runCount,3);setTimeout(()=>modal(LANG==='ko'?'길 잃은 기억':'Lost Memory',LANG==='ko'?ko[idx]:en[idx]),150);}showScreen('battle',{_started:true,_greeted:true});}
+if(G.runCount===0){if(G.tutorialStage==='placeAction'&&c.id==='afterimage'){setTimeout(()=>runTutorialSequence('inkSpent'),500);}else if(G.tutorialStage==='fadedIntro'&&c.id==='faded_memory'){setTimeout(()=>runTutorialSequence('fadedSacrifice'),350);}}if(c.sigil==='talking'){const ko=['...어디지? 나 어디 있는 거야?','또 여기야. 몇 번째인지 알고 있어?','저 사서 있잖아. 처음엔 달랐어.','자물쇠 말이야. 날짜를 봐.'];const en=['...where am I? Where is this?','Again here. Do you know how many times?','That receptionist... she was different at first.','The locks. Look at the dates.'];const idx=Math.min(G.runCount,3);setTimeout(()=>modal(LANG==='ko'?'길 잃은 기억':'Lost Memory',LANG==='ko'?ko[idx]:en[idx]),150);}showScreen('battle',{_started:true,_greeted:true});}
 
 function flashHit(side,idx){const sel=`.${side}-slot[data-slot="${idx}"]`;const el=document.querySelector(sel);if(el)el.classList.add('hit');setTimeout(()=>el&&el.classList.remove('hit'),250);}
 function showBlocked(side,idx){const sel=`.${side}-slot[data-slot="${idx}"]`;const el=document.querySelector(sel);if(!el)return;const r=el.getBoundingClientRect();const tag=document.createElement('div');tag.innerHTML=`🛡 ${LANG==='ko'?'차단':'BLOCK'}`;tag.className='block-tag';tag.style.cssText=`position:fixed;left:${r.left+r.width/2-58}px;top:${r.top+r.height/2-22}px;background:linear-gradient(135deg,rgba(110,70,88,0.98),rgba(70,42,56,0.98));color:#ffd778;padding:8px 18px;border-radius:8px;font-family:'Cinzel',serif;font-weight:700;font-size:17px;letter-spacing:0.18em;z-index:600;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,0.85),0 0 24px rgba(255,215,120,0.45);border:2px solid #c8a84b;text-shadow:0 0 10px rgba(255,215,120,0.6);animation:block-pop 1.4s ease-out forwards;white-space:nowrap`;document.body.appendChild(tag);setTimeout(()=>tag.remove(),1400);}
