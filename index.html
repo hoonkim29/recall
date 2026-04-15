@@ -361,7 +361,7 @@ function doDelMsg(idx){G.deletedMsgs.push(idx);saveGame();G.sacrificeMode=false;
 
 // TITLE
 function renderTitle(root){
-  root.innerHTML=`<div class="title-wrap"><h1>${T('recall')}</h1><div class="dim" style="letter-spacing:0.3em">${T('loading')}</div><div class="title-deck" id="deck"></div><div class="dim">${T('run')} #${G.runCount}</div><div class="dim" style="letter-spacing:0.3em;margin-top:18px">${T('tap')}</div><div style="margin-top:26px"><button id="rst" style="font-size:10px">${T('reset')}</button></div><div class="dim" style="margin-top:18px;font-size:10px">T = sim · D = debug</div></div>`;
+  root.innerHTML=`<div class="title-wrap"><h1>${T('recall')}</h1><div class="dim" style="letter-spacing:0.3em">${T('loading')}</div><div class="title-deck" id="deck"></div><div class="dim">${T('run')} #${G.runCount}</div><div class="dim" style="letter-spacing:0.3em;margin-top:18px">${T('tap')}</div><div style="margin-top:26px"><button id="rst" style="font-size:10px">${T('reset')}</button></div></div>`;
   root.querySelector('#deck').addEventListener('click',()=>{startNewRun();setScreen('cutscene',{text:LANG==='ko'?'엘리제: "카드가 손에 잡혔군요. 여기선 그게 시작이에요."':'Elise: "A card found its way into your hand. That is where it begins."',next:()=>enterBattle({isBoss:false,nodeId:'intro'})});});
   root.querySelector('#rst').addEventListener('click',()=>{if(confirm(T('confirm_reset'))){try{localStorage.removeItem('recall_save');}catch(e){}G.runCount=0;G.solvedLocks=Array(7).fill(false);G.rememberedCards=[];G.deletedMsgs=[];G.deathCards=[];G.sacrificeCounter=0;G.items=[];G.collectedHints=[];G.completedNodes=[];G.diedThisRun=[];setScreen('title');}});
 }
@@ -540,8 +540,20 @@ function renderBattle(root,opts){
   if(!opts._greeted){
     setTimeout(()=>{
       const r=G.runCount;let line;
-      if(G.currentRoom===1){line=r===0?(LANG==='ko'?'처음 오셨군요. 카드로 길을 여는 곳이에요.':'First time here. This is where cards open the way.'):r<=5?(LANG==='ko'?'또 왔네요. 몇 번째죠?':"You're back. How many times now?"):(LANG==='ko'?'오래 있으면 안 돼요. 나처럼 되기 전에.':"You shouldn't stay so long. Not like I did.");}
-      else{line=r===0?(LANG==='ko'?'(오웬은 말없이 카드를 놓는다.)':'(Owen silently places a card.)'):r===1?(LANG==='ko'?'여기 왔었죠.':'You were here.'):r===2?(LANG==='ko'?'누군가를 찾고 있죠?':"You're looking for someone?"):(LANG==='ko'?'저도 찾고 있었어요. 지금은 누구였는지 모르겠어요.':"I was looking too. Now I can't remember who.");}
+      const firstBattleThisRun=(G.completedNodes||[]).filter(n=>{const nd=MAPS[G.currentRoom]?.nodes[n];return nd&&(nd.type==='battle'||nd.type==='battle_hint'||nd.type==='boss');}).length===0;
+      if(G.currentRoom===1){
+        if(r===0 && firstBattleThisRun) line=LANG==='ko'?'처음 오셨군요. 카드로 길을 여는 곳이에요.':'First time here. This is where cards open the way.';
+        else if(r===0 && opts.isBoss) line=LANG==='ko'?'이번엔 진심이에요. 돌아가지 못할 수도 있어요.':"I mean it this time. You may not return.";
+        else if(r===0) line=LANG==='ko'?'다음 기억도 보여주세요.':'Show me the next memory.';
+        else if(r<=5) line=LANG==='ko'?'또 왔네요. 몇 번째죠?':"You're back. How many times now?";
+        else line=LANG==='ko'?'오래 있으면 안 돼요. 나처럼 되기 전에.':"You shouldn't stay so long. Not like I did.";
+      } else {
+        if(r===0 && firstBattleThisRun) line=LANG==='ko'?'(오웬은 말없이 카드를 놓는다.)':'(Owen silently places a card.)';
+        else if(r===0) line=LANG==='ko'?'(오웬이 고개를 든다.)':'(Owen raises his head.)';
+        else if(r===1) line=LANG==='ko'?'여기 왔었죠.':'You were here.';
+        else if(r===2) line=LANG==='ko'?'누군가를 찾고 있죠?':"You're looking for someone?";
+        else line=LANG==='ko'?'저도 찾고 있었어요. 지금은 누구였는지 모르겠어요.':"I was looking too. Now I can't remember who.";
+      }
       modal(wardenName.toUpperCase(),line,()=>{
         if(G.runCount===0&&!G.tutorialStage&&G.screen==='battle'){runTutorialSequence('intro');}
       });
@@ -690,7 +702,7 @@ function renderLockPuzzle(root){
   root.querySelector('#b').addEventListener('click',()=>{const s=G.currentRoom===1?G.solvedLocks.slice(0,3):G.solvedLocks.slice(3,7);if(s.every(x=>x)){const id=G.currentRoom===1?'r1_locks':'r2_locks';if(!G.completedNodes.includes(id))G.completedNodes.push(id);}setScreen('map');});
 }
 
-function renderLoopEnding(root){const pages=LANG==='ko'?['탈출했다.','기숙사 방. 아침.','J의 문자: "야 어제 어디 있었어?"','평범한 하루인 것 같다.','...','핸드폰에 Recall 알림이 떴다.','"두 개의 새로운 기억이 기록되었습니다."']:['Escaped.','The dorm room. Morning.','A message from J: "hey where were you yesterday?"','It feels like an ordinary day.','...','A Recall notification appeared on the phone.','"Two new memories have been recorded."'];let p=0;function draw(){root.innerHTML=`<div style="padding-top:100px;min-height:60vh;display:flex;align-items:center;justify-content:center"><div class="dialogue center" style="font-size:18px;max-width:360px">${pages[p]}</div></div>`;root.addEventListener('click',adv,{once:true});}function adv(){p++;if(p>=pages.length)setScreen('regression');else draw();}draw();}
+function renderLoopEnding(root){const pages=LANG==='ko'?['탈출했다.','기숙사 방. 아침.','J의 문자: "야 어제 어디 있었어?"','평범한 하루인 것 같다.','...','핸드폰에 Recall 알림이 떴다.','"두 개의 새로운 기억이 기록되었습니다."']:['Escaped.','The dorm room. Morning.','A message from J: "hey where were you yesterday?"','It feels like an ordinary day.','...','A Recall notification appeared on the phone.','"Two new memories have been recorded."'];let p=0;function draw(){const isLast=p===pages.length-1;root.innerHTML=`<div style="padding-top:80px;min-height:60vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px"><div class="dialogue center" style="font-size:18px;max-width:360px">${pages[p]}</div>${isLast?`<button class="primary" id="le-end">${LANG==='ko'?'계속':'Continue'}</button>`:`<div class="dim" style="font-size:11px;letter-spacing:0.2em;animation:fadeIn 1s">${LANG==='ko'?'— 탭하여 계속 —':'— tap to continue —'}</div>`}</div>`;if(isLast){root.querySelector('#le-end').addEventListener('click',adv);}else{root.addEventListener('click',adv,{once:true});}}function adv(){p++;if(p>=pages.length)setScreen('regression');else draw();}draw();}
 
 function renderRegression(root){G.runCount++;G.rememberedCards=[...new Set([...G.rememberedCards,...G.diedThisRun])];G.diedThisRun=[];saveGame();const pages=LANG==='ko'?['기억이 수집되었습니다.','눈을 뜬다.','핸드폰이 손에 있다.','Recall이 켜져 있다.']:['Memory collected.','Eyes open.','The phone is in your hand.','Recall is running.'];let p=0;function draw(){root.innerHTML=`<div style="padding-top:120px;display:flex;align-items:center;justify-content:center;min-height:50vh"><div class="dialogue center" style="font-size:18px">${pages[p]}</div></div>`;}draw();const t=setInterval(()=>{p++;if(p>=pages.length){clearInterval(t);setScreen('title');return;}draw();},1300);root.addEventListener('click',()=>{clearInterval(t);setScreen('title');});}
 

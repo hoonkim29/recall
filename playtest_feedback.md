@@ -187,3 +187,29 @@ Single-source tracker since no git yet. Most recent on top within each section.
 7. "튜토리얼 나레이션 없이 게임이 시작되면 너무 어렵다" → Tutorial system 추가
 8. "워든 카드가 한꺼번에 놓인다, 하나씩 뒤집히는 애니메이션으로" → T2 작업
 9. "배경 이미지 세팅 필요" → T1 작업
+
+---
+
+## 2026-04 20-Run Playtest (in progress)
+
+Logging new issues here so they survive context compaction. Most recent on top.
+
+### Findings
+
+#### Run 1 (tutorial run, lost at Elise boss)
+- **I1** 타이틀에 `T = sim · D = debug` 디버그 텍스트 노출 — production에서 숨겨야 함
+- **I2** 승리/카드선택/맵 화면 배경이 완전 검정 — 타이틀/배틀만 배경이미지 씀, 전환 stark
+- **I3** 맵 아이콘(⚔📦🔒👁?💠⇄🚪) 무엇인지 첫방문 시 설명 부재
+- **I4** lockpuzzle 메커니즘(힌트 모으기→락 해제→보스) 안내 부재
+- **I5** 첫 런(runCount=0) 각 배틀마다 "처음 오셨군요" 반복 — 튜토리얼 후엔 다른 대사 필요
+- **I6** 첫 런 보스전에 프리플레이스 2장(야경꾼+잔상)으로 난이도 급증 — 첫 플레이어가 쉽게 패배
+
+#### Run 2 (regular run, reached loopending via force-unlock test)
+- **I7** fuse 화면 "2세대 불가" 용어 설명 부재
+- **I8** 🚨 **loopending "Escaped" 화면에 재시작/메인 버튼 없음** — 유저 stuck
+- **I9** room2 map `reclass` 화면이 map UI를 렌더하지만 G.screen==='reclass' — 상태 불일치 가능성
+
+#### Immediate high-priority fixes before more runs
+1. Hide `T = sim · D = debug` hint
+2. loopending: add "처음부터" / "타이틀로" 버튼
+3. 첫 런 인사 반복 제거 — 첫 배틀만 풀대사, 이후 짧은 대사
