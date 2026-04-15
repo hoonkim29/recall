@@ -147,9 +147,11 @@ input[type=text]:focus{outline:none;border-color:var(--border-gold)}
 .tut-dialog{position:fixed;background:linear-gradient(to bottom,#2a1e28,#1a1418);border:1.5px solid var(--border-gold);border-radius:8px;padding:14px 16px;color:var(--text-main);font-size:14px;line-height:1.5;max-width:300px;z-index:502;box-shadow:0 8px 24px rgba(0,0,0,0.8);animation:fadeIn .3s}
 .tut-dialog .tut-label{font-family:'Cinzel',serif;color:var(--text-gold);font-size:11px;letter-spacing:0.15em;margin-bottom:6px;text-transform:uppercase}
 .tut-dialog button{margin-top:10px;width:100%;font-size:13px;padding:8px}
-body.screen-battle{height:100dvh;min-height:0;overflow:hidden;justify-content:flex-start}
+.tut-outline{position:fixed;border:2px solid var(--border-gold);border-radius:8px;z-index:502;pointer-events:none;background:transparent;animation:tut-outline-pulse 1.6s ease-in-out infinite}
+@keyframes tut-outline-pulse{0%,100%{box-shadow:0 0 14px rgba(200,168,75,0.7),inset 0 0 12px rgba(200,168,75,0.15)}50%{box-shadow:0 0 28px rgba(200,168,75,1),inset 0 0 20px rgba(200,168,75,0.3)}}
+body.screen-battle{height:100dvh;min-height:0;overflow:hidden;justify-content:center}
 body.screen-battle #app{height:100dvh;max-height:100dvh;overflow:hidden;display:flex;flex-direction:column;padding:6px 6px 4px;gap:0}
-body.screen-battle #app>.screen{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;gap:2px;overflow:hidden}
+body.screen-battle #app>.screen{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;justify-content:center;gap:2px;overflow:hidden}
 body.screen-battle .panel{margin:1px 0;flex-shrink:0}
 body.screen-battle .panel.battle-field{padding:4px 6px}
 body.screen-battle .divider{margin:1px 0;height:1px}
@@ -363,7 +365,7 @@ function renderCutscene(root,opts){root.innerHTML=`<div style="padding-top:100px
 
 function startNewRun(){G.playerFragments=5;G.battery=100;G.oblivionGauge=0;G.currentRoom=1;G.currentNodeId='start';G.completedNodes=[];G.collectedHints=[];G.visitedNodes=['start'];G.skippedNodes=[];G.pendingNode=null;G.tutorialShown={};G.playerDeck=buildStarterDeck();G.battleDiscard=[];G.diedThisRun=[];G.runStats={cardUsageCount:{},lastDeadCard:null,cardFieldSurvival:{}};}
 function tutorialTip(key,textKo,textEn){if(G.runCount!==0)return;G.tutorialShown=G.tutorialShown||{};if(G.tutorialShown[key])return;G.tutorialShown[key]=true;setTimeout(()=>modal(LANG==='ko'?'안내':'Guide',LANG==='ko'?textKo:textEn),200);}
-function tutorialClose(){document.querySelectorAll('.tut-mask,.tut-highlight,.tut-dialog').forEach(e=>e.remove());_lastTutOpts=null;}
+function tutorialClose(){document.querySelectorAll('.tut-mask,.tut-highlight,.tut-outline,.tut-dialog').forEach(e=>e.remove());_lastTutOpts=null;}
 window.addEventListener('resize',()=>{if(_lastTutOpts&&G.screen==='battle'){const o=_lastTutOpts;setTimeout(()=>tutorialStep(o),50);}});
 function tutorialActive(){return !!document.querySelector('.tut-mask');}
 function runTutorialSequence(stage){
@@ -380,7 +382,7 @@ function runTutorialSequence(stage){
     hand:{target:'#hand',textKo:'<b>손패</b>입니다. 각 카드의 파란 숫자(좌상단)는 배치 비용, ⚔는 공격력, ❤는 체력이에요.',textEn:'Your <b>hand</b>. Blue number = cost, ⚔ = attack, ❤ = HP.',onDone:()=>runTutorialSequence('field')},
     field:{target:'.battle-field',textKo:'<b>배틀 필드</b> — 위는 상대(엘리제), 아래는 당신. 같은 레인 카드끼리 싸우고, 빈 레인 공격은 상대 조각을 직접 깎아요.',textEn:'<b>Battle field</b> — top is the warden, bottom is you. Same-lane cards fight; empty-lane hits go directly to fragments.',onDone:()=>runTutorialSequence('frags')},
     frags:{target:'.fragments.warden',textKo:'<b>상대의 조각</b>입니다. 이걸 0으로 만들면 승리해요. 당신의 조각은 아래에 있어요.',textEn:'<b>Warden\'s fragments</b>. Reduce to zero to win. Yours are below.',onDone:()=>runTutorialSequence('fadedIntro')},
-    fadedIntro:{target:null,textKo:'<b>흐릿한 기억</b>(⚔0)을 골라 <b>빈 슬롯</b>에 배치하세요.',textEn:'Select the <b>Faded Memory</b> (⚔0) and place it in an <b>empty slot</b>.',waitForAction:true,highlightCard:'faded_memory'},
+    fadedIntro:{target:null,outlineTargets:['hand:faded_memory','#ps'],dialogAnchor:'#ps',textKo:'<b>흐릿한 기억</b>(⚔0)을 손패에서 골라 <b>빈 슬롯</b>에 배치하세요.',textEn:'Pick the <b>Faded Memory</b> (⚔0) from your hand and place it on an <b>empty slot</b>.',waitForAction:true},
     fadedSacrifice:{target:null,textKo:'이제 놓은 카드를 <b>다시 눌러 희생</b>하세요. 💧+1과 기억 카운터 +1이 생겨요.',textEn:'Now <b>tap the placed card again to sacrifice</b> it. Gain 💧+1 and +1 memory counter.',waitForAction:true,highlightPlayerSlotWith:'faded_memory'},
     sacFeedback:{target:'.battle-ink',textKo:'잉크가 생겼어요! 기억 카운터도 1 올라갔고. 10개 모으면 기억 삭제 모드가 열려요.',textEn:'Ink appeared! Memory counter +1. Reach 10 to unlock delete mode.',onDone:()=>runTutorialSequence('placeAction')},
     placeAction:{target:null,textKo:'이제 잉크 1로 <b>잔상</b> 카드를 놓을 수 있어요. 눌러서 빈 슬롯에 배치해보세요.',textEn:'Now with 1 ink you can place the <b>Afterimage</b> card. Tap it into an empty slot.',waitForAction:true,highlightCard:'afterimage'},
@@ -396,7 +398,7 @@ function tutorialStep(opts){
   tutorialClose();
   if(G.screen!=='battle')return;
   _lastTutOpts=opts;
-  const {target,textKo,textEn,buttonKo='계속',buttonEn='Continue',waitForAction,onDone,highlightCard,highlightPlayerSlotWith}=opts;
+  const {target,textKo,textEn,buttonKo='계속',buttonEn='Continue',waitForAction,onDone,highlightCard,highlightPlayerSlotWith,outlineTargets,dialogAnchor}=opts;
   let highlight=null,hlRect=null,mask=null;
   let resolvedTarget=target;
   if (highlightCard && !target){
@@ -406,6 +408,30 @@ function tutorialStep(opts){
   if (highlightPlayerSlotWith && !resolvedTarget){
     const idx=G.playerSlots.findIndex(c=>c&&c.id===highlightPlayerSlotWith);
     if (idx>=0) resolvedTarget=document.querySelector(`.player-slot[data-slot="${idx}"]`);
+  }
+  if (outlineTargets && !resolvedTarget){
+    outlineTargets.forEach(sel=>{
+      let el=null;
+      if (typeof sel==='string' && sel.startsWith('hand:')){
+        const cid=sel.slice(5);
+        const idx=G.playerHand.findIndex(c=>c.id===cid);
+        if (idx>=0) el=document.querySelectorAll('#hand .card')[idx];
+      } else {
+        el=document.querySelector(sel);
+      }
+      if (el){
+        const r=el.getBoundingClientRect();
+        const o=document.createElement('div');
+        o.className='tut-outline';
+        o.style.left=(r.left-4)+'px';o.style.top=(r.top-4)+'px';
+        o.style.width=(r.width+8)+'px';o.style.height=(r.height+8)+'px';
+        document.body.appendChild(o);
+      }
+    });
+    if (dialogAnchor){
+      const el=document.querySelector(dialogAnchor);
+      if (el) hlRect=el.getBoundingClientRect();
+    }
   }
   if (resolvedTarget){
     const el=typeof resolvedTarget==='string'?document.querySelector(resolvedTarget):resolvedTarget;
