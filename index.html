@@ -302,7 +302,7 @@ function giveItem(id){if(G.items.length<3){G.items.push(id);saveGame();}}
 function useItem(idx){const id=G.items[idx];if(!id||G.battlePhase!=='play')return;if(ITEMS[id].use()===false)return;G.items.splice(idx,1);saveGame();showScreen('battle',{_started:true,_greeted:true});}
 function generateDeathCard(){const eligible=id=>id&&id!=='faded_memory'&&!!CARDS[id];const usage=Object.entries(G.runStats.cardUsageCount||{}).filter(([id])=>eligible(id));const mostUsed=usage.sort((a,b)=>b[1]-a[1])[0];const surv=Object.entries(G.runStats.cardFieldSurvival||{}).filter(([id])=>eligible(id)).sort((a,b)=>b[1]-a[1])[0];const last=G.runStats.lastDeadCard;const atk=mostUsed?Math.max(1,CARDS[mostUsed[0]].attack||1):1;const hp=last&&eligible(last.id)?last.maxHp:(mostUsed?CARDS[mostUsed[0]].maxHp:2);const sigil=surv?CARDS[surv[0]].sigil:(last&&eligible(last.id)?last.sigil:null);const lastDel=G.deletedMsgs.length?J_MSGS[G.deletedMsgs[G.deletedMsgs.length-1]].t.split(/\s+/)[0]:'잔상';return{id:'death_'+Date.now(),inkCost:1,attack:atk,maxHp:hp,currentHp:hp,sigil,uid:++UID,name:lastDel,isDeath:true};}
 
-function buildStarterDeck(){const ids=['afterimage','afterimage','memory_shard','lost_memory'];const deck=ids.map(id=>mkCard(id));for(const id of G.rememberedCards)deck.push(mkCard(id,true));for(const dc of (G.deathCards||[]))deck.push({...dc,currentHp:dc.maxHp,uid:++UID});return shuffle(deck);}
+function buildStarterDeck(){const ids=['afterimage','afterimage','archive_rat','archive_rat','memory_shard','lost_memory'];const deck=ids.map(id=>mkCard(id));for(const id of G.rememberedCards)deck.push(mkCard(id,true));for(const dc of (G.deathCards||[]))deck.push({...dc,currentHp:dc.maxHp,uid:++UID});return shuffle(deck);}
 function buildWardenDeck(which){const D={elise_normal:['faded_memory','faded_memory','faded_memory','faded_memory','afterimage','afterimage','archive_rat','memory_shard'],elise_boss:['faded_memory','faded_memory','afterimage','afterimage','afterimage','night_watcher','night_watcher','memory_shard','memory_shard','forgotten_dog','forgotten_dog','echo'],owen_normal:['faded_memory','faded_memory','faded_memory','afterimage','afterimage','old_book','old_book','reverb_card'],owen_boss:['faded_memory','faded_memory','afterimage','afterimage','old_book','old_book','old_book','reverb_card','reverb_card','forgotten_dog','forgotten_dog','echo']};return shuffle(D[which].map(id=>mkCard(id)));}
 
 const appEl=()=>document.getElementById('app');
@@ -485,6 +485,11 @@ function enterBattle(opts){
   G.playerSlots=[null,null,null,null];G.wardenSlots=[null,null,null,null];G.playerHand=[];G.selectedHandIdx=null;G.battlePhase='play';
   G.playerDeck=shuffle(G.playerDeck);
   for(let i=0;i<3;i++){if(G.playerDeck.length)G.playerHand.push(G.playerDeck.pop());}
+  // Tutorial (run 0 first battle): guarantee afterimage in hand since the tutorial walks through it
+  if(G.runCount===0 && !G.playerHand.some(c=>c.id==='afterimage')){
+    const ai=G.playerDeck.findIndex(c=>c.id==='afterimage');
+    if(ai>=0){const swap=G.playerHand.findIndex(c=>c.id!=='afterimage')??0;if(swap>=0){G.playerDeck.push(G.playerHand[swap]);G.playerHand[swap]=G.playerDeck.splice(ai,1)[0];}}
+  }
   G.playerHand.push(mkCard('faded_memory'));
   const which=G.currentRoom===1?(opts.isBoss?'elise_boss':'elise_normal'):(opts.isBoss?'owen_boss':'owen_normal');
   G.wardenDeck=buildWardenDeck(which);
