@@ -164,7 +164,7 @@ input[type=text]:focus{outline:none;border-color:var(--border-gold)}
 .fab-stack{position:fixed;left:10px;bottom:10px;z-index:170;display:flex;flex-direction:column;gap:8px}
 .fab-btn{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#3a2a28,#1a1418);border:1.5px solid var(--border-gold);color:var(--text-gold);font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.7),inset 0 0 8px rgba(200,168,75,0.15);transition:transform .15s,box-shadow .15s;padding:0}
 .fab-btn:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,0.85),0 0 14px rgba(200,168,75,0.4),inset 0 0 8px rgba(200,168,75,0.25)}
-@media (max-width:520px){.fab-stack{left:8px;bottom:8px}.fab-btn{width:42px;height:42px;font-size:20px}}
+@media (max-width:520px){.fab-stack{left:auto!important;right:8px!important;bottom:auto!important;top:62px!important}.fab-btn{width:38px;height:38px;font-size:18px}}
 .expl-overlay{position:fixed;inset:0;background:linear-gradient(to bottom,rgba(15,8,12,0.96),rgba(8,4,6,0.98));z-index:240;display:flex;flex-direction:column;animation:fadeIn .2s}
 .expl-header{display:flex;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border-dim);background:linear-gradient(to bottom,rgba(40,28,32,0.9),rgba(20,14,18,0.9))}
 .expl-title{font-family:'Cinzel',serif;color:var(--text-gold);font-size:15px;letter-spacing:0.15em}
