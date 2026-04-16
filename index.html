@@ -622,11 +622,11 @@ function runTutorialSequence(stage){
     frags:{target:'.fragments.warden',textKo:'<b>상대의 조각</b>입니다. 이걸 0으로 만들면 승리해요. 당신의 조각은 아래에 있어요.',textEn:'<b>Warden\'s fragments</b>. Reduce to zero to win. Yours are below.',onDone:()=>runTutorialSequence('fadedIntro')},
     fadedIntro:{target:null,outlineTargets:['hand:faded_memory','emptyPlayerSlots'],dialogAnchor:'#ps',textKo:'<b>흐릿한 기억</b>(⚔0)을 손패에서 골라 <b>빈 슬롯</b>에 배치하세요.',textEn:'Pick the <b>Faded Memory</b> (⚔0) from your hand and place it on an <b>empty slot</b>.',waitForAction:true},
     fadedSacrifice:{target:null,textKo:'이제 놓은 카드를 <b>다시 눌러 희생</b>하세요. 💧+1과 기억 카운터 +1이 생겨요.',textEn:'Now <b>tap the placed card again to sacrifice</b> it. Gain 💧+1 and +1 memory counter.',waitForAction:true,highlightPlayerSlotWith:'faded_memory'},
-    sacFeedback:{target:'.battle-ink',textKo:'잉크가 생겼어요! 기억 카운터도 1 올라갔고. 10개 모으면 기억 삭제 모드가 열려요.',textEn:'Ink appeared! Memory counter +1. Reach 10 to unlock delete mode.',onDone:()=>runTutorialSequence('placeAction')},
+    sacFeedback:{target:'.battle-ink',textKo:'잉크가 생겼어요! 기억 카운터도 1 올라갔고. 5개 모으면 J의 메시지 중 하나가 영구 삭제돼요.',textEn:'Ink appeared! Memory counter +1. Reach 5 to permanently delete one of J\u2019s messages.',onDone:()=>runTutorialSequence('placeAction')},
     placeAction:{target:null,outlineTargets:['hand:afterimage','emptyPlayerSlots'],dialogAnchor:'#ps',textKo:'이제 잉크 1로 <b>잔상</b> 카드를 놓을 수 있어요. 눌러서 빈 슬롯에 배치해보세요.',textEn:'Now with 1 ink you can place the <b>Afterimage</b> card. Tap it into an empty slot.',waitForAction:true},
     inkSpent:{target:'.battle-ink',textKo:'잉크 1이 소모됐죠? 카드의 배치 비용만큼 차감돼요.',textEn:'Ink dropped by 1 — equal to the card\'s cost.',onDone:()=>runTutorialSequence('endTurn')},
     endTurn:{target:'#bell',textKo:'이제 <b>턴 종료</b>를 눌러 전투를 시작해요. 당신의 카드가 먼저 공격하고, 그 다음 상대가 공격해요.',textEn:'Press <b>End Turn</b>. Your cards attack first, then the warden.',waitForAction:true},
-    attackResult:{target:'.fragments.warden',textKo:'빈 레인을 공격했기 때문에 상대 조각이 깎였어요. ✦ 하나가 줄었죠?',textEn:'Since you hit an empty lane, a warden fragment dropped. ✦ is down by one.',onDone:()=>{tutorialClose();G.tutorialStage='done';}}
+    attackResult:{target:'.fragments.warden',textKo:'빈 레인을 공격했기 때문에 잔상의 공격력 2만큼 상대 조각이 깎였어요. ✦ 두 개가 줄었죠?',textEn:'You hit an empty lane, so the warden lost fragments equal to Afterimage\u2019s ⚔2. Two ✦ are down.',onDone:()=>{tutorialClose();G.tutorialStage='done';}}
   };
   const s=steps[stage];if(!s){tutorialClose();return;}
   setTimeout(()=>tutorialStep(s),250);
