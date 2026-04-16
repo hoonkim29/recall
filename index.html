@@ -25,6 +25,8 @@ body.bg-map-r1{background-image:url("image/reception_table.png")}
 body.bg-map-r2{background-image:url("image/corridor_table.png")}
 body.bg-title::after,body.bg-title-vault::after,body.bg-battle-r1::after,body.bg-battle-r2::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:2;background:linear-gradient(to bottom,rgba(0,0,0,0.08) 0%,rgba(0,0,0,0.18) 40%,rgba(0,0,0,0.38) 85%,rgba(0,0,0,0.55) 100%)}
 body.bg-map-r1::after,body.bg-map-r2::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:2;background:radial-gradient(ellipse at center,rgba(10,6,8,0.15) 0%,rgba(10,6,8,0.55) 45%,rgba(10,6,8,0.82) 85%,rgba(10,6,8,0.9) 100%)}
+body.bg-soft{background:radial-gradient(ellipse at top,#2a1e22 0%,#1a1216 35%,#0e0a0e 75%,#06030a 100%)}
+body.bg-soft::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n2'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/><feColorMatrix values='0 0 0 0 0.7  0 0 0 0 0.55  0 0 0 0 0.3  0 0 0 0.04 0'/></filter><rect width='100%' height='100%' filter='url(%23n2)'/></svg>");opacity:0.55;mix-blend-mode:overlay}
 @media (min-width:760px){body.bg-map-r1,body.bg-map-r2{background-size:auto 100vh;background-position:center center}}
 @media (max-width:759px){body.bg-map-r1,body.bg-map-r2{background-size:100% auto!important;background-position:center top!important;background-attachment:fixed!important}}
 body::before{content:"";position:fixed;inset:0;pointer-events:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/><feColorMatrix values='0 0 0 0 0.7  0 0 0 0 0.55  0 0 0 0 0.3  0 0 0 0.05 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");opacity:0.5;z-index:1;mix-blend-mode:overlay}
@@ -412,10 +414,11 @@ function showScreen(name,opts={}){
   if(name!=='battle'&&typeof tutorialClose==='function')tutorialClose();
   const el=document.createElement('div');el.className='screen';
   if(name==='battle')el.style.animation='none';
-  document.body.classList.remove('bg-title','bg-title-vault','bg-battle-r1','bg-battle-r2','bg-map-r1','bg-map-r2');
+  document.body.classList.remove('bg-title','bg-title-vault','bg-battle-r1','bg-battle-r2','bg-map-r1','bg-map-r2','bg-soft');
   if(name==='title')document.body.classList.add(G.runCount>=3?'bg-title-vault':'bg-title');
   else if(name==='battle')document.body.classList.add(G.currentRoom===2?'bg-battle-r2':'bg-battle-r1');
   else if(name==='map')document.body.classList.add(G.currentRoom===2?'bg-map-r2':'bg-map-r1');
+  else document.body.classList.add('bg-soft');
   removeLangBtn();removePhone();if(name!=='battle')document.querySelector('.side-fans')?.remove();
   const lb=document.createElement('button');lb.className='lang-btn';lb.textContent=LANG==='ko'?'EN':'한';
   lb.addEventListener('click',()=>{LANG=LANG==='ko'?'en':'ko';localStorage.setItem('recall_lang',LANG);setScreen(G.screen,opts);});
@@ -564,7 +567,7 @@ function renderTitle(root){
   root.querySelector('#deck').addEventListener('click',()=>{startNewRun();setScreen('cutscene',{text:LANG==='ko'?'엘리제: "카드가 손에 잡혔군요. 여기선 그게 시작이에요."':'Elise: "A card found its way into your hand. That is where it begins."',next:()=>enterBattle({isBoss:false,nodeId:'intro'})});});
   root.querySelector('#rst').addEventListener('click',()=>{if(confirm(T('confirm_reset'))){try{localStorage.removeItem('recall_save');}catch(e){}G.runCount=0;G.solvedLocks=Array(7).fill(false);G.rememberedCards=[];G.deletedMsgs=[];G.deathCards=[];G.sacrificeCounter=0;G.items=[];G.collectedHints=[];G.completedNodes=[];G.diedThisRun=[];setScreen('title');}});
 }
-function renderCutscene(root,opts){root.innerHTML=`<div style="padding-top:100px"><div class="panel"><div class="dialogue" style="font-size:16px">${opts.text}</div><button class="primary" id="n" style="margin-top:18px;width:100%">${T('continue')}</button></div></div>`;root.querySelector('#n').addEventListener('click',opts.next);}
+function renderCutscene(root,opts){const m=opts.text.match(/^([^:]+):\s*"?(.+?)"?$/);const speaker=m?m[1].trim():'';const body=m?m[2].trim():opts.text;root.innerHTML=`<div style="padding-top:90px"><div class="panel" style="background:linear-gradient(to bottom,rgba(40,28,32,0.92),rgba(20,14,18,0.92));border-color:var(--border-gold);box-shadow:0 8px 28px rgba(0,0,0,0.7)">${speaker?`<div class="speaker">${speaker}</div>`:''}<div class="dialogue" style="font-size:16px">${speaker?`"${body}"`:body}</div><button class="primary" id="n" style="margin-top:18px;width:100%">${T('continue')}</button></div></div>`;root.querySelector('#n').addEventListener('click',opts.next);}
 
 function startNewRun(){G.playerFragments=5;G.battery=100;G.oblivionGauge=0;G.currentRoom=1;G.currentNodeId='start';G.completedNodes=[];G.collectedHints=[];G.visitedNodes=['start'];G.skippedNodes=[];G.pendingNode=null;G.tutorialShown={};G.playerDeck=buildStarterDeck();G.battleDiscard=[];G.diedThisRun=[];G.sacrificeCounter=0;G.runStats={cardUsageCount:{},lastDeadCard:null,cardFieldSurvival:{}};saveGame();}
 function tutorialTip(key,textKo,textEn){if(G.runCount!==0)return;G.tutorialShown=G.tutorialShown||{};if(G.tutorialShown[key])return;G.tutorialShown[key]=true;setTimeout(()=>modal(LANG==='ko'?'안내':'Guide',LANG==='ko'?textKo:textEn),200);}
@@ -593,7 +596,7 @@ function runTutorialSequence(stage){
     sacFeedback:{target:'.battle-ink',textKo:'잉크가 생겼어요! 기억 카운터도 1 올라갔고. 10개 모으면 기억 삭제 모드가 열려요.',textEn:'Ink appeared! Memory counter +1. Reach 10 to unlock delete mode.',onDone:()=>runTutorialSequence('placeAction')},
     placeAction:{target:null,outlineTargets:['hand:afterimage','emptyPlayerSlots'],dialogAnchor:'#ps',textKo:'이제 잉크 1로 <b>잔상</b> 카드를 놓을 수 있어요. 눌러서 빈 슬롯에 배치해보세요.',textEn:'Now with 1 ink you can place the <b>Afterimage</b> card. Tap it into an empty slot.',waitForAction:true},
     inkSpent:{target:'.battle-ink',textKo:'잉크 1이 소모됐죠? 카드의 배치 비용만큼 차감돼요.',textEn:'Ink dropped by 1 — equal to the card\'s cost.',onDone:()=>runTutorialSequence('endTurn')},
-    endTurn:{target:'#bell',textKo:'이제 <b>턴 종료</b>를 눌러 전투를 시작해요. 당신의 카드가 먼저 공격하고, 그 다음 상대가 공격해요. <b>경계(vigilance)</b> sigil이 붙은 카드는 받는 피해를 1 줄여서, 공격력 1 카드로는 상처를 못 내요. 이때 "🛡 차단" 표시가 떠요.',textEn:'Press <b>End Turn</b>. Your cards attack first, then the warden. Cards with <b>vigilance</b> reduce incoming damage by 1 — a 1-atk card won\'t hurt them, shown as "🛡 BLOCK".',waitForAction:true},
+    endTurn:{target:'#bell',textKo:'이제 <b>턴 종료</b>를 눌러 전투를 시작해요. 당신의 카드가 먼저 공격하고, 그 다음 상대가 공격해요.',textEn:'Press <b>End Turn</b>. Your cards attack first, then the warden.',waitForAction:true},
     attackResult:{target:'.fragments.warden',textKo:'빈 레인을 공격했기 때문에 상대 조각이 깎였어요. ✦ 하나가 줄었죠?',textEn:'Since you hit an empty lane, a warden fragment dropped. ✦ is down by one.',onDone:()=>{tutorialClose();G.tutorialStage='done';}}
   };
   const s=steps[stage];if(!s){tutorialClose();return;}
