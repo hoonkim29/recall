@@ -402,7 +402,19 @@ function showScreen(name,opts={}){
 }
 function removeLangBtn(){document.querySelectorAll('.lang-btn').forEach(b=>b.remove());}
 function removePhone(){document.querySelectorAll('.phone-btn,.phone-overlay,.phone-backdrop').forEach(b=>b.remove());}
-function ensureFabStack(){if(!['map','battle'].includes(G.screen)){document.querySelector('.fab-stack')?.remove();return;}let s=document.querySelector('.fab-stack');if(!s){s=document.createElement('div');s.className='fab-stack';document.body.appendChild(s);}s.innerHTML=`<button class="fab-btn" id="fabExplore" title="${LANG==='ko'?'탐색':'Explore'}">🚪</button>`;s.querySelector('#fabExplore').addEventListener('click',openExploreOverlay);}
+function ensureFabStack(){if(!['map','battle'].includes(G.screen)){document.querySelector('.fab-stack')?.remove();return;}let s=document.querySelector('.fab-stack');if(!s){s=document.createElement('div');s.className='fab-stack';document.body.appendChild(s);}s.innerHTML=`<button class="fab-btn" id="fabExplore" title="${LANG==='ko'?'탐색':'Explore'}">🚪</button><button class="fab-btn" id="fabSigil" title="${LANG==='ko'?'능력 사전':'Sigil book'}">📜</button>`;s.querySelector('#fabExplore').addEventListener('click',openExploreOverlay);s.querySelector('#fabSigil').addEventListener('click',openSigilEncyclopedia);}
+function openSigilEncyclopedia(){
+  if(document.querySelector('.expl-overlay'))return;
+  const all=Object.keys(SIGIL_EMOJI);
+  const seen=new Set(G.seenSigils||[]);
+  const ov=document.createElement('div');ov.className='expl-overlay';
+  ov.innerHTML=`<div class="expl-header"><div class="expl-title">${LANG==='ko'?'특수능력 사전':'Sigil Codex'}</div><button class="expl-close" id="exClose">×</button></div><div class="expl-body" id="exBody"></div>`;
+  document.body.appendChild(ov);
+  const body=ov.querySelector('#exBody');
+  const intro=document.createElement('div');intro.className='dim';intro.style.cssText='font-size:12px;margin-bottom:10px;text-align:center';intro.textContent=LANG==='ko'?'전투에서 한 번이라도 본 능력은 항상 여기서 다시 확인할 수 있어요.':'Any sigil you have seen at least once stays available for reference here.';body.appendChild(intro);
+  all.forEach(s=>{const isSeen=seen.has(s);const row=document.createElement('div');row.className='panel';row.style.cssText=`display:flex;gap:12px;align-items:flex-start;${isSeen?'':'opacity:0.5;filter:grayscale(0.7)'}`;const emoji=isSeen?SIGIL_EMOJI[s]:'❓';const lab=isSeen?(LANG==='ko'?SIGIL_LABEL_KO[s]:SIGIL_LABEL_EN[s]):(LANG==='ko'?'미확인 능력':'Unknown sigil');const desc=isSeen?(LANG==='ko'?SIGIL_DESC_KO[s]:SIGIL_DESC_EN[s]):(LANG==='ko'?'전투에서 한 번 마주치면 여기 풀려요.':'Encounter it in battle to unlock.');row.innerHTML=`<div style="font-size:28px;flex:0 0 auto">${emoji}</div><div style="flex:1"><div class="cinzel" style="color:var(--text-gold);font-size:13px;margin-bottom:4px">${lab}</div><div style="font-size:13px;color:var(--text-bright);line-height:1.45">${desc}</div></div>`;body.appendChild(row);});
+  ov.querySelector('#exClose').addEventListener('click',()=>ov.remove());
+}
 function openExploreOverlay(){
   if(document.querySelector('.expl-overlay'))return;
   const r1=G.currentRoom===1;const lockRange=r1?[0,1,2]:[3,4,5,6];
