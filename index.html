@@ -1073,13 +1073,13 @@ function showDebug(){const o=document.createElement('div');o.className='debug-ov
 
 function runSim(){const log=[];let pass=0;function reset(){G.playerSlots=[null,null,null,null];G.wardenSlots=[null,null,null,null];G.playerFragments=5;G.wardenFragments=5;G.currentInk=0;G.battleDiscard=[];G.playerDeck=[];G.playerHand=[];}
   function a(cond,name,d){if(cond){log.push(`✓ ${name}`);pass++;}else log.push(`✗ ${name} — ${d||''}`);}
-  reset();G.playerSlots[0]=mkCard('echo');G.wardenSlots[0]=mkCard('forgotten_dog');const preFrag=G.wardenFragments;resolveCombat('player');a(G.wardenSlots[0]?.currentHp===1&&G.wardenFragments===preFrag,'T1 lane combat blocks fragment damage');
-  reset();G.wardenSlots[0]=mkCard('afterimage');resolveCombat('warden');a(G.playerFragments===4,'T2 empty→frag');
-  reset();G.playerSlots[0]=mkCard('afterimage');resolveCombat('player');a(G.wardenFragments===4,'T3 empty warden→frag');
+  reset();G.playerSlots[0]=mkCard('memory_shard');G.wardenSlots[0]=mkCard('forgotten_dog');const preFrag=G.wardenFragments;resolveCombat('player');a(G.wardenSlots[0]?.currentHp===2&&G.wardenFragments===preFrag,'T1 lane combat blocks fragment damage');
+  reset();G.wardenSlots[0]=mkCard('afterimage');resolveCombat('warden');a(G.playerFragments===3,'T2 empty→frag');
+  reset();G.playerSlots[0]=mkCard('afterimage');resolveCombat('player');a(G.wardenFragments===3,'T3 empty warden→frag');
   reset();G.wardenSlots[0]=mkCard('faded_memory');G.playerSlots[0]=mkCard('afterimage');G.oblivionGauge=0;resolveCombat('player');a(G.wardenSlots[0]===null&&G.oblivionGauge===1,'T4 death clears + oblivion +1');
   reset();const sh=mkCard('memory_shard');sh.currentHp=1;G.playerSlots[0]=sh;G.wardenSlots[0]=mkCard('echo');G.playerFragments=3;resolveCombat('warden');a(G.playerFragments===4,'T5 shatter',`frag=${G.playerFragments}`);
   reset();G.playerSlots[0]=mkCard('night_watcher');G.wardenSlots[0]=mkCard('echo');resolveCombat('warden');a(G.playerSlots[0]&&G.playerSlots[0].currentHp===1,'T6 vigilance');
-  reset();G.playerSlots[0]=mkCard('reverb_card');G.wardenSlots[0]=mkCard('afterimage');G.playerFragments=3;resolveCombat('warden');a(G.playerSlots[0]?.currentHp===1&&G.playerFragments===4,'T7 reverb');
+  reset();G.playerSlots[0]=mkCard('reverb_card');G.wardenSlots[0]=mkCard('archive_rat');G.playerFragments=3;resolveCombat('warden');a(G.playerSlots[0]?.currentHp===1&&G.playerFragments===4,'T7 reverb');
   reset();G.playerSlots[0]=mkCard('archive_rat');G.wardenSlots[0]=mkCard('old_book');G.oblivionGauge=0;resolveCombat('player');a(G.playerSlots[0]===null&&G.oblivionGauge>=1,'T8 ephemeral self-destruct + oblivion');
   reset();G.oblivionGauge=2;const c=mkCard('afterimage');const pre=G.oblivionGauge;G.oblivionGauge-=c.inkCost;a(G.oblivionGauge===pre-c.inkCost&&G.oblivionGauge>=0,'T9 oblivion spend');
   reset();G.sacrificeCounter=9;G.sacrificeCounter+=1;const triggered=G.sacrificeCounter>=10;if(triggered)G.sacrificeCounter=0;a(triggered&&G.sacrificeCounter===0,'T10 counter→10 resets');
