@@ -404,7 +404,22 @@ mirror:{name:{ko:'잔상 거울',en:'Afterimage Mirror'},icon:'🪞',use:()=>{co
 sealed:{name:{ko:'봉인된 기억',en:'Sealed Memory'},icon:'📜',use:()=>{for(let i=0;i<3&&G.playerDeck.length;i++)G.playerHand.push(G.playerDeck.pop());msg(LANG==='ko'?'3장 드로우':'Drew 3');}}};
 function giveItem(id){if(G.items.length<3){G.items.push(id);saveGame();}}
 function useItem(idx){const id=G.items[idx];if(!id||G.battlePhase!=='play')return;if(ITEMS[id].use()===false)return;G.items.splice(idx,1);saveGame();showScreen('battle',{_started:true,_greeted:true});}
-function generateDeathCard(){const eligible=id=>id&&id!=='faded_memory'&&!!CARDS[id];const usage=Object.entries(G.runStats.cardUsageCount||{}).filter(([id])=>eligible(id));const mostUsed=usage.sort((a,b)=>b[1]-a[1])[0];const surv=Object.entries(G.runStats.cardFieldSurvival||{}).filter(([id])=>eligible(id)).sort((a,b)=>b[1]-a[1])[0];const last=G.runStats.lastDeadCard;const atk=mostUsed?Math.max(1,CARDS[mostUsed[0]].attack||1):1;const hp=last&&eligible(last.id)?last.maxHp:(mostUsed?CARDS[mostUsed[0]].maxHp:2);const sigil=surv?CARDS[surv[0]].sigil:(last&&eligible(last.id)?last.sigil:null);const lastDel=G.deletedMsgs.length?(()=>{const lm=J_MSGS[G.deletedMsgs[G.deletedMsgs.length-1]];const txt=typeof lm.t==='string'?lm.t:(lm.t?.[LANG]||lm.t?.ko||'');return txt.split(/\s+/)[0]||'잔상';})():'잔상';return{id:'death_'+Date.now(),inkCost:1,attack:atk,maxHp:hp,currentHp:hp,sigil,uid:++UID,name:lastDel,isDeath:true};}
+function generateDeathCard(){
+  const eligible=id=>id&&id!=='faded_memory'&&!!CARDS[id];
+  const usage=Object.entries(G.runStats.cardUsageCount||{}).filter(([id])=>eligible(id));
+  const mostUsed=usage.sort((a,b)=>b[1]-a[1])[0];
+  const surv=Object.entries(G.runStats.cardFieldSurvival||{}).filter(([id])=>eligible(id)).sort((a,b)=>b[1]-a[1])[0];
+  const last=G.runStats.lastDeadCard;
+  // Pick base id for art: prefer most-used, then survived, then died, else any deck card
+  const baseId=(mostUsed&&mostUsed[0])||(surv&&surv[0])||(last&&eligible(last.id)?last.id:null)||(G.diedThisRun||[]).find(eligible)||'afterimage';
+  const baseStats=CARDS[baseId];
+  const atk=Math.max(1,(baseStats?.attack||1)+1); // +1 for memorial bump
+  const hp=Math.max(2,(baseStats?.maxHp||2));
+  const sigil=baseStats?.sigil||null;
+  // Name: prefer last deleted J-message's first word, else memorial of base card
+  let name;if(G.deletedMsgs.length){const lm=J_MSGS[G.deletedMsgs[G.deletedMsgs.length-1]];const txt=typeof lm.t==='string'?lm.t:(lm.t?.[LANG]||lm.t?.ko||'');name=(txt.split(/\s+/)[0]||Tc(baseId))+' ☠';}else{name=(LANG==='ko'?'잔상의 ':'Echo of ')+Tc(baseId);}
+  return{id:baseId,deathBase:baseId,deathUid:'death_'+Date.now(),inkCost:1,attack:atk,maxHp:hp,currentHp:hp,sigil,sigils:sigil?[sigil]:[],uid:++UID,name,isDeath:true};
+}
 
 function buildStarterDeck(){const ids=['afterimage','afterimage','archive_rat','archive_rat','memory_shard','lost_memory'];const deck=ids.map(id=>mkCard(id));for(const id of G.rememberedCards)deck.push(mkCard(id,true));for(const dc of (G.deathCards||[]))deck.push({...dc,currentHp:dc.maxHp,uid:++UID});return shuffle(deck);}
 function buildWardenDeck(which){const D={elise_normal:['file_case','file_case','file_case','ledger_entry','ledger_entry','reception_bell','archive_rat','archive_rat'],elise_boss:['file_case','file_case','ledger_entry','ledger_entry','seal_stamp','seal_stamp','reception_bell','reception_bell','memory_shard','forgotten_dog','echo'],owen_normal:['missing_page','missing_page','missing_page','watchman_lamp','watchman_lamp','empty_frame','archive_rat','archive_rat'],owen_boss:['missing_page','missing_page','watchman_lamp','watchman_lamp','empty_frame','empty_frame','long_corridor','old_book','old_book','forgotten_dog','echo']};return shuffle(D[which].map(id=>mkCard(id)));}
@@ -845,7 +860,7 @@ function checkWinLose(){
       setTimeout(()=>modal(T(G.currentRoom===1?'elise':'owen').toUpperCase(),line,()=>showScreen('battle',{_started:true,_greeted:true})),400);
       return true;
     }
-    G.battery=0;G.battlePhase='over';const sl=document.createElement('div');sl.className='scanlines';document.body.appendChild(sl);document.body.classList.add('screen-off');setTimeout(()=>{sl.remove();document.body.classList.remove('screen-off');},2100);const dc=generateDeathCard();if(G.deathCards.length<3)G.deathCards.push(dc);saveGame();const r0=G.runCount;const isE=G.currentRoom===1;const line0=isE?(r0>=3?(LANG==='ko'?'...오래 걸렸네요. 이제 기록될 거예요.':"...Took you a while. It'll be recorded now."):(LANG==='ko'?'배터리가 다 됐군요. 다음엔 충전하고 오세요.':"Battery's out. Charge it next time.")):(r0>=2?(LANG==='ko'?'꺼지는군요. 저도 이렇게 됐을 거예요.':"It's going dark. I must have gone this way too."):(LANG==='ko'?'...':'...'));setTimeout(()=>modal(T(isE?'elise':'owen').toUpperCase(),line0,()=>runDeathCardCinematic(dc,()=>setScreen('regression'))),2200);return true;
+    G.battery=0;G.battlePhase='over';const sl=document.createElement('div');sl.className='scanlines';document.body.appendChild(sl);document.body.classList.add('screen-off');setTimeout(()=>{sl.remove();document.body.classList.remove('screen-off');},2100);const dc=generateDeathCard();G.deathCards.push(dc);if(G.deathCards.length>6)G.deathCards.shift();saveGame();const r0=G.runCount;const isE=G.currentRoom===1;const line0=isE?(r0>=3?(LANG==='ko'?'...오래 걸렸네요. 이제 기록될 거예요.':"...Took you a while. It'll be recorded now."):(LANG==='ko'?'배터리가 다 됐군요. 다음엔 충전하고 오세요.':"Battery's out. Charge it next time.")):(r0>=2?(LANG==='ko'?'꺼지는군요. 저도 이렇게 됐을 거예요.':"It's going dark. I must have gone this way too."):(LANG==='ko'?'...':'...'));setTimeout(()=>modal(T(isE?'elise':'owen').toUpperCase(),line0,()=>runDeathCardCinematic(dc,()=>setScreen('regression'))),2200);return true;
   }
   return false;
 }
