@@ -914,12 +914,49 @@ function buildMap(room){
       spec._id=id;
     });
   });
-  // connect: each tier → every node in next tier (full bipartite)
+  // connect: each cur node connects only to a subset of next tier so path choice matters.
+  // Pattern based on widths: 1→N covers all (single node fans out); N→1 all converge;
+  // same width: i → i and one neighbor (alternating bias); width changes use proportional mapping.
+  function pickConns(curIdx,curN,nxtN,parityBias){
+    if(curN===1) return [...Array(nxtN).keys()];
+    if(nxtN===1) return [0];
+    if(curN===nxtN){
+      // same width — i + one neighbor; bias alternates by parityBias for variety
+      const arr=[curIdx];
+      const dir=(curIdx+parityBias)%2===0?1:-1;
+      const nb=curIdx+dir;
+      if(nb>=0&&nb<nxtN)arr.push(nb);
+      else if(curIdx-dir>=0&&curIdx-dir<nxtN)arr.push(curIdx-dir);
+      return arr;
+    }
+    if(nxtN>curN){
+      // expand — 2→3: 0→[0,1], 1→[1,2]
+      const startIdx=Math.floor(curIdx*nxtN/curN);
+      const endIdx=Math.min(nxtN-1,Math.floor((curIdx+1)*nxtN/curN));
+      const arr=[];for(let j=startIdx;j<=endIdx;j++)arr.push(j);
+      return arr.length?arr:[Math.min(nxtN-1,curIdx)];
+    }
+    // contract — 3→2: 0→[0], 1→[0,1], 2→[1]
+    const arr=[Math.floor(curIdx*nxtN/curN)];
+    if(curN>=3&&curIdx===Math.floor(curN/2)){
+      const alt=Math.min(nxtN-1,arr[0]+1);if(alt!==arr[0])arr.push(alt);
+    }
+    return arr;
+  }
   for(let ti=0;ti<tiers.length-1;ti++){
     const cur=tiers[ti],nxt=tiers[ti+1];
-    cur.forEach(spec=>{
-      nodes[spec._id].c=nxt.map(s=>s._id);
+    cur.forEach((spec,i)=>{
+      const conns=pickConns(i,cur.length,nxt.length,ti);
+      nodes[spec._id].c=conns.map(j=>nxt[j]._id);
     });
+    // Reachability guard: every nxt node must have at least one inbound edge
+    for(let j=0;j<nxt.length;j++){
+      const hasIn=cur.some(s=>nodes[s._id].c.includes(nxt[j]._id));
+      if(!hasIn){
+        const nearestCur=Math.floor(j*cur.length/nxt.length);
+        nodes[cur[nearestCur]._id].c.push(nxt[j]._id);
+      }
+    }
   }
   return {nodes};
 }
