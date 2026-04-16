@@ -177,7 +177,10 @@ input[type=text]:focus{outline:none;border-color:var(--border-gold)}
 .expl-body{flex:1;overflow-y:auto;padding:12px}
 .room3d{position:relative;width:100%;height:100%;overflow:hidden;background:#06030a;perspective:1100px;perspective-origin:50% 50%}
 .room3d-stage{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .85s cubic-bezier(.55,.05,.4,1);transform:rotateY(0deg)}
-.room3d-wall{position:absolute;width:100%;height:100%;left:0;top:0;overflow:hidden;box-shadow:inset 0 0 80px rgba(0,0,0,0.7);transform-origin:center center}
+.room3d-wall{position:absolute;width:100%;height:100%;left:0;top:0;overflow:hidden;box-shadow:inset 0 0 80px rgba(0,0,0,0.7);transform-origin:center center;pointer-events:none}
+.room3d.view-front .room3d-wall.front,
+.room3d.view-left .room3d-wall.left,
+.room3d.view-right .room3d-wall.right{pointer-events:auto}
 /* Camera at origin, walls form a 3-wall corner. Each wall is one container-width away. */
 .room3d-wall.front{transform:translateZ(-50vw)}
 .room3d-wall.left{transform:translateX(-50vw) rotateY(90deg)}
@@ -541,7 +544,8 @@ function openExploreOverlay(){
       body.appendChild(room);
       // touch swipe
       let sx=null;room.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;},{passive:true});
-      room.addEventListener('touchend',e=>{if(sx==null)return;const dx=(e.changedTouches[0].clientX-sx);sx=null;if(Math.abs(dx)<40)return;const cur=room.classList.contains('view-left')?-1:room.classList.contains('view-right')?1:0;const next=Math.max(-1,Math.min(1,cur+(dx<0?1:-1)));const sideName=next===-1?'left':next===1?'right':'front';room.classList.remove('view-left','view-front','view-right');room.classList.add('view-'+sideName);ctrl.querySelectorAll('button').forEach(x=>x.classList.toggle('active',x.dataset.side===sideName));});
+      room.addEventListener('touchend',e=>{if(sx==null)return;const dx=(e.changedTouches[0].clientX-sx);sx=null;if(Math.abs(dx)<40)return;const cur=room.classList.contains('view-left')?-1:room.classList.contains('view-right')?1:0;// Drag right (dx>0) = look left (camera turns left)
+const next=Math.max(-1,Math.min(1,cur+(dx>0?-1:1)));const sideName=next===-1?'left':next===1?'right':'front';room.classList.remove('view-left','view-front','view-right');room.classList.add('view-'+sideName);ctrl.querySelectorAll('button').forEach(x=>x.classList.toggle('active',x.dataset.side===sideName));});
     } else if(t==='locks'){
       const roomHints=G.collectedHints.filter(i=>lockRange.includes(i));
       const hintListBox=document.createElement('div');hintListBox.className='panel';hintListBox.innerHTML=`<div class="speaker">${T('hints')} · ${roomHints.length}/${lockRange.length}</div>`;if(roomHints.length===0){const e=document.createElement('div');e.className='dim';e.style.fontSize='12px';e.textContent=LANG==='ko'?'이 방의 자물쇠에 맞는 힌트가 아직 없어요':'No hints for this room yet';hintListBox.appendChild(e);}else roomHints.forEach(i=>{const p=document.createElement('div');p.style.cssText='font-size:13px;margin-top:4px;color:var(--text-bright)';p.textContent='· '+HINTS[i]();hintListBox.appendChild(p);});body.appendChild(hintListBox);
