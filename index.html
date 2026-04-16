@@ -69,7 +69,7 @@ button.primary{border-color:var(--border-gold);color:var(--text-gold)}
 .fragments.warden{color:var(--border-red);filter:brightness(1.3)}
 .divider{height:2px;margin:6px 0;background:linear-gradient(to right,transparent,var(--border-gold),transparent);position:relative}
 .divider::before{content:"❦";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:var(--bg-dark);padding:0 8px;color:var(--border-gold);font-size:12px}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:200;padding:16px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:300;padding:16px}
 .modal-content{background:linear-gradient(to bottom,var(--bg-panel),var(--bg-dark));border:1.5px solid var(--border-gold);border-radius:5px;padding:16px;max-width:400px;width:100%}
 .dialogue{font-style:italic;color:var(--text-bright);margin:6px 0;line-height:1.6;font-size:16px;font-family:'Crimson Text','Noto Sans KR',serif}
 .speaker{font-family:'Cinzel',serif;color:var(--text-gold);font-size:11px;letter-spacing:0.2em;text-transform:uppercase;margin-bottom:4px}
@@ -173,13 +173,16 @@ input[type=text]:focus{outline:none;border-color:var(--border-gold)}
 .expl-tab{flex:1;padding:8px 10px;font-size:12px;color:var(--text-dim);background:transparent;border:1px solid transparent;border-bottom:2px solid transparent;cursor:pointer;font-family:inherit;letter-spacing:0.05em}
 .expl-tab.active{color:var(--text-gold);border-bottom-color:var(--border-gold);background:rgba(200,168,75,0.06)}
 .expl-body{flex:1;overflow-y:auto;padding:12px}
-.room3d{position:relative;width:100%;height:100%;overflow:hidden;background:#0a0608}
-.room3d-stage{display:flex;width:300%;height:100%;transition:transform .5s cubic-bezier(.4,.1,.3,1);transform:translateX(-33.333%)}
-.room3d-wall{position:relative;flex:0 0 33.333%;height:100%;overflow:hidden;border-left:1px solid rgba(0,0,0,0.5);border-right:1px solid rgba(0,0,0,0.5)}
-.room3d.view-left .room3d-stage{transform:translateX(0)}
-.room3d.view-right .room3d-stage{transform:translateX(-66.666%)}
-.room3d.view-front .room3d-stage{transform:translateX(-33.333%)}
-.room3d-wall::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center 60%,transparent 0%,rgba(10,6,8,0.45) 75%,rgba(10,6,8,0.85) 100%)}
+.room3d{position:relative;width:100%;height:100%;overflow:hidden;background:#06030a;perspective:800px;perspective-origin:50% 50%}
+.room3d-stage{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .9s cubic-bezier(.5,.05,.4,1);transform:translateZ(-220px) rotateY(0deg)}
+.room3d-wall{position:absolute;width:100%;height:100%;left:0;top:0;backface-visibility:hidden;overflow:hidden;box-shadow:inset 0 0 80px rgba(0,0,0,0.7)}
+.room3d-wall.front{transform:translateZ(220px)}
+.room3d-wall.left{transform:rotateY(90deg) translateZ(220px)}
+.room3d-wall.right{transform:rotateY(-90deg) translateZ(220px)}
+.room3d.view-front .room3d-stage{transform:translateZ(-220px) rotateY(0deg)}
+.room3d.view-left .room3d-stage{transform:translateZ(-220px) rotateY(-90deg)}
+.room3d.view-right .room3d-stage{transform:translateZ(-220px) rotateY(90deg)}
+.room3d-wall::after{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center 50%,transparent 0%,rgba(10,6,8,0.35) 80%,rgba(10,6,8,0.7) 100%)}
 .room3d-floor{position:absolute;left:0;right:0;bottom:0;height:25%;background:linear-gradient(to bottom,rgba(40,28,24,0),rgba(20,12,8,0.9));pointer-events:none}
 .room3d-ctrl{position:absolute;bottom:18px;left:0;right:0;display:flex;justify-content:center;gap:10px;z-index:5}
 .room3d-ctrl button{padding:8px 14px;font-size:12px;background:rgba(40,28,32,0.9);border:1px solid var(--border-warm);color:var(--text-bright);border-radius:6px;cursor:pointer;font-family:inherit;letter-spacing:0.05em}
@@ -188,17 +191,29 @@ input[type=text]:focus{outline:none;border-color:var(--border-gold)}
 .room3d-obj:hover{transform:scale(1.06);border-color:var(--border-gold);box-shadow:0 8px 18px rgba(0,0,0,0.85),0 0 16px rgba(200,168,75,0.4);color:var(--text-gold)}
 .room3d-obj .ic{display:block;font-size:22px;margin-bottom:2px}
 .room3d-obj.locked{opacity:0.7;border-style:dashed}
-.room3d-wall.r1-left{background:linear-gradient(135deg,#3a2820 0%,#1e1410 70%),url("image/reception_table.png");background-size:200% auto,250% auto;background-position:left center,15% 80%;background-blend-mode:multiply;background-repeat:no-repeat}
-.room3d-wall.r1-front{background:linear-gradient(180deg,#3a2a22 0%,#1e1614 70%,#120c0a 100%)}
-.room3d-wall.r1-front::before{content:"";position:absolute;left:12%;right:12%;top:18%;bottom:32%;background:linear-gradient(180deg,#5a3e22,#3a2614);border:3px solid #c8a84b;box-shadow:inset 0 0 30px rgba(0,0,0,0.7),0 4px 12px rgba(0,0,0,0.6);border-radius:4px}
-.room3d-wall.r1-front::after{content:"";position:absolute;left:20%;right:20%;top:22%;bottom:50%;background:repeating-linear-gradient(0deg,rgba(255,235,180,0.08) 0,rgba(255,235,180,0.08) 4px,transparent 4px,transparent 8px);pointer-events:none}
-.room3d-wall.r1-right{background:linear-gradient(135deg,#2a1e18 0%,#0e0a0a 75%);}
-.room3d-wall.r1-right::before{content:"";position:absolute;left:15%;right:15%;top:25%;height:8%;background:linear-gradient(180deg,#3a2a18,#1c130c);box-shadow:0 4px 8px rgba(0,0,0,0.6);border-radius:2px}
-.room3d-wall.r1-right::after{content:"";position:absolute;left:15%;right:15%;top:55%;height:8%;background:linear-gradient(180deg,#3a2a18,#1c130c);box-shadow:0 4px 8px rgba(0,0,0,0.6);border-radius:2px}
-.room3d-wall.r2-left{background:linear-gradient(135deg,#1a1418 0%,#0a0608 70%),url("image/corridor_table.png");background-size:auto 100%,300% auto;background-position:left center,10% 30%;background-blend-mode:overlay;background-repeat:no-repeat}
-.room3d-wall.r2-front{background:radial-gradient(ellipse at center 35%,#3a3540 0%,#1a1620 50%,#0a080d 100%);}
-.room3d-wall.r2-front::before{content:"";position:absolute;left:30%;right:30%;top:18%;bottom:32%;background:radial-gradient(ellipse at center,rgba(120,140,180,0.35),rgba(40,30,50,0.6));border:2px solid #3a3038;border-radius:50% 50% 6px 6px;box-shadow:inset 0 0 40px rgba(0,0,0,0.6)}
-.room3d-wall.r2-right{background:linear-gradient(135deg,#1a1216 0%,#0a0608 80%),url("image/corridor_table.png");background-size:auto 120%,250% auto;background-position:right center,90% 60%;background-blend-mode:soft-light;background-repeat:no-repeat}
+/* Wallpaper texture */
+.room3d-wall::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(0,0,0,0.05) 0,rgba(0,0,0,0.05) 1px,transparent 1px,transparent 4px),repeating-linear-gradient(0deg,rgba(255,235,180,0.02) 0,rgba(255,235,180,0.02) 60px,transparent 60px,transparent 120px);pointer-events:none}
+.room3d-wall.r1-left{background:linear-gradient(180deg,#5a3a2a 0%,#3a2418 50%,#1e120a 100%)}
+.room3d-wall.r1-left::after{content:"";position:absolute;left:0;right:0;bottom:0;height:55%;background:linear-gradient(180deg,#5a3818 0%,#3a2410 100%);border-top:3px solid #2a1a0a;box-shadow:inset 0 12px 24px rgba(0,0,0,0.6)}
+.room3d-wall.r1-front{background:linear-gradient(180deg,#4a3428 0%,#2a1c14 70%,#120a06 100%)}
+.r1-front-board{position:absolute;left:14%;right:14%;top:18%;bottom:36%;background:linear-gradient(180deg,#6a3e22,#3a2210);border:3px solid #8a6a40;box-shadow:inset 0 0 35px rgba(0,0,0,0.7),0 6px 16px rgba(0,0,0,0.7);border-radius:3px;z-index:1}
+.r1-front-board::before{content:"";position:absolute;inset:8% 10%;background:repeating-linear-gradient(0deg,rgba(255,240,200,0.15) 0,rgba(255,240,200,0.15) 3px,transparent 3px,transparent 9px)}
+.r1-front-board::after{content:"";position:absolute;left:50%;top:-8px;width:14px;height:14px;background:radial-gradient(circle at 30% 30%,#dfd6b8,#8a8068);border-radius:50%;transform:translateX(-50%);box-shadow:0 2px 4px rgba(0,0,0,0.5)}
+.r1-front-floor{position:absolute;left:0;right:0;bottom:0;height:18%;background:linear-gradient(180deg,#3a2820,#1e140e);border-top:2px solid #1a0e08;z-index:1}
+.room3d-wall.r1-right{background:linear-gradient(180deg,#3a2820 0%,#1e1410 60%,#0e0808 100%)}
+.r1-right-shelf{position:absolute;left:8%;right:8%;height:4%;background:linear-gradient(180deg,#5a3e22 0%,#3a2614 100%);box-shadow:0 6px 10px rgba(0,0,0,0.65),inset 0 1px 2px rgba(255,235,180,0.18);border-radius:2px;z-index:1}
+.room3d-wall.r2-left{background:linear-gradient(180deg,#1a1620 0%,#0e0a14 70%,#06040a 100%)}
+.r2-glass-case{position:absolute;width:30%;height:32%;background:linear-gradient(180deg,rgba(120,160,200,0.18),rgba(40,60,90,0.4));border:2px solid #5a6a80;box-shadow:0 8px 16px rgba(0,0,0,0.7),inset 0 0 20px rgba(150,180,210,0.12);border-radius:4px;z-index:1}
+.r2-glass-case::before{content:"";position:absolute;inset:6% 8% 30% 8%;background:linear-gradient(135deg,rgba(255,255,255,0.08),transparent 60%);border-radius:2px}
+.room3d-wall.r2-front{background:radial-gradient(ellipse at center 35%,#2a2b3a 0%,#161620 55%,#08080d 100%)}
+.r2-arch{position:absolute;left:28%;right:28%;top:14%;bottom:36%;background:radial-gradient(ellipse at center 45%,#9bb4d8 0%,#5a4a7a 30%,#3a2a4a 60%,#1c1226 90%);border:3px solid #5a4a3a;border-radius:50% 50% 8px 8px;box-shadow:inset 0 0 50px rgba(0,0,0,0.55),0 0 30px rgba(155,180,216,0.18);z-index:1}
+.r2-arch::before{content:"";position:absolute;inset:10% 12%;background:linear-gradient(0deg,transparent 0,rgba(255,235,180,0.08) 30%,transparent 35%,rgba(155,180,216,0.12) 50%,transparent 55%,rgba(255,235,180,0.08) 70%,transparent 75%);border-radius:50% 50% 4px 4px}
+.r2-arch::after{content:"";position:absolute;left:50%;top:30%;bottom:30%;width:2px;background:rgba(80,60,40,0.7);transform:translateX(-50%)}
+.r2-front-floor{position:absolute;left:0;right:0;bottom:0;height:18%;background:linear-gradient(180deg,#1a1a24,#0a0a14);border-top:2px solid #060610;z-index:1}
+.room3d-wall.r2-right{background:linear-gradient(180deg,#241620 0%,#120a14 60%,#06030a 100%)}
+.r2-door{position:absolute;left:32%;right:32%;top:18%;bottom:18%;background:linear-gradient(180deg,#3a261c 0%,#1a0e08 100%);border:3px solid #6a4a30;box-shadow:inset 0 0 30px rgba(0,0,0,0.7),0 6px 14px rgba(0,0,0,0.7);border-radius:3px 3px 0 0;z-index:1}
+.r2-door::before{content:"";position:absolute;left:20%;right:20%;top:8%;bottom:8%;border:1.5px solid #5a3a22;box-shadow:inset 0 0 12px rgba(0,0,0,0.5)}
+.r2-door::after{content:"";position:absolute;left:80%;top:50%;width:8px;height:8px;background:radial-gradient(circle at 30% 30%,#ddc080,#7a5a30);border-radius:50%;transform:translateY(-50%);box-shadow:0 0 6px rgba(255,215,120,0.4)}
 .tut-outline{position:fixed;border:2px solid var(--border-gold);border-radius:8px;z-index:502;pointer-events:none;background:transparent;animation:tut-outline-pulse 1.6s ease-in-out infinite}
 @keyframes tut-outline-pulse{0%,100%{box-shadow:0 0 14px rgba(200,168,75,0.7),inset 0 0 12px rgba(200,168,75,0.15)}50%{box-shadow:0 0 28px rgba(200,168,75,1),inset 0 0 20px rgba(200,168,75,0.3)}}
 .tut-lit{outline:2px solid var(--border-gold)!important;outline-offset:2px;animation:tut-lit-pulse 1.6s ease-in-out infinite;position:relative;z-index:60}
@@ -490,8 +505,10 @@ function openExploreOverlay(){
       const room=document.createElement('div');room.className='room3d view-front';room.style.height='calc(100vh - 200px)';
       const stage=document.createElement('div');stage.className='room3d-stage';
       const wallOrder=['left','front','right'];
+      const decorMap={'r1-front':['<div class="r1-front-board"></div>','<div class="r1-front-floor"></div>'],'r1-right':['<div class="r1-right-shelf" style="top:30%"></div>','<div class="r1-right-shelf" style="top:60%"></div>'],'r2-left':['<div class="r2-glass-case" style="left:8%;top:24%"></div>','<div class="r2-glass-case" style="right:8%;top:24%"></div>'],'r2-front':['<div class="r2-arch"></div>','<div class="r2-front-floor"></div>'],'r2-right':['<div class="r2-door"></div>']};
       wallOrder.forEach(side=>{
         const w=walls[side];const wall=document.createElement('div');wall.className=`room3d-wall ${side} ${w.cls}`;
+        const decor=decorMap[w.cls];if(decor){const dd=document.createElement('div');dd.style.cssText='position:absolute;inset:0;pointer-events:none';dd.innerHTML=decor.join('');wall.appendChild(dd);}
         const lbl=document.createElement('div');lbl.style.cssText='position:absolute;top:6px;left:0;right:0;text-align:center;font-family:Cinzel,serif;font-size:11px;color:var(--text-gold);letter-spacing:0.15em;text-shadow:0 1px 4px #000;z-index:3';lbl.textContent=w.label;wall.appendChild(lbl);
         const floor=document.createElement('div');floor.className='room3d-floor';wall.appendChild(floor);
         w.objs.forEach(o=>{const ob=document.createElement('div');ob.className='room3d-obj'+(o.locked?' locked':'');ob.style.left=o.x+'%';ob.style.top=o.y+'%';ob.innerHTML=`<span class="ic">${o.icon}</span>${o.label}`;ob.addEventListener('click',ev=>{ev.stopPropagation();if(o.goLocks){showTab('locks');return;}if(o.hint!==undefined&&!G.collectedHints.includes(o.hint)){G.collectedHints.push(o.hint);}if(o.grant&&!G.items.includes(o.grant)&&G.items.length<3)giveItem(o.grant);saveGame();const ww=document.createElement('div');ww.className='modal';const mc=document.createElement('div');mc.className='modal-content';mc.innerHTML=`<div class="speaker">${o.label}</div><div class="dialogue">${o.text}</div>${o.hint!==undefined?`<div class="dim" style="font-size:11px;margin-top:6px">${LANG==='ko'?'힌트 수집':'Hint collected'}</div>`:''}`;const cb=document.createElement('button');cb.className='primary';cb.textContent=T('continue');cb.style.marginTop='10px';cb.addEventListener('click',()=>ww.remove());mc.appendChild(cb);ww.appendChild(mc);document.body.appendChild(ww);});wall.appendChild(ob);});
@@ -780,7 +797,7 @@ function updateBattleFragments(){const w=document.querySelector('.fragments.ward
 function checkStalemate(){const noPlayerAtk=G.playerHand.concat(G.playerSlots.filter(Boolean)).concat(G.playerDeck).concat(G.battleDiscard).every(c=>!c||c.attack<=0);const noWardenAtk=G.wardenHand.concat(G.wardenSlots.filter(Boolean)).concat(G.wardenDeck).every(c=>!c||c.attack<=0);return noPlayerAtk&&noWardenAtk;}
 function concede(){if(G.battlePhase==='play'||G.battlePhase==='draw'){G.battlePhase='resolve';G.playerFragments=0;checkWinLose();}}
 function endTurn(){if(G.battlePhase!=='play')return;G.battlePhase='resolve';if(G.runCount===0&&G.tutorialStage==='endTurn'){tutorialClose();G.tutorialStage='attackPending';}
-  if(checkStalemate()){if(G.playerFragments>=G.wardenFragments)G.wardenFragments=0;else G.playerFragments=0;checkWinLose();return;}if(G.turnCount>=20){if(G.playerFragments>=G.wardenFragments)G.wardenFragments=0;else G.playerFragments=0;checkWinLose();return;}resolveCombatStep('player',0,()=>{if(checkWinLose())return;setTimeout(()=>{wardenTurn(()=>{if(checkWinLose())return;if(!G.lowFragWarned&&G.playerFragments<=2&&G.playerFragments>0){G.lowFragWarned=true;const line=G.currentRoom===1?(LANG==='ko'?'거의 다 왔네요. 하지만 여기서 끝이에요.':"Almost there. But it ends here."):(LANG==='ko'?'조금만 더... 아니, 여기까지예요.':"Just a little more... no, this is as far as you go.");setTimeout(()=>modal(T(G.currentRoom===1?'elise':'owen').toUpperCase(),line),200);}setTimeout(()=>{resolveCombatStep('warden',0,()=>{if(checkWinLose())return;G.turnCount++;if(G.turnCount%2===0)G.currentInk+=1;[...G.playerSlots,...G.wardenSlots].forEach(c=>{if(c&&hasSigil(c,'growth')&&!isSilenced(G.playerSlots,G.playerSlots.indexOf(c))&&!isSilenced(G.wardenSlots,G.wardenSlots.indexOf(c)))c.attack=(c.attack||0)+1;});G.playerSlots.forEach((c,i)=>{if(c){if(c.faded){G.playerSlots[i]=null;}else if(c.id!=='faded_memory'){G.runStats.cardFieldSurvival[c.id]=(G.runStats.cardFieldSurvival[c.id]||0)+1;}}});G.battlePhase='draw';showScreen('battle',{_started:true,_greeted:true});if(G.runCount===0&&G.tutorialStage==='attackPending'){setTimeout(()=>runTutorialSequence('attackResult'),400);}});},300);});},300);});}
+  if(checkStalemate()){if(G.playerFragments>=G.wardenFragments)G.wardenFragments=0;else G.playerFragments=0;checkWinLose();return;}if(G.turnCount>=20){if(G.playerFragments>=G.wardenFragments)G.wardenFragments=0;else G.playerFragments=0;checkWinLose();return;}resolveCombatStep('player',0,()=>{if(checkWinLose())return;const proceed=()=>{setTimeout(()=>{wardenTurn(()=>{if(checkWinLose())return;if(!G.lowFragWarned&&G.playerFragments<=2&&G.playerFragments>0){G.lowFragWarned=true;const line=G.currentRoom===1?(LANG==='ko'?'거의 다 왔네요. 하지만 여기서 끝이에요.':"Almost there. But it ends here."):(LANG==='ko'?'조금만 더... 아니, 여기까지예요.':"Just a little more... no, this is as far as you go.");setTimeout(()=>modal(T(G.currentRoom===1?'elise':'owen').toUpperCase(),line),200);}setTimeout(()=>{resolveCombatStep('warden',0,()=>{if(checkWinLose())return;G.turnCount++;if(G.turnCount%2===0)G.currentInk+=1;[...G.playerSlots,...G.wardenSlots].forEach(c=>{if(c&&hasSigil(c,'growth')&&!isSilenced(G.playerSlots,G.playerSlots.indexOf(c))&&!isSilenced(G.wardenSlots,G.wardenSlots.indexOf(c)))c.attack=(c.attack||0)+1;});G.playerSlots.forEach((c,i)=>{if(c){if(c.faded){G.playerSlots[i]=null;}else if(c.id!=='faded_memory'){G.runStats.cardFieldSurvival[c.id]=(G.runStats.cardFieldSurvival[c.id]||0)+1;}}});G.battlePhase='draw';showScreen('battle',{_started:true,_greeted:true});});},300);});},300);};if(G.runCount===0&&G.tutorialStage==='attackPending'){G.tutorialStage='attackResultShown';setTimeout(()=>{runTutorialSequence('attackResult');let appeared=false;const wait=()=>{const ex=!!document.querySelector('.tut-dialog');if(!appeared){if(ex)appeared=true;setTimeout(wait,200);}else if(!ex){proceed();}else setTimeout(wait,200);};setTimeout(wait,500);},400);}else{proceed();}});}
 
 function resolveCombat(attacker){
   for(let i=0;i<4;i++){const p=G.playerSlots[i];const e=G.wardenSlots[i];
@@ -1083,7 +1100,17 @@ function runSim(){const log=[];let pass=0;function reset(){G.playerSlots=[null,n
   reset();G.playerSlots[0]=mkCard('archive_rat');G.wardenSlots[0]=mkCard('old_book');G.oblivionGauge=0;resolveCombat('player');a(G.playerSlots[0]===null&&G.oblivionGauge>=1,'T8 ephemeral self-destruct + oblivion');
   reset();G.oblivionGauge=2;const c=mkCard('afterimage');const pre=G.oblivionGauge;G.oblivionGauge-=c.inkCost;a(G.oblivionGauge===pre-c.inkCost&&G.oblivionGauge>=0,'T9 oblivion spend');
   reset();G.sacrificeCounter=9;G.sacrificeCounter+=1;const triggered=G.sacrificeCounter>=10;if(triggered)G.sacrificeCounter=0;a(triggered&&G.sacrificeCounter===0,'T10 counter→10 resets');
-  log.push('');log.push(`${pass}/10 passed`);console.log(log.join('\n'));const o=document.createElement('div');o.className='sim-log';o.textContent=log.join('\n')+'\n\n(click to close)';o.addEventListener('click',()=>o.remove());document.body.appendChild(o);}
+  // T11: explore overlay opens with 3 walls and tabs; modal opens above overlay
+  reset();G.currentRoom=1;G.screen='map';G.seenSigils=['shatter'];openExploreOverlay();const ov=document.querySelector('.expl-overlay');const wallsEx=document.querySelectorAll('.room3d-wall').length;const tabsEx=document.querySelectorAll('.expl-tab').length;const ovZ=ov?parseInt(getComputedStyle(ov).zIndex):0;a(wallsEx===3&&tabsEx===3&&ovZ===240,'T11 explore overlay structure');ov?.remove();
+  // T12: modal z-index higher than expl-overlay
+  reset();const mw=document.createElement('div');mw.className='modal';document.body.appendChild(mw);const mZ=parseInt(getComputedStyle(mw).zIndex);mw.remove();a(mZ===300&&mZ>240,'T12 modal z-index above explore overlay');
+  // T13: sigil codex opens with all 10 sigils, gray for unseen
+  reset();G.seenSigils=['vigilance'];openSigilEncyclopedia();const sigPanels=document.querySelectorAll('.expl-overlay .panel').length;const grayed=Array.from(document.querySelectorAll('.expl-overlay .panel')).filter(p=>p.style.opacity==='0.5').length;a(sigPanels===10&&grayed===9,'T13 sigil codex 10 entries, 9 unseen');document.querySelector('.expl-overlay')?.remove();
+  // T14: floating door + sigil buttons present on map screen
+  reset();G.screen='map';ensureFabStack();const fabDoor=!!document.querySelector('#fabExplore');const fabSig=!!document.querySelector('#fabSigil');a(fabDoor&&fabSig,'T14 FAB stack on map screen');
+  // T15: post-boss missing-hint reveal: collectedHints starts incomplete, after grant fills lockRange
+  reset();G.currentRoom=2;G.collectedHints=[3];const range=[3,4,5,6];const missing=range.filter(i=>!G.collectedHints.includes(i));missing.forEach(i=>G.collectedHints.push(i));a(G.collectedHints.length===4&&range.every(i=>G.collectedHints.includes(i)),'T15 post-boss hint grant fills room range');
+  log.push('');log.push(`${pass}/15 passed`);console.log(log.join('\n'));const o=document.createElement('div');o.className='sim-log';o.textContent=log.join('\n')+'\n\n(click to close)';o.addEventListener('click',()=>o.remove());document.body.appendChild(o);}
 
 window.addEventListener('keydown',e=>{const t=e.target;if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable))return;if(e.key==='d'||e.key==='D')showDebug();if((e.key==='t'||e.key==='T')&&G.screen==='title')runSim();});
 
