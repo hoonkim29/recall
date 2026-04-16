@@ -157,6 +157,18 @@ input[type=text]:focus{outline:none;border-color:var(--border-gold)}
 .tut-dialog{position:fixed;background:linear-gradient(to bottom,#2a1e28,#1a1418);border:1.5px solid var(--border-gold);border-radius:8px;padding:14px 16px;color:var(--text-main);font-size:14px;line-height:1.5;max-width:300px;z-index:502;box-shadow:0 8px 24px rgba(0,0,0,0.8);animation:fadeIn .3s}
 .tut-dialog .tut-label{font-family:'Cinzel',serif;color:var(--text-gold);font-size:11px;letter-spacing:0.15em;margin-bottom:6px;text-transform:uppercase}
 .tut-dialog button{margin-top:10px;width:100%;font-size:13px;padding:8px}
+.fab-stack{position:fixed;left:10px;bottom:10px;z-index:170;display:flex;flex-direction:column;gap:8px}
+.fab-btn{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#3a2a28,#1a1418);border:1.5px solid var(--border-gold);color:var(--text-gold);font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.7),inset 0 0 8px rgba(200,168,75,0.15);transition:transform .15s,box-shadow .15s;padding:0}
+.fab-btn:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,0.85),0 0 14px rgba(200,168,75,0.4),inset 0 0 8px rgba(200,168,75,0.25)}
+@media (max-width:520px){.fab-stack{left:8px;bottom:8px}.fab-btn{width:42px;height:42px;font-size:20px}}
+.expl-overlay{position:fixed;inset:0;background:linear-gradient(to bottom,rgba(15,8,12,0.96),rgba(8,4,6,0.98));z-index:240;display:flex;flex-direction:column;animation:fadeIn .2s}
+.expl-header{display:flex;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border-dim);background:linear-gradient(to bottom,rgba(40,28,32,0.9),rgba(20,14,18,0.9))}
+.expl-title{font-family:'Cinzel',serif;color:var(--text-gold);font-size:15px;letter-spacing:0.15em}
+.expl-close{margin-left:auto;background:none;border:1px solid var(--border-warm);color:var(--text-dim);font-size:16px;width:34px;height:34px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.expl-tabs{display:flex;gap:4px;padding:8px 12px;background:rgba(0,0,0,0.4);border-bottom:1px solid var(--border-dim)}
+.expl-tab{flex:1;padding:8px 10px;font-size:12px;color:var(--text-dim);background:transparent;border:1px solid transparent;border-bottom:2px solid transparent;cursor:pointer;font-family:inherit;letter-spacing:0.05em}
+.expl-tab.active{color:var(--text-gold);border-bottom-color:var(--border-gold);background:rgba(200,168,75,0.06)}
+.expl-body{flex:1;overflow-y:auto;padding:12px}
 .tut-outline{position:fixed;border:2px solid var(--border-gold);border-radius:8px;z-index:502;pointer-events:none;background:transparent;animation:tut-outline-pulse 1.6s ease-in-out infinite}
 @keyframes tut-outline-pulse{0%,100%{box-shadow:0 0 14px rgba(200,168,75,0.7),inset 0 0 12px rgba(200,168,75,0.15)}50%{box-shadow:0 0 28px rgba(200,168,75,1),inset 0 0 20px rgba(200,168,75,0.3)}}
 .tut-lit{outline:2px solid var(--border-gold)!important;outline-offset:2px;animation:tut-lit-pulse 1.6s ease-in-out infinite;position:relative;z-index:60}
@@ -386,9 +398,46 @@ function showScreen(name,opts={}){
   }
   root.replaceChildren(el);
   if(!['title','cutscene','regression','loopending','bossreward'].includes(name))addPhone();
+  ensureFabStack();
 }
 function removeLangBtn(){document.querySelectorAll('.lang-btn').forEach(b=>b.remove());}
 function removePhone(){document.querySelectorAll('.phone-btn,.phone-overlay,.phone-backdrop').forEach(b=>b.remove());}
+function ensureFabStack(){if(!['map','battle'].includes(G.screen)){document.querySelector('.fab-stack')?.remove();return;}let s=document.querySelector('.fab-stack');if(!s){s=document.createElement('div');s.className='fab-stack';document.body.appendChild(s);}s.innerHTML=`<button class="fab-btn" id="fabExplore" title="${LANG==='ko'?'탐색':'Explore'}">🚪</button>`;s.querySelector('#fabExplore').addEventListener('click',openExploreOverlay);}
+function openExploreOverlay(){
+  if(document.querySelector('.expl-overlay'))return;
+  const r1=G.currentRoom===1;const lockRange=r1?[0,1,2]:[3,4,5,6];
+  const objects=r1?[
+    {label:LANG==='ko'?'접수 데스크':'Reception Desk',icon:'🗄️',text:LANG==='ko'?'서랍 안쪽에 찢긴 종이: "입고일 11월 03일."':'Inside the drawer: "Entry: Nov 03."',hint:0},
+    {label:LANG==='ko'?'벽 게시판':'Wall Board',icon:'📋',text:LANG==='ko'?'공지: "유물은 만지지 마시오. — 관리인"':'Notice: "Do not touch the relics. —The Keeper"'},
+    {label:LANG==='ko'?'낡은 방명록':'Old Guestbook',icon:'📔',text:LANG==='ko'?'"...J... 2025.11.03."':'"...J... 2025.11.03."'},
+    {label:LANG==='ko'?'선반 상자':'Shelf Box',icon:'📦',text:G.solvedLocks[0]?(LANG==='ko'?'상자가 열린다. 안에 작은 결정 하나.':'Opened. A small crystal inside.'):(LANG==='ko'?'잠겨있다.':'Locked.'),grant:G.solvedLocks[0]?'memory_crystal':null}
+  ]:[
+    {label:LANG==='ko'?'유리 케이스 A':'Glass Case A',icon:'🗃️',text:LANG==='ko'?'"property of _ _ _"':'"property of _ _ _"',hint:3},
+    {label:LANG==='ko'?'유리 케이스 B':'Glass Case B',icon:'🗃️',text:G.solvedLocks[3]?(LANG==='ko'?'뚜껑이 열린다. 색 바랜 천.':'Opened. A faded cloth.'):(LANG==='ko'?'잠겨있다.':'Locked.')},
+    {label:LANG==='ko'?'벽 메모':'Wall Note',icon:'📝',text:LANG==='ko'?'"나도 누굴 찾고 있었어."':'"I was looking for someone too."'},
+    {label:LANG==='ko'?'복도 끝 문':'End Door',icon:'🚪',text:LANG==='ko'?'굳게 잠겨있다.':'Sealed shut.'}
+  ];
+  const ov=document.createElement('div');ov.className='expl-overlay';
+  ov.innerHTML=`<div class="expl-header"><div class="expl-title">${LANG==='ko'?(r1?'접수실 둘러보기':'복도 둘러보기'):(r1?'Reception':'Corridor')}</div><button class="expl-close" id="exClose">×</button></div><div class="expl-tabs"><button class="expl-tab active" data-tab="objects">${LANG==='ko'?'🔍 살펴보기':'🔍 Inspect'}</button><button class="expl-tab" data-tab="locks">${LANG==='ko'?'🔒 자물쇠':'🔒 Locks'}</button><button class="expl-tab" data-tab="hints">${LANG==='ko'?'📖 힌트':'📖 Hints'}</button></div><div class="expl-body" id="exBody"></div>`;
+  document.body.appendChild(ov);
+  const body=ov.querySelector('#exBody');
+  function showTab(t){
+    ov.querySelectorAll('.expl-tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===t));
+    body.innerHTML='';
+    if(t==='objects'){
+      objects.forEach((o,i)=>{const b=document.createElement('button');b.style.cssText='display:flex;align-items:center;gap:10px;width:100%;padding:14px;margin:6px 0;text-align:left;background:linear-gradient(to right,rgba(40,28,32,0.85),rgba(26,20,24,0.85));border:1px solid var(--border-warm);border-radius:6px;color:var(--text-bright);cursor:pointer;font-family:inherit';b.innerHTML=`<span style="font-size:26px;flex:0 0 auto">${o.icon}</span><span style="flex:1"><div class="cinzel" style="color:var(--text-gold);font-size:13px">${o.label}</div></span>`;b.addEventListener('click',()=>{if(o.hint!==undefined&&!G.collectedHints.includes(o.hint))G.collectedHints.push(o.hint);if(o.grant&&!G.items.includes(o.grant)&&G.items.length<3)giveItem(o.grant);saveGame();const w=document.createElement('div');w.className='modal';const mc=document.createElement('div');mc.className='modal-content';mc.innerHTML=`<div class="speaker">${o.label}</div><div class="dialogue">${o.text}</div>`;const cb=document.createElement('button');cb.className='primary';cb.textContent=T('continue');cb.style.marginTop='10px';cb.addEventListener('click',()=>w.remove());mc.appendChild(cb);w.appendChild(mc);document.body.appendChild(w);});body.appendChild(b);});
+    } else if(t==='locks'){
+      const hintListBox=document.createElement('div');hintListBox.className='panel';hintListBox.innerHTML=`<div class="speaker">${T('hints')} · ${G.collectedHints.length}</div>`;if(G.collectedHints.length===0){const e=document.createElement('div');e.className='dim';e.style.fontSize='12px';e.textContent=LANG==='ko'?'힌트 없음 — 살펴보기 탭에서 모으세요':'No hints yet — collect from Inspect tab';hintListBox.appendChild(e);}else G.collectedHints.forEach(i=>{const p=document.createElement('div');p.style.cssText='font-size:13px;margin-top:4px;color:var(--text-bright)';p.textContent='· '+HINTS[i]();hintListBox.appendChild(p);});body.appendChild(hintListBox);
+      lockRange.forEach(i=>{const l=LOCKS[i];const panel=document.createElement('div');panel.className='panel';if(G.solvedLocks[i]){panel.innerHTML=`<div class="gold">✓ ${LOCK_LABELS(i)} — ${T('solved')}</div>`;}else if(l.t==='text'){panel.innerHTML=`<div class="speaker">${LANG==='ko'?'자물쇠 ':'Lock '}${i+1}</div><div>${LOCK_LABELS(i)}</div><input type="text" id="lk${i}" style="margin-top:6px"/><button class="primary" id="sub${i}" style="margin-top:6px;width:100%">${T('confirm')}</button>`;panel.querySelector('#lk'+i).addEventListener('keydown',ev=>{if(ev.key==='Enter')panel.querySelector('#sub'+i).click();});panel.querySelector('#sub'+i).addEventListener('click',()=>{const input=panel.querySelector('#lk'+i);const v=input.value.toUpperCase().trim();if(v===l.a){G.solvedLocks[i]=true;saveGame();msg(T('solved'));showTab('locks');}else{msg(T('wrong'));input.value='';input.focus();}});}else{const seq=[];panel.innerHTML=`<div class="speaker">${LANG==='ko'?'자물쇠 ':'Lock '}${i+1}</div><div>${LOCK_LABELS(i)}</div><div id="sq${i}" style="font-size:26px;min-height:32px;margin:6px 0;color:var(--text-gold);letter-spacing:8px">·</div>`;const row=document.createElement('div');row.style.cssText='display:flex;flex-wrap:wrap;gap:2px';l.s.forEach(s=>{const b=document.createElement('button');b.textContent=s;b.style.cssText='width:44px;height:44px;font-size:20px;margin:2px';b.addEventListener('click',()=>{seq.push(s);panel.querySelector('#sq'+i).textContent=seq.join(' ');});row.appendChild(b);});const clr=document.createElement('button');clr.textContent='↺';clr.style.cssText='width:44px;height:44px;font-size:18px;margin:2px';clr.addEventListener('click',()=>{seq.length=0;panel.querySelector('#sq'+i).textContent='·';});row.appendChild(clr);const sub=document.createElement('button');sub.className='primary';sub.textContent=T('confirm');sub.style.cssText='margin-top:6px;width:100%';sub.addEventListener('click',()=>{if(JSON.stringify(seq)===JSON.stringify(l.a)){G.solvedLocks[i]=true;saveGame();msg(T('solved'));showTab('locks');}else{msg(T('wrong'));seq.length=0;panel.querySelector('#sq'+i).textContent='·';}});panel.appendChild(row);panel.appendChild(sub);}body.appendChild(panel);});
+    } else {
+      // hints tab — just show full list
+      const all=document.createElement('div');all.className='panel';all.innerHTML=`<div class="speaker">${LANG==='ko'?'수집한 힌트':'Collected hints'} · ${G.collectedHints.length}/${HINTS.length}</div>`;if(!G.collectedHints.length){const e=document.createElement('div');e.className='dim';e.textContent=LANG==='ko'?'아직 모은 힌트가 없어요':'No hints collected yet';all.appendChild(e);}G.collectedHints.forEach(i=>{const p=document.createElement('div');p.style.cssText='font-size:13px;margin-top:6px;color:var(--text-bright);padding:6px;border-left:2px solid var(--border-gold)';p.innerHTML=`<span class="dim" style="font-size:11px">#${i+1}</span><br>${HINTS[i]()}`;all.appendChild(p);});body.appendChild(all);
+    }
+  }
+  ov.querySelectorAll('.expl-tab').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
+  ov.querySelector('#exClose').addEventListener('click',()=>ov.remove());
+  showTab('objects');
+}
 function msg(t,ms=1300){const m=document.createElement('div');m.className='msg';m.textContent=t;document.body.appendChild(m);setTimeout(()=>m.remove(),ms);}
 function modal(sp,txt,onClose){const w=document.createElement('div');w.className='modal';const mc=document.createElement('div');mc.className='modal-content';mc.innerHTML=`${sp?`<div class="speaker">${sp}</div>`:''}<div class="dialogue">${txt}</div>`;const b=document.createElement('button');b.className='primary';b.textContent=T('continue');b.style.marginTop='10px';b.addEventListener('click',()=>{w.remove();onClose&&onClose();});mc.appendChild(b);w.appendChild(mc);document.body.appendChild(w);}
 
@@ -550,7 +599,6 @@ function renderBattle(root,opts){
         <span style="color:#c8a84b;font-size:10px;letter-spacing:1px" title="기억 카운터 ${G.sacrificeCounter}/10">${'●'.repeat(G.sacrificeCounter)}${'○'.repeat(10-G.sacrificeCounter)}</span>
         <span style="font-size:12px;color:var(--text-bright)" title="${LANG==='ko'?'덱에 남은 카드':'Cards left in deck'}">📖${G.playerDeck.length}</span>
         <span style="font-size:12px">${G.items.map((id,i)=>`<button class="item-btn" data-i="${i}" title="${ITEMS[id].name[LANG]}">${ITEMS[id].icon}</button>`).join('')}</span>
-        <button id="ibl" title="${LANG==='ko'?'자물쇠':'Locks'}" style="font-size:12px;padding:4px 8px;border-color:#5a5a3a;color:#c8a84b">🔒</button>
         <button id="cncd" title="${LANG==='ko'?'항복':'Concede'}" style="font-size:12px;padding:4px 8px;border-color:#5a3848;color:#a88080">🏳️</button>
         <button class="primary" id="bell" ${drawPhase?'disabled':''}>${T('ring_bell')}</button>
       </div>
@@ -566,7 +614,6 @@ function renderBattle(root,opts){
     const hand=root.querySelector('#hand');
     G.playerHand.forEach((c,i)=>{const canAfford=!drawPhase&&(c.inkCost===0||(G.currentInk+G.oblivionGauge)>=c.inkCost);const canSac=!drawPhase&&!canAfford&&G.playerSlots.some(Boolean)&&c.inkCost<=G.currentInk+G.oblivionGauge+G.playerSlots.filter(Boolean).length;const el=renderCardEl(c,{selected:G.selectedHandIdx===i,onClick:()=>{if(drawPhase){msg(LANG==='ko'?'뽑기 먼저':'Draw first');return;}if(G.fieldSacMode){msg(LANG==='ko'?'희생 선택 중':'Selecting sacrifices');return;}if(!canAfford&&!canSac){msg(LANG==='ko'?'잉크 부족 (필드에 희생할 카드도 없음)':'Not enough ink and no field cards to sacrifice');return;}G.selectedHandIdx=G.selectedHandIdx===i?null:i;showScreen('battle',{_started:true,_greeted:true});}});if(drawPhase||!canAfford)el.style.opacity=canSac?'0.75':'0.5';hand.appendChild(el);});
     root.querySelector('#cncd')?.addEventListener('click',()=>{if(confirm(LANG==='ko'?'항복하시겠습니까? 배터리가 절반으로 줄어들 수 있어요.':'Concede? You may lose half battery.'))concede();});
-    root.querySelector('#ibl')?.addEventListener('click',openInBattleLocks);
     root.querySelector('#inkSac')?.addEventListener('click',()=>{if(G.battlePhase!=='play')return;if(!G.playerSlots.some(Boolean)){msg(LANG==='ko'?'필드에 희생할 카드 없음':'No cards to sacrifice');return;}G.fieldSacMode=!G.fieldSacMode;G.fieldSacSelection=[];showScreen('battle',{_started:true,_greeted:true});});
     root.querySelector('#sacConf')?.addEventListener('click',()=>{const sel=G.fieldSacSelection||[];if(!sel.length){G.fieldSacMode=false;G.pendingPlay=null;showScreen('battle',{_started:true,_greeted:true});return;}let fadedCount=0;sel.sort((a,b)=>b-a).forEach(i=>{const c=G.playerSlots[i];if(!c)return;if(c.id==='faded_memory')fadedCount++;G.playerSlots[i]=null;});G.currentInk+=sel.length;G.sacrificeCounter+=fadedCount;saveGame();if(G.sacrificeCounter>=10){G.sacrificeCounter=0;saveGame();G.sacrificeMode=true;G.phoneOpen=true;document.getElementById('phoneOverlay')?.classList.add('open');renderPhone();msg(T('sacrifice_select'));}else msg(`💧+${sel.length}${fadedCount?` · 🌫 ${G.sacrificeCounter}/10`:''}`);G.fieldSacMode=false;G.fieldSacSelection=[];const pend=G.pendingPlay;G.pendingPlay=null;showScreen('battle',{_started:true,_greeted:true});if(pend){const card=G.playerHand[pend.handIdx];if(card&&card.inkCost<=G.currentInk+G.oblivionGauge&&!G.playerSlots[pend.slotIdx]){setTimeout(()=>playCard(pend.handIdx,pend.slotIdx),300);}}});
     root.querySelector('#sacCancel')?.addEventListener('click',()=>{G.fieldSacMode=false;G.fieldSacSelection=[];G.pendingPlay=null;showScreen('battle',{_started:true,_greeted:true});});
@@ -718,7 +765,6 @@ function buildMap(room){
     [{id:'chestB',type:'chestB'}],
     [{id:'battle_l2',type:'battle'},{id:'vault',type:'vault'},{id:'battle_r2',type:'battle'}],
     [{id:'reclass',type:'reclass'},{id:'fuse',type:'fuse'}],
-    [{id:'explore',type:'explore'}],
     [{id:'mysteryA',type:'mysteryA'},{id:'campfire',type:'reading'}],
     [{id:'battle3_l',type:'battle_hint'},{id:'reading_late',type:'reading'},{id:'battle3_r',type:'battle'}],
     [{id:'chestC',type:'chestB'}],
@@ -728,7 +774,6 @@ function buildMap(room){
     [{id:'battle5_l',type:'battle_hint'},{id:'reading_deep',type:'reading'},{id:'battle5_r',type:'battle'}],
     [{id:'mysteryC',type:'mysteryC'},{id:'campfire2',type:'reading'}],
     [{id:'reclass2',type:'reclass'},{id:'fuse2',type:'fuse'}],
-    [{id:'explore2',type:'explore'}],
     [{id:'battle_pre',type:'battle'}],
     [{id:'locks',type:'locks'}],
     [{id:'boss',type:'boss'}]
@@ -740,7 +785,6 @@ function buildMap(room){
     [{id:'battle_l2',type:'battle'},{id:'battle_mid',type:'battle'},{id:'mysteryB',type:'mysteryB'}],
     [{id:'mysteryC',type:'mysteryC'},{id:'fuse',type:'fuse'}],
     [{id:'reclass',type:'reclass'}],
-    [{id:'explore',type:'explore'}],
     [{id:'battle3_l',type:'battle_hint'},{id:'mysteryD',type:'mysteryB'},{id:'battle3_r',type:'battle'}],
     [{id:'vault2',type:'vault'},{id:'reading2',type:'reading'}],
     [{id:'chestC',type:'chestB'}],
@@ -754,7 +798,6 @@ function buildMap(room){
     [{id:'mysteryF',type:'mysteryA'}],
     [{id:'campfire3',type:'reading'}],
     [{id:'battle7_l',type:'battle'},{id:'battle7_r',type:'battle'}],
-    [{id:'explore2',type:'explore'}],
     [{id:'battle_pre',type:'battle'}],
     [{id:'locks',type:'locks'}],
     [{id:'boss',type:'boss'}]
